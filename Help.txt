@@ -1,0 +1,167 @@
+(Note: This document contains the same texts that are readable from
+within the program.)
+
+
+1. Rules of the Game
+
+At the start, use the list to select the number of a game to play.
+Each number corresponds to a different initial ordering of cards.
+There are no unsolvable games in the list. Once you select a game, you
+will see the starting layout of the game.
+
+The layout consists of three areas:
+
+* the four foundations at top left;
+* the four reserves at top right;
+* and the eight columns of the tableau.
+
+The game begins with the complete deck being dealt onto the tableau.
+The object of the game is to move all of the cards onto the four
+foundations.
+
+The foundations are to be built up, from Ace to King, in suit. A card
+can only be moved to a foundation if the next lower card of the same
+suit is currently showing (or if it an Ace being moved onto an empty
+foundation).
+
+Each of the four reserves can temporarily hold any one card. Cards in
+the reserve can always be moved, but cannot be built upon.
+
+In the tableau, only the last card in each column is available to
+move. In addition, the last card in each column can be built upon, but
+only going downwards and staying in suit.
+
+For example, if the 3 of clubs was the last card in a tableau column,
+it could be moved onto a tableau column only if the 4 of clubs was the
+last card in that column. Or it could be moved to the clubs'
+foundation pile, but only if the 2 of clubs had already been moved
+there. If neither of these are possible, the card could still be moved
+onto an empty reserve or an empty tableau column.
+
+If a tableau column is emptied of cards, any available card can then
+be played there.
+
+Since it is never detrimental to do so, the program will automatically
+move cards onto the foundations once it becomes possible to do so.
+However, if you find it distracting, you can turn off this behavior
+from the options menu.
+
+At any time, you can leave a game and return to the initial display of
+the list of available games. Your move history (and solution, if any)
+will be remembered, and if you return to the game at a later time you
+can use redo to pick up where you left off.
+
+
+2. How to Play (graphical interface)
+
+To move a card, simply click on it with the left mouse button. If the
+card has a legal move, it will be made.
+
+If there is more than one legal move, the program will choose one. The
+program will generally prefer moves that maximize your options (such
+as moving a card onto a empty tableau column over an empty reserve).
+
+You can select an alternate destination for your move by using the
+right mouse button instead, or by holding down the Shift key while
+clicking the left mouse button.
+
+Alternately, you can move cards using the keyboard. Tableau cards can
+be moved with the letter keys A through H, for the eight columns going
+from left to right. Cards in the reserve can be moved with the letter
+keys I through L, again going from left to right. As with the mouse,
+you can select an alternate destination by holding down Shift while
+pressing a letter key.
+
+These letters will also appear underneath cards after undoing a move,
+to indicate which move the redo command will execute. A move is
+represented as a lower case letter on the left-hand side, or as an
+uppercase letter on the right-hand side for a move to the alternate
+destination.
+
+As you are playing, the current number of moves is displayed in the
+top right corner.
+
+If at any time, no legal moves are available, a U-turn icon will
+appear at right, below the move count, and you will need to use undo
+in order to proceed. When you complete a game, a checkered-flag icon
+will appear instead. In this situation you can also use undo if you
+wish to try to improve on your solution.
+
+If you are playing a game that you have already solved, then the
+number of moves in your solution will be displayed at bottom right, so
+you can see what you are trying to improve. Directly below that will
+be the number of moves in the shortest possible solution, so you can
+see how much room there is for improvement.
+
+
+3. Branching Redo
+
+By default, the game provides the familiar undo and redo commands.
+However, from the options menu you can choose to enable the branching
+redo feature, which provides a fuller set of commands.
+
+When the branching redo feature is enabled, the game will maintain a
+complete history of all moves made. When you use undo to return to a
+previous state and then try another set of moves going forward, the
+game will still remember the old moves. So if you later use undo to
+return to this point again, either path will be available to be
+redone.
+
+You can see when there are multiple paths forward because more than
+one card will have redoable moves displayed underneath. By default,
+the redo command will choose the most recently visited move, but you
+can visit the other path by specifying the other move directly.
+
+The branching redo feature is most useful after you have solved a game
+and you wish to improve upon your solution. It allows you to revisit
+your moves and experiment with changes at any point, while still
+keeping your working solution intact.
+
+When you are revisiting a solved game, the moves that are part of a
+solution are displayed differently: instead of a letter, the move is
+represented by the total number of moves in the solution. This allows
+you to more easily see which moves are part of shorter solutions.
+
+Sometimes while trying a new sequence of moves, you will return to a
+state you had already visited via a different path. In that case, an
+indicator will appear below your current move count, showing the
+number of moves in the other path. When the other path is shorter, you
+can switch over to that path if you choose. If, on the other hand,
+your newer path is the shorter one, then the game will automatically
+update your history to prefer this newer path. If you have already
+solved this game, and this change creates a new, shorter solution,
+then it will immediately be saved as your current best solution.
+
+In addition to the above commands, the program also allows you to
+bookmark a state, so that you can more easily return to it again. When
+a state is bookmarked, an indicator appear on the right-hand side. You
+can switch between the current state and the bookmarked state.
+
+See the list of redo key commands for more information.
+
+
+4. Credits and License
+
+Copyright (C) 2017 by Brian Raiter <breadbox@muppetlabs.com>
+License: GNU GPL version 3 or later; see <http://gnu.org/licenses/gpl.html>.
+
+This program is written by Brian Raiter. It is based on the original
+Windows program written by Peter Liepa. The configurations were
+created by Peter Liepa, with assistance from Bert van Oortmarssen, and
+are used here with their permission.
+
+The rules of Brainjam are based on "Baker's Game", as described by
+Martin Gardner in the June 1968 issue of Scientific American.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.

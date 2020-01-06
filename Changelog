@@ -1,0 +1,11 @@
+
+* January 2020: version 0.7
+	
+	The initial public release. The program is a fully working beta
+	version, though still lacking some things like as a proper
+	./configure script. See TODO for details.
+
+	(I first started working on this program almost exactly ten years
+	ago. Since then I've been in a repeating pattern of doing a little
+	work on it before abandoning it for a couple of years. It's high
+	time I actually finished it.)

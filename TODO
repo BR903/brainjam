@@ -1,0 +1,40 @@
+
+* Write configure.ac. [This is mandatory for 1.0.]
+
+* Modify the code to permit it to cross-compile for Windows. This will
+  require additions to the Makefile and configuration, but also to the
+  font selection code and the data directory handling, and likely some
+  other parts as well. [This is strongly desirable for 1.0.]
+
+* Come up with a more attractive layout for the opening screen?
+
+* The top-level directory is getting crowded -- maybe the source code
+  should be moved into a src directory? (Edit: tried it; appreciate
+  the cleaner directory listings, don't appreciate the effect on the
+  Makefile build process.)
+
+* Add unit tests for the game logic code. This will probably also
+  require new Makefile rules.
+
+* Add feature to copy solutions to the clipboard. This presumably
+  means adding a new button to the list display.
+
+* Improve the calculation of solution equivalence, so that two states
+  that differ only in (say) the ordering of reserve cards are seen as
+  equivalent. This will require the game state encoding to change, so
+  that individual reserves and tableau piles do not keep their
+  identities, but are simply listed in some fixed ordering. (It is not
+  clear if this will in turn require extra state data to be appended.)
+
+* Add feature to generate a new layout, random but guaranteed to be
+  solvable. Such games would not have a configuration ID and would not
+  generate saved solutions. These differences might require changes in
+  a few different areas of the existing code. However, such a feature
+  would allow users to play the game more than 1500 times. (Algorithm
+  to generate a new, solvable game: Start at the final state and make
+  random inverse moves. An inverse move into the tableau onto a
+  non-sequential card is permanent, causing the card to become
+  unavailable for further moves. A decreasing temperature, in the
+  manner of simulated annealing, causes the frequency of permanent
+  moves to slowly increase, until the end when all cards are forced
+  into the tableau.)

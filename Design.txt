@@ -1,0 +1,268 @@
+The following is a set of notes for the program's overall design, and
+the motivation behind that design. If you're looking to make
+large-scale changes to the program, or if you just want to understand
+how the code is organized, then this will hopefully be helpful.
+
+
+BASIC GOALS
+
+I had a few goals when I started writing this code:
+
+1. Stick to basic, portable C.
+2. Avoid introducing too many external library dependencies.
+3. No external data files.
+
+The first goal was motivated by not wanting to wade into the quagmire
+of C++ (particularly at the time, with major features still being
+added by the ANSI committee). C code can be more roundabout, due to
+requiring more steps to accomplish basic tasks, but for this program I
+felt the advantages of simple, familiar code outweighed the
+disadvantages.
+
+The motivation for the goal of minimizing external dependencies was
+mainly to avoid obstacles for other people being able to build the
+code. It can be very frustrating for users to have to install a bunch
+of unfamiliar libraries before they can even make your program run. In
+the end I had to make use of five external libraries -- though the
+code is organized so as to allow two of the five to be omitted (at the
+cost of losing access to their functionality).
+
+The final goal, of building an executable with no dependencies on
+external data files, means that there doesn't need to be a special
+install process. The user can just copy the executable to whatever
+directory they wish to store it in.
+
+
+MODULES
+
+The code base is broken up into modules. Each module has its own
+directory. The top-level directory is a module as well, called ".".
+The other modules are subdirectories of this one.
+
+The header files declared in the top-level module mostly contain basic
+definitions, and they are available to be #included throughout the
+program. The remaining modules are required to declare all of their
+exported definitions and function declarations in a single header
+file, bearing the same name as the module proper. Any other header
+files with a subdirectory are purely for internal use within that
+module.
+
+(Thanks to C's limited namespace controls, "internal" declarations are
+in reality accessible program-wide. This rule -- that all
+externally-facing symbols must be declared in a single header file --
+helps ensure that any accidental external use of an internal-only
+symbol will generate a compiler warning. Unfortunately, internal
+symbols still need to be globally unique. It is possible to build
+mechanisms to work around this, but for now at least it's not enough
+of a problem to be worth addressing.)
+
+There is no explicit hierarchy between the modules, beyond than that
+of being subdirectories within top-level module. They are all treated
+as peers, and each module may choose to be dependent on any of the
+others. That said, there are a few different types of modules, each
+with different expectations for how it is used.
+
+
+BUILDING
+
+Building is done entirely from the top-level directory, and so every
+file's containing directory is part of its name. Thus, for example,
+inside the "game" module is a source file named "game/play.c". It
+depends on a function defined in the "solutions" module, therefore it
+#includes "solutions/solutions.h". It also depends on header files in
+the top-level module, and they get #included as "./gen.h",
+"./types.h", and so on.
+
+A module's internal header files are never used outside of their own
+directory, so they are #included without a path -- thus e.g.
+game/play.c #includes "internal.h". (This pattern makes the
+distinction between internal and external inclusions easier to spot.)
+
+There is only one makefile for the entire project, which naturally can
+be found in the top-level directory. The makefile defines the usual
+variables, $(CFLAGS) and so on, as well as two empty variables $(SRC)
+and $(GENRES). The makefile then includes a file named "modules.mk"
+from every subdirectory. Each modules.mk then appends to these
+variables, creating a master list of source files and resource files,
+respectively. (The modules.mk file can also append more options to
+variables like $(CFLAGS), and/or define build rules that are unique to
+that module.) The top-level module uses a short shell script,
+"depend.sh", to automatically list out the full set of dependencies
+for the source code. (There is also a third shared variable, named
+$(SRCRES), which tracks the source files that resources are built
+from. However, this variable is currently unused.)
+
+
+MODULES: THE USER INTERFACE MODULES
+
+The program comes with not one but two separate user interfaces, each
+one in its own module. Both adhere to the same API, so that either one
+can be used without affecting the rest of the program. The choice is
+made during program initialization, depending on the system's
+functionality and the user's preferences.
+
+The "sdl" module provides a user interface built upon the SDL2 library
+(plus SDL2_ttf to provide font rendering -- functionality that is,
+sadly, wholly absent from SDL2 proper). This module includes, among
+other things, all of the program's graphical resources. For most
+people, this is the only user interface that they will ever see.
+
+The "curses" module provides a text-based user interface that runs in
+a terminal. It is much simpler in design than "sdl", but it
+nonetheless implements the same API and provides the equivalent
+functionality (within the limitations of the text terminal).
+
+All functionality that is specific to managing the user interface is
+contained entirely within these modules. All other modules must
+therefore be independent of UI details.
+
+The internal design of the user interface code is complex enough to
+warrant its own section; see below for details.
+
+
+MODULES: THE REDO LIBRARY
+
+Unlike other modules, the "redo" module is fully indepenent: it
+references no external code, not even in the top-level module. This
+module is actually designed to be a separate library -- but since it's
+not a library that anyone else uses (so far), the build process just
+includes it directly.
+
+The "redo" module provides functionality for implementing the
+program's undo and redo commands. It is not documented here, but if
+you're curious to learn more about it, please see my "libredo" project
+at <http://www.muppetlabs.com/~breadbox/software/libredo.html>.
+
+
+MODULES: THE OWNERSHIP MODULES
+
+There are two modules whose central task is just to be the owner of
+data that needs to be globally accessible.
+
+The "configs" module owns the list of 1500 unique configurations that
+make each game different. This module's job is simply to turn the
+compressed defintion of a given configuration into an initial game
+layout.
+
+The "solutions" module owns the list of the user's solutions to each
+game. This module provides functions to look up solutions, and to find
+games with or without a recorded solution. It also ensures that the
+solutions file on disk is updated whenever a change is made.
+
+
+MODULES: THE FUNCTIONAL MODULES
+
+Finally, three more modules are responsible for providing some major
+subset of the program's functionality.
+
+The "files" module is responsible for all file I/O. This module's
+functions handle all reading and writing to files, as well as the
+translations between in-memory and on-disk rerepresentations of data.
+
+The "game" module is responsible for implementing the actual rules of
+the game itself, as well as the logic for all of the UI commands. All
+of the code that manipulates the game state is here.
+
+And lastly, the top-level "." module is responsible for the pre-UI
+startup code, as well as transitioning into and out of the program's
+main loop. This module is also used to hold some foundational parts
+that the rest of the program depends on: the most basic type
+definitions and some low-level functionality that isn't specific to
+any single module.
+
+
+THE "SDL" MODULE: INTERNAL DESIGN
+
+By far the largest module is the "sdl" module, which creates the
+graphical user interface. It is involved enough to warrant its own
+descriptive overview.
+
+(Note that while the "curses" module is similar in organization to the
+"sdl" module, it differs considerably at various points, mostly
+because it is also significantly simpler.)
+
+The SDL user interface has three main modes, or "displays": the game
+selection display (which also functions as the introductory splash
+page), the documentation reader display, and the main game play
+display. Each display has a similar organization in which it takes
+responsibility for rendering and responding to input events. This
+allows much of the code to go into the central files, and work the
+same regardless of which display is currently active.
+
+(There is technically speaking a fourth display, namely the options
+menu display. However, it is simple enough that it is mostly folded
+into the main game display as a temporary mode.)
+
+Each display, like much UI code, is structured around a central event
+loop. The display is rendered, and the program waits for an input
+event to occur. When it does, it is translated into a user command as
+appropriate (or ignored as a do-nothing event), the command is applied
+to the game state, and the loop iterates.
+
+However, there is a significant difference here between the main game
+display and the other two. The latter have their event loops handled
+entirely within the UI module, while the game display's event loop
+must necessarily exit to code outside the module (since the external
+code has all the logic for modifying game state). Every time a event
+occurs which translates into a user command, the main game display
+exits its event loop and returns to the external calling function.
+
+The button is a common enough UI object that the code to manage its
+interactions with the mouse are part of the general UI event loop,
+independent of the individual displays. Once a button is created and
+registered, the standard event loop takes care of rendering it,
+tracking the mouse, and generating user commands. In addition to the
+more traditional pushbuttons, the check boxes in the options menu are
+also handled by the same code.
+
+The scroll bar that appears next to the game selection list and the
+help text is also managed by shared code, though for this object each
+display has to explicitly call the functions that manage the scroll
+bar.
+
+The third common UI object is the animation handler. This isn't a
+visual object per se, but rather a standard way to access the timer in
+order to allow a value to change smoothly over time. Animation objects
+are used in conjunction with scroll bars to let them scroll smoothly,
+as well as animating the movement of the playing cards in the main
+game display.
+
+
+IMAGE FILES
+
+The "sdl" module's graphical UI, naturally, depends on a number of
+graphical images. There is one large image, namely the banner that
+appears at the top of the initial display. A second image holds the
+complete set of playing cards, arranged in a grid. The remaining
+graphics are concatenated into the third image, as a "sprite sheet".
+
+All images are stored within the binary as Windows bitmaps compressed
+via gzip. This may seem to be an odd choice of formats, but this is
+done because bitmaps are the only image format that SDL2 supports
+natively. Using an image format like PNG would require adding another
+library dependency (or a significant amount of extra code).
+
+Bitmaps tend to be rather large, and this is why the images are
+compressed before adding them to the binary. Since the images are only
+used during initialization (when they are turned into textures), this
+costs little in performance. And, interestingly enough, a compressed
+bitmap is typically smaller than the equivalent PNG.
+
+The only real downside of this choice is the handling of transparency.
+The Windows bitmap file format does include support for an alpha
+channel -- but such bitmaps are rare in practice, and as a result most
+programs do not recognize them. Gimp, for example, or the Imagemagick
+tools, simply ignore the alpha channel of a bitmap file. (Thankfully,
+the SDL2 library does handle such bitmaps correctly.) Therefore, for
+ease of use, the images are stored as PNGs in the source tree, and at
+build time a python script manually converts each PNG into a
+transparent bitmap file.
+
+
+DATA RESOURCES
+
+C does not have a way to directly import a data file into a program as
+a C object. So, in order to accomplish this, the program makes use of
+short assembly files. The GNU assembler provides a directive, .incbin,
+which has the desired functionality. A shared header file declares the
+data as an extern variable, which can then be used in the C program.

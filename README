@@ -1,0 +1,161 @@
+!! PLEASE NOTE: This is currently beta software. Though stable, and
+!! believed to be largely bug-free, its design and user interface are
+!! still subject to change.
+
+
+ * About This Program
+
+Brain Jam is a solitaire card game. It is similar to soltaire games
+like Freecell in that the entire deck is dealt out face up at the
+start, so the player has full information. However, unlike many
+solitaire programs, Brain Jam comes with a large but finite number of
+initial orderings, all of which are guaranteed to be solvable. Thus
+there is no luck factor in playing Brain Jam.
+
+Once you have solved a given configuration, you can then  go back and
+work to find a new solution with fewer moves.
+
+
+ * Prerequisites
+
+Brain Jam depends on the following libraries:
+
+* ncursesw
+* SDL2
+* SDL2_ttf
+* fontconfig
+* zlib
+
+In order to compile Brain Jam, you will need to have the include files
+for the above libraries. For most Linux users, this means that you
+will need to have installed the development versions of these
+packages. For example, on a Debian-based system, you would run
+something like:
+
+  sudo apt install libsdl2-dev libsdl2-ttf-dev zlib1g-dev
+                   libncursesw5-dev libfontconfig1-dev
+
+Brain Jam can be configured to remove its dependency on some but not
+all of the above libraries, at the expense of removing program
+functionality. See the "Configuration" section below for details.
+
+(In addition, the build process makes use of Python and the python
+image library PIL, pkg-config, gzip, and sed.)
+
+
+ * Configuration
+
+There's no configure script at this time. But the code should be
+portable to any system that supports the above dependencies. However,
+you can manually edit the file "config.mk" in the top-level directory
+before building to remove a couple of features of the program, in
+order to avoid some library dependencies. Most users will have no need
+to change these, but if for some reason you wish to avoid using these
+libraries, the option is available.
+
+If you remove the definition of "USE_NCURSES" in "config.mk", Brain
+Jam will not link with the ncursesw library, at the expense of
+removing support for the alternative text-based user interface.
+
+If you remove the definition of "USE_SDL" in "config.mk", Brain Jam
+will not link with the SDL2 libraries (nor zlib), at the expense of
+removing support for the graphical user interface. Only the textual
+interface will be available.
+
+(And yes, you can disable both ncurses and SDL, but the resulting
+program will not be useful.)
+
+If you remove the definition of "USE_FONTCONFIG" in "config.mk", Brain
+Jam will not link with the fontconfig library. In order to use the
+graphical interface without libfontconfig, the program will need to
+have a full pathname to a font file supplied. The path can be added to
+the initialization file "brainjam.ini" (see below), with a line such
+as:
+
+  font=/usr/share/fonts/opentype/freefont/FreeSerif.otf
+
+Alternately, the path can be hard-coded into the binary by editing
+"sdl/getfont.c" before building. Hey, I don't judge.
+
+
+ * Installing
+
+Running "make install" with the necessary permissions will install the
+brainjam executable under "/usr/local/games", and the man page under
+"/usr/local/share/man/man6". There are no external data files
+that the program requires access to in order to run.
+
+
+ * How to Play
+
+Brain Jam comes with its own documentation. You can type "?" or F1 at
+any time while the program is running to switch to the help display.
+The documentation is also available in "Help.txt" in the top-level
+directory, for those who prefer to read plain text files.
+
+
+ * Files
+
+Brain Jam creates a directory "~/.brainjam" for storing your
+individual settings and game state.
+
+Two files in this directory are worth mentioning specifically. The
+file "brainjam.ini" stores your current settings, such as the number
+of the most recent game. The file "brainjam.sol" contains your best
+solutions for each game you've completed. Note that these files
+intentionally use the same filename and format as the original Windows
+program. If you used this program, you should be able to copy your old
+files over and have all of your existing solutions available in this
+program.
+
+The other files in this directory have names of the form "session-*",
+and store undo history for each game.
+
+
+ * Websites
+
+The home page for this program is at:
+
+  http://www.muppetlabs.com/~breadbox/software/brainjam.html
+
+The website for the original Brain Jam program is at:
+
+  http://brainjam.ca/brainjam/
+
+From there you can obtain the original 16-bit Windows binary, as well
+as play a variant version that runs in the browser.
+
+
+ * License
+
+Brain Jam is copyright 2017 by Brian Raiter. This program is free
+software; you can redistribute it and/or modify it under the terms of
+the GNU General Public License as published by the Free Software
+Foundation; either version 3 of the License, or (at your option) any
+later version. This program is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License, included in this distribution in the file
+COPYING, for more details.
+
+
+ * Credits
+
+This program is written by Brian Raiter. The original game comes from
+the Brain Jam program for Windows, which was written by Peter Liepa.
+
+The rules of Brain Jam are based on "Baker's Game", as described by
+Martin Gardner in the June 1968 issue of Scientific American.
+
+The deck configurations were created by Peter Liepa with assistance
+from Bert van Oortmarssen, and are used here with their permission.
+
+The graphics that appear in Brain Jam (with the exception of the
+original Brain Jam icon), are either taken from public domain sources,
+or have been explicitly placed in the public domain by their creators.
+
+
+ * Bugs
+
+Bug reports are always appreciated, and can be sent to the author at
+<breadbox@muppetlabs.com>.

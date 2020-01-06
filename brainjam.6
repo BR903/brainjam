@@ -1,0 +1,77 @@
+.TH "brainjam" "6" "December 2019" "" "Games"
+.SH NAME
+brainjam \- a solitaire puzzle game
+.SH SYNOPSIS
+.B brainjam [OPTIONS] [ID]
+.SH DESCRIPTION
+.B Brain Jam
+is a playing-card puzzle game created by Peter Liepa, based
+on "Baker's Game", as described by Martin Gardner in the June 1968
+issue of Scientific American.
+.PP
+Brain Jam begins by presenting a list of available games. Each game
+uses the same rules but a differently shuffled deck. Each game has a
+known best solution, so after solving a particular game you can also
+return to in order to improve your solution.
+.PP
+If an \fIID\fR is supplied on the command line, Brain Jam will begin
+with that game selected. Otherwise, Brain Jam defaults to your most
+recently played game.
+.PP
+Press \fB?\fR or \fBF1\fR to view help within the game. The in-game
+help includes information on the rules of Brain Jam and how to play.
+.SH OPTIONS
+.TP
+\fB\-D\fR, \fB\-\-datadir\fR=\fIDIR\fR
+Use \fIDIR\fR as the user's data directory for storing session data
+and game solutions. The default data directory is \fI~/.brainjam\fR.
+.TP
+\fB\-t\fR, \fB\-\-textmode\fR
+Force \fBBrain Jam\fR to run in the terminal. The default behavior is
+to open a graphical window, and to use a text-based interface only if
+no graphics system is available.
+.TP
+\fB\-r\fR, \fB\-\-readonly\fR
+Run in read-only mode. No data files will be changed, and no game
+progress will be preserved.
+.TP
+.B \--help
+Display help and exit.
+.TP
+.B \--version
+Display version information and exit.
+.TP
+.B \--license
+Display the software license and exit.
+.TP
+.B \--rules
+Display the rules of the game and exit.
+.SH FILES
+.TP
+.IR DATADIR /brainjam.ini
+The game's persistent settings.
+.TP
+.IR DATADIR /brainjam.sol
+The solutions to your completed games.
+.TP
+.IR DATADIR /session-*
+Move history for each game.
+.SH LICENSE
+This program is free software; it is distributed under the terms of
+the GNU General Public License version 3 (or, at your option, any
+later version).
+.SH CREDITS
+This program is written by Brian Raiter. It is based on the original
+Windows program written by Peter Liepa. The configurations were
+created by Peter Liepa with assistance from Bert van Oortmarssen, and
+are used here with their permission.
+.SH COPYRIGHT
+Copyright \(co 2017 Brian Raiter <\fIbreadbox@muppetlabs.com\fR>.
+.br
+License GPLv3+: GNU GPL version 3 or later. This is free software: you
+are free to change and redistribute it. There is NO WARRANTY, to the
+extent permitted by law. See <\fIhttp://gnu.org/licenses/gpl.html\fR>
+for more information.
+.SH "SEE ALSO"
+Brian Jam's home page is at
+<\fIhttp://www.muppetlabs.com/~breadbox/software/brainjam.html\fR>.
