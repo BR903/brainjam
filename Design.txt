@@ -23,14 +23,13 @@ The motivation for the goal of minimizing external dependencies was
 mainly to avoid obstacles for other people being able to build the
 code. It can be very frustrating for users to have to install a bunch
 of unfamiliar libraries before they can even make your program run. In
-the end I had to make use of five external libraries -- though the
-code is organized so as to allow two of the five to be omitted (at the
-cost of losing access to their functionality).
+the end I had to make use of five external libraries, so in order to
+stay true to this goal I allowed several of them to be omitted, at the
+cost of losing program functionality.
 
 The final goal, of building an executable with no dependencies on
-external data files, means that there doesn't need to be a special
-install process. The user can just copy the executable to whatever
-directory they wish to store it in.
+external data files, means that the executable is self-contained, and
+doesn't require a special install process.
 
 
 MODULES
@@ -55,12 +54,6 @@ symbol will generate a compiler warning. Unfortunately, internal
 symbols still need to be globally unique. It is possible to build
 mechanisms to work around this, but for now at least it's not enough
 of a problem to be worth addressing.)
-
-There is no explicit hierarchy between the modules, beyond than that
-of being subdirectories within top-level module. They are all treated
-as peers, and each module may choose to be dependent on any of the
-others. That said, there are a few different types of modules, each
-with different expectations for how it is used.
 
 
 BUILDING
@@ -93,6 +86,15 @@ $(SRCRES), which tracks the source files that resources are built
 from. However, this variable is currently unused.)
 
 
+THE LIST OF MODULES
+
+There is no explicit hierarchy between the modules, beyond than that
+of being subdirectories within top-level module. They are all treated
+as peers, and each module may choose to be dependent on any of the
+others. That said, there are a few different types of modules, each
+with different expectations for how it is used.
+
+
 MODULES: THE USER INTERFACE MODULES
 
 The program comes with not one but two separate user interfaces, each
@@ -102,18 +104,17 @@ made during program initialization, depending on the system's
 functionality and the user's preferences.
 
 The "sdl" module provides a user interface built upon the SDL2 library
-(plus SDL2_ttf to provide font rendering -- functionality that is,
-sadly, wholly absent from SDL2 proper). This module includes, among
+(plus SDL2_ttf to provide font rendering). This module includes, among
 other things, all of the program's graphical resources. For most
 people, this is the only user interface that they will ever see.
 
-The "curses" module provides a text-based user interface that runs in
-a terminal. It is much simpler in design than "sdl", but it
+The "curses" module provides a second user interface that runs in a
+text terminal. It is much simpler in design than "sdl", but it
 nonetheless implements the same API and provides the equivalent
 functionality (within the limitations of the text terminal).
 
 All functionality that is specific to managing the user interface is
-contained entirely within these modules. All other modules must
+contained entirely within these modules. All other modules should
 therefore be independent of UI details.
 
 The internal design of the user interface code is complex enough to
@@ -125,8 +126,8 @@ MODULES: THE REDO LIBRARY
 Unlike other modules, the "redo" module is fully indepenent: it
 references no external code, not even in the top-level module. This
 module is actually designed to be a separate library -- but since it's
-not a library that anyone else uses (so far), the build process just
-includes it directly.
+not a library that anyone else uses (so far), it's just included
+directly for the sake of a simpler build process.
 
 The "redo" module provides functionality for implementing the
 program's undo and redo commands. It is not documented here, but if
@@ -160,8 +161,8 @@ functions handle all reading and writing to files, as well as the
 translations between in-memory and on-disk rerepresentations of data.
 
 The "game" module is responsible for implementing the actual rules of
-the game itself, as well as the logic for all of the UI commands. All
-of the code that manipulates the game state is here.
+the game itself, as well as the logic for the UI commands. All of the
+code that manipulates the game state is here.
 
 And lastly, the top-level "." module is responsible for the pre-UI
 startup code, as well as transitioning into and out of the program's
@@ -251,12 +252,12 @@ bitmap is typically smaller than the equivalent PNG.
 The only real downside of this choice is the handling of transparency.
 The Windows bitmap file format does include support for an alpha
 channel -- but such bitmaps are rare in practice, and as a result most
-programs do not recognize them. Gimp, for example, or the Imagemagick
-tools, simply ignore the alpha channel of a bitmap file. (Thankfully,
-the SDL2 library does handle such bitmaps correctly.) Therefore, for
-ease of use, the images are stored as PNGs in the source tree, and at
-build time a python script manually converts each PNG into a
-transparent bitmap file.
+programs do not recognize them. Gimp ignores the alpha channel of a
+bitmap file, and the Imagemagick tools reject them as invalid.
+(Thankfully, the SDL2 library does handle such bitmaps correctly.)
+Therefore, for ease of handling, images are stored as familiar PNGs in
+the source tree. At build time a python script manually converts each
+PNG into a transparent bitmap.
 
 
 DATA RESOURCES
