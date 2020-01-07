@@ -1,6 +1,6 @@
 # sdl/module.mk: build rules for the sdl module.
 
-ifdef USE_SDL
+ifdef WITH_SDL
 
 SRC += sdl/sdl.c sdl/zrwops.c sdl/resource.S sdl/getfont.c
 SRC += sdl/images.c sdl/button.c sdl/scroll.c sdl/help.c sdl/list.c sdl/game.c
@@ -13,8 +13,8 @@ LDLIBS += $(shell $(SDL2_CONFIG) --libs)
 LDLIBS += $(shell $(PKG_CONFIG) --libs SDL2_ttf zlib)
 
 # Skip this if the fontconfig library is not being used.
-ifdef USE_FONTCONFIG
-CFLAGS += -D_USE_FONTCONFIG $(shell $(PKG_CONFIG) --cflags fontconfig)
+ifdef WITH_FONTCONFIG
+CFLAGS += -D_WITH_FONTCONFIG $(shell $(PKG_CONFIG) --cflags fontconfig)
 LDLIBS += $(shell $(PKG_CONFIG) --libs fontconfig)
 endif
 
@@ -27,7 +27,7 @@ include sdl/sprites/module.mk
 
 else
 
-# A stub module to use if sdl support is removed.
+# An empty module to use if sdl support is removed.
 SRC += sdl/stub.c
 
 endif

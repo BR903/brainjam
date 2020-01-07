@@ -17,7 +17,7 @@ static char const *defaultfontname = "freeserif";
 static char const *defaultfontfile =
     "/usr/share/fonts/opentype/freefont/FreeSerif.otf";
 
-#if _USE_FONTCONFIG
+#if _WITH_FONTCONFIG
 
 #include <fontconfig/fontconfig.h>
 
