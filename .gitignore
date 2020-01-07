@@ -1,5 +1,11 @@
+*.d
 *.o
 *.a
+configs.bin
+*.bmp.gz
+sdl/images.png
+sdl/imageids.h
+sdl/layout.h
 brainjam
 *.tar.gz
 *.zip
