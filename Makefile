@@ -23,7 +23,7 @@ PROG := $(NAME)
 all: $(PROG)
 
 #
-# The basic tools.
+# Build tools.
 #
 
 # The tools that are used to build the program.
@@ -31,15 +31,26 @@ CC := gcc
 PKG_CONFIG := pkg-config
 SDL2_CONFIG := sdl2-config
 
-# The definitions that control how the program is built.
+# The default build tool options are pretty tame.
 CPPFLAGS := 
-CFLAGS := -Wall -Wextra -ggdb -Og -DVERSION_ID='"$(VERSION)"'
-ASFLAGS := -Wall -Wextra -ggdb
-LDFLAGS := -Wall -Wextra -ggdb
+CFLAGS := -Wall -Wextra
+ASFLAGS := -Wall -Wextra
+LDFLAGS := -Wall -Wextra
 LDLIBS := 
 
+# If debugging symbols are requested, add the necessary options.
+# Otherwise, turn on optimization.
+ifdef ENABLE_DEBUG
+override CFLAGS += -ggdb -Og
+override ASFLAGS += -ggdb
+override LDFLAGS += -ggdb
+else
+override CFLAGS += -O2
+override LDFLAGS += -s
+endif
+
 #
-# The modules.
+# Modules.
 #
 
 # Each directory (including the top-level directory) is a module that
@@ -47,7 +58,7 @@ LDLIBS :=
 MODULES := . configs solutions files game redo curses sdl
 
 # Source files in all modules are built from this directory.
-CPPFLAGS += -I.
+override CPPFLAGS += -I.
 
 # The lists of source files and resource files, initially empty.
 SRC :=
@@ -93,3 +104,7 @@ clean:
 # Alternately, the cclean rule only removes the program and object files.
 cclean:
 	rm -f $(PROG) $(OBJ)
+
+# This won't update automatically; replace with something better.
+./version.h:
+	echo '#define VERSION_ID "$(VERSION)"' > $@

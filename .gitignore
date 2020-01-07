@@ -1,7 +1,8 @@
 *.d
 *.o
 *.a
-configs.bin
+version.h
+configs/configs.bin
 *.bmp.gz
 sdl/images.png
 sdl/imageids.h

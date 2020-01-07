@@ -3,8 +3,9 @@
 ifdef WITH_NCURSES
 
 SRC += curses/curses.c curses/list.c curses/game.c curses/help.c
-CFLAGS += $(shell $(PKG_CONFIG) --cflags ncursesw)
-LDLIBS += $(shell $(PKG_CONFIG) --libs ncursesw)
+
+override CFLAGS += $(shell $(PKG_CONFIG) --cflags ncursesw)
+override LDLIBS += $(shell $(PKG_CONFIG) --libs ncursesw)
 
 else
 

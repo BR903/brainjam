@@ -7,6 +7,7 @@
 #include <locale.h>
 #include <getopt.h>
 #include "./gen.h"
+#include "./version.h"
 #include "./types.h"
 #include "./settings.h"
 #include "./ui.h"
