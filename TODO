@@ -1,17 +1,10 @@
 
-* Write configure.ac. [This is mandatory for 1.0.]
-
 * Modify the code to permit it to cross-compile for Windows. This will
   require additions to the Makefile and configuration, but also to the
   font selection code and the data directory handling, and likely some
   other parts as well. [This is strongly desirable for 1.0.]
 
 * Come up with a more attractive layout for the opening screen?
-
-* The top-level directory is getting crowded -- maybe the source code
-  should be moved into a src directory? (Edit: tried it; appreciate
-  the cleaner directory listings, don't appreciate the effect on the
-  Makefile build process.)
 
 * Add unit tests for the game logic code. This will probably also
   require new Makefile rules.

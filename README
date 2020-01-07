@@ -26,11 +26,10 @@ Brain Jam depends on the following libraries:
 * fontconfig
 * zlib
 
-In order to compile Brain Jam, you will need to have the include files
-for the above libraries. For most Linux users, this means that you
-will need to have installed the development versions of these
-packages. For example, on a Debian-based system, you would run
-something like:
+In order to compile Brain Jam, you will need to have installed these
+libraries along with their include files. For most Linux users, this
+means that you will need to have installed the development packages.
+For example, on a Debian-based system, you would run something like:
 
   sudo apt install libsdl2-dev libsdl2-ttf-dev zlib1g-dev
                    libncursesw5-dev libfontconfig1-dev
@@ -39,50 +38,53 @@ Brain Jam can be configured to remove its dependency on some but not
 all of the above libraries, at the expense of removing program
 functionality. See the "Configuration" section below for details.
 
-(In addition, the build process makes use of Python and the python
-image library PIL, pkg-config, gzip, and sed.)
+In addition, the build process makes use of Python and the python
+image library PIL, pkg-config, gzip, and sed.
 
 
  * Configuration
 
-There's no configure script at this time. But the code should be
-portable to any system that supports the above dependencies. However,
-you can manually edit the file "config.mk" in the top-level directory
-before building to remove a couple of features of the program, in
-order to avoid some library dependencies. Most users will have no need
-to change these, but if for some reason you wish to avoid using these
-libraries, the option is available.
+Run "./configure" to configure the build process to your system. You
+can use "--prefix", "--exec-prefix", "--datarootdir", "--bindir",
+and/or "--mandir" to control where the files will be installed. The
+following flags can also be used to modify the nature of the program:
 
-If you remove the definition of "USE_NCURSES" in "config.mk", Brain
-Jam will not link with the ncursesw library, at the expense of
-removing support for the alternative text-based user interface.
+  --enable-debug
 
-If you remove the definition of "USE_SDL" in "config.mk", Brain Jam
-will not link with the SDL2 libraries (nor zlib), at the expense of
-removing support for the graphical user interface. Only the textual
-interface will be available.
+If present, the program will be built with debugging symbols. The
+default is "--disable-debug". 
 
-(And yes, you can disable both ncurses and SDL, but the resulting
-program will not be useful.)
+  --without-ncurses
 
-If you remove the definition of "USE_FONTCONFIG" in "config.mk", Brain
-Jam will not link with the fontconfig library. In order to use the
-graphical interface without libfontconfig, the program will need to
-have a full pathname to a font file supplied. The path can be added to
-the initialization file "brainjam.ini" (see below), with a line such
-as:
+This flag will remove the program's dependency on the ncursesw
+library, at the expense of dropping the alternative text-based user
+interface. (The default is "--with-ncurses".)
+
+  --without-sdl
+
+This flag will remove the program's dependency on the SDL2 library (as
+well as SDL2_ttf and zlib), at the expense of leaving out the graphic
+user interface. Only the text-based interface will be avaiable. (The
+default is "--with-sdl".)
+
+  --without-fontconfig
+
+This flag will remove the program's dependency on the fontconfig
+library. (The default is "--with-fontconfig".) This will cause the
+program to require a full path to a font file to be supplied when the
+program runs. The path can be added to the initialization file
+"brainjam.ini" (see "Files" below), with a line such as:
 
   font=/usr/share/fonts/opentype/freefont/FreeSerif.otf
 
-Alternately, the path can be hard-coded into the binary by editing
-"sdl/getfont.c" before building. Hey, I don't judge.
+(Alternately, the path can be hard-coded into the binary by editing
+"src/sdl/getfont.c" before compiling. Hey, I don't judge.)
 
 
  * Installing
 
 Running "make install" with the necessary permissions will install the
-brainjam executable under "/usr/local/games", and the man page under
-"/usr/local/share/man/man6". There are no external data files
+brainjam executable and the man page. There are no external data files
 that the program requires access to in order to run.
 
 
