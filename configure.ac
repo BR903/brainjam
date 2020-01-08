@@ -102,6 +102,7 @@ if test "$with_fontconfig" != "no" ; then
                 fi])
 fi
 
+
 dnl * Ensure that the requested dependencies are functional.
 dnl *
 

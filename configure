@@ -3511,6 +3511,7 @@ fi
 fi
 
 
+
 if test "$with_ncurses" = "yes" ; then
   pkg-config ncursesw || as_fn_error $? "the ncursesw library was not found." "$LINENO" 5
 fi
