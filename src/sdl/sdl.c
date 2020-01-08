@@ -19,7 +19,8 @@
 
 /* Convenience macro for initializing an SDL_Color struct.
  */
-#define setcolor(c, rr, gg, bb) ((c).r = (rr), (c).g = (gg), (c).b = (bb))
+#define setcolor(c, rr, gg, bb) \
+    ((c).r = (rr), (c).g = (gg), (c).b = (bb), (c).a = SDL_ALPHA_OPAQUE)
 
 /* The set of available timer-initiated events.
  */

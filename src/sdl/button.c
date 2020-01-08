@@ -130,9 +130,9 @@ void makegraphicbutton(button *pushbutton, SDL_Surface *graphic)
     SDL_BlitSurface(bkgnd, NULL, image, &rect);
     rect.y += pushbutton->pos.h;
     SDL_FreeSurface(bkgnd);
-    color = SDL_MapRGB(image->format, colors(_graph.bkgndcolor));
+    color = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
     SDL_FillRect(image, &rect, color);
-    color = SDL_MapRGB(image->format, colors(_graph.defaultcolor));
+    color = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
     drawrect(image, color, rect.x, rect.y, rect.w, rect.h);
 
     rect.x = (pushbutton->pos.w - graphic->w) / 2;
@@ -202,9 +202,9 @@ void makecheckbox(button *chkbox, char const *str)
                                  textimage->format->Gmask,
                                  textimage->format->Bmask,
                                  textimage->format->Amask);
-    bkgndval = SDL_MapRGB(image->format, colors(_graph.bkgndcolor));
-    textval = SDL_MapRGB(image->format, colors(_graph.defaultcolor));
-    dimtextval = SDL_MapRGB(image->format, colors(_graph.dimmedcolor));
+    bkgndval = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
+    textval = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
+    dimtextval = SDL_MapRGB(image->format, colors3(_graph.dimmedcolor));
     SDL_FillRect(image, NULL, bkgndval);
     destrect.x = image->w - textimage->w;
     destrect.y = 0;
@@ -302,8 +302,8 @@ void makepopupbutton(button *popup, SDL_Surface *graphic)
     SDL_BlitSurface(bkgnd, NULL, image, &rect);
     rect.y += popup->pos.h;
     SDL_FreeSurface(bkgnd);
-    bkgndval = SDL_MapRGB(image->format, colors(_graph.bkgndcolor));
-    textval = SDL_MapRGB(image->format, colors(_graph.defaultcolor));
+    bkgndval = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
+    textval = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
     SDL_FillRect(image, &rect, bkgndval);
     drawrect(image, textval, rect.x, rect.y, rect.w, rect.h);
     rect.y += popup->pos.h;

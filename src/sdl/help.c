@@ -432,7 +432,7 @@ static void makeparagraphtexture(sectioninfo *section)
                                          lineimage->format->Gmask,
                                          lineimage->format->Bmask,
                                          lineimage->format->Amask);
-            cv = SDL_MapRGB(image->format, colors(_graph.bkgndcolor));
+            cv = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
             SDL_FillRect(image, NULL, cv);
         }
         rect.x = 0;
@@ -485,7 +485,7 @@ static void maketabletexture(sectioninfo *section)
                                          lineimage->format->Gmask,
                                          lineimage->format->Bmask,
                                          lineimage->format->Amask);
-            cv = SDL_MapRGB(image->format, colors(_graph.bkgndcolor));
+            cv = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
             SDL_FillRect(image, NULL, cv);
         }
         rect.w = lineimage->w;
@@ -531,15 +531,12 @@ static void render(void)
     SDL_Rect rect;
     int i;
 
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.bkgndcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.bkgndcolor));
     SDL_RenderClear(_graph.renderer);
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.dimmedcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.dimmedcolor));
     SDL_RenderDrawLines(_graph.renderer, listoutline, 5);
     SDL_RenderDrawLines(_graph.renderer, textoutline, 5);
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.defaultcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
 
     rect.x = listrect.x;
     rect.y = listrect.y;
@@ -548,10 +545,10 @@ static void render(void)
                          NULL, NULL, &rect.w, &rect.h);
         if (i == currentsection)
             SDL_SetTextureColorMod(sections[i].titletexture,
-                                   colors(_graph.highlightcolor));
+                                   colors3(_graph.highlightcolor));
         else
             SDL_SetTextureColorMod(sections[i].titletexture,
-                                   colors(_graph.defaultcolor));
+                                   colors3(_graph.defaultcolor));
         SDL_RenderCopy(_graph.renderer, sections[i].titletexture, NULL, &rect);
         rect.y += lineheight;
     }

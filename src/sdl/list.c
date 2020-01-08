@@ -290,11 +290,9 @@ static void drawrecthighlight(int x, int y, int w, int h)
     rect.y = y;
     rect.w = w;
     rect.h = h;
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.lightbkgndcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.lightbkgndcolor));
     SDL_RenderFillRect(_graph.renderer, &rect);
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.defaultcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
 }
 
 /* Render the configuration list
@@ -308,8 +306,7 @@ static void renderconfiglist(void)
     scrollrender(&scroll);
     drawlargetext("Game",
                   listrect.x + listrect.w / 2, listrect.y - rowheight - 2, 0);
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.defaultcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
     SDL_RenderDrawLine(_graph.renderer, listrect.x, listrect.y - 1,
                        listrect.x + listrect.w, listrect.y - 1);
     SDL_RenderSetClipRect(_graph.renderer, &listrect);
@@ -344,8 +341,7 @@ static void renderconfiglist(void)
  */
 static void render(void)
 {
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.bkgndcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.bkgndcolor));
     SDL_RenderClear(_graph.renderer);
 
     SDL_RenderCopy(_graph.renderer, bannertexture, NULL, &bannerrect);
