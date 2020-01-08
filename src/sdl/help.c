@@ -37,6 +37,10 @@ typedef struct sectioninfo {
 static sectioninfo *sections;
 static int sectioncount = 0;
 
+/* The width of the section list, wide enough to show each title.
+ */
+static int listwidth = 0;
+
 /* The index of the section currently being displayed.
  */
 static int currentsection = -1;
@@ -51,6 +55,7 @@ static button backbutton;
 
 /* The locations of the elements of the display.
  */
+static SDL_Point displaysize;           /* size of the window */
 static SDL_Rect listrect;               /* location for the section list */
 static SDL_Rect textrect;               /* location for the main text */
 static SDL_Point listoutline[5];        /* outline around the section list */
@@ -128,22 +133,6 @@ static void inserthelpsection(char const *title, char const *text, int first)
  * Display element placement.
  */
 
-/* Determine the minimum width necessary for rendering the list of
- * section names.
- */
-static int measurelistwidth(void)
-{
-    int maxwidth, w, i;
-
-    maxwidth = 0;
-    for (i = 0 ; i < sectioncount ; ++i) {
-        SDL_QueryTexture(sections[i].titletexture, NULL, NULL, &w, NULL);
-        if (maxwidth < w)
-            maxwidth = w;
-    }
-    return maxwidth;
-}
-
 /* Calculate the locations and positions of the elements that make up
  * the help display: The section list and its outline, the main text
  * display and its outline, the scrollbar, and the back button.
@@ -152,7 +141,9 @@ static SDL_Point setlayout(SDL_Point display)
 {
     SDL_Rect rect;
     SDL_Point size;
-    int textmargin, listwidth;
+    int textmargin;
+
+    displaysize = display;
 
     lineheight = TTF_FontLineSkip(_graph.smallfont);
 
@@ -166,8 +157,6 @@ static SDL_Point setlayout(SDL_Point display)
     backbutton.pos.x = rect.x + rect.w - backbutton.pos.w;
     backbutton.pos.y = rect.y + rect.h - backbutton.pos.h;
     rect.w -= backbutton.pos.w + _graph.margin;
-
-    listwidth = measurelistwidth();
 
     listoutline[0].x = rect.x - 1;
     listoutline[0].y = rect.y - 1;
@@ -217,6 +206,28 @@ static SDL_Point setlayout(SDL_Point display)
     size.x = listrect.w + 2 * rect.w + backbutton.pos.w + 5 * _graph.margin;
     size.y = 8 * lineheight + 2 * _graph.margin;
     return size;
+}
+
+/* Determine the minimum width necessary for rendering the list of
+ * section names. If the width needs to change, then recompute the
+ * full layout.
+ */
+static int updatelistwidth(void)
+{
+    int maxwidth, w, i;
+
+    maxwidth = 0;
+    for (i = 0 ; i < sectioncount ; ++i) {
+        SDL_QueryTexture(sections[i].titletexture, NULL, NULL, &w, NULL);
+        if (maxwidth < w)
+            maxwidth = w;
+    }
+    if (maxwidth <= listwidth)
+        return FALSE;
+
+    listwidth = maxwidth;
+    setlayout(displaysize);
+    return TRUE;
 }
 
 /*
@@ -720,11 +731,13 @@ void sdl_addhelpsection(char const *title, char const *text, int placefirst)
     for (i = 0 ; i < sectioncount ; ++i) {
         if (!strcmp(title, sections[i].title)) {
             updatehelpsection(i, text);
+            updatelistwidth();
             return;
         }
     }
     if (text) {
         inserthelpsection(title, text, placefirst);
+        updatelistwidth();
         if (currentsection < 0)
             currentsection = 0;
     }
