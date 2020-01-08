@@ -177,7 +177,8 @@ static SDL_Point setlayout(SDL_Point display)
 
     bannerrect.x = 0;
     bannerrect.y = 0;
-    headlinerect.x = display.x - headlinerect.w;
+    headlinerect.x = display.x < bannerrect.w ? display.x : bannerrect.w;
+    headlinerect.x -= headlinerect.w;
     headlinerect.y = bannerrect.y + bannerrect.h - headlinerect.h;
 
     area.x = quitbutton.pos.w + 2 * _graph.margin;
