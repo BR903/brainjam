@@ -604,7 +604,7 @@ static command_t handletimedevent(int type, timedeventinfo *timedevent)
         timedevent->type = event_none;
         return cmd_redraw;
       case event_unget:
-        cmd = (command_t)(long)timedevent->data;
+        cmd = (command_t)(intptr_t)timedevent->data;
         timedevent->type = event_none;
         return cmd;
       case event_animate:
@@ -1029,7 +1029,7 @@ static command_t sdl_getinput(void)
  */
 static void sdl_ungetinput(command_t cmd, int msec)
 {
-    scheduletimedevent(event_unget, msec, (void*)(long)cmd);
+    scheduletimedevent(event_unget, msec, (void*)(intptr_t)cmd);
 }
 
 /* Indicate that a user action was invalid or otherwise rejected.
