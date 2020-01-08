@@ -26,9 +26,11 @@ EXTERN_PTR(gzimages_end)
 EXTERN_PTR(gzcardset)
 EXTERN_PTR(gzcardset_end)
 
-/* The banner image.
+/* The banner images.
  */
 EXTERN_PTR(gzbanner)
 EXTERN_PTR(gzbanner_end)
+EXTERN_PTR(gzheadline)
+EXTERN_PTR(gzheadline_end)
 
 #endif

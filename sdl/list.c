@@ -43,6 +43,10 @@ static int markeroffset;                /* vertical offset of list markers */
  */
 static SDL_Texture *bannertexture;
 
+/* The texture of the banner graphic's headline.
+ */
+static SDL_Texture *headlinetexture;
+
 /*
  * Managing the list selection and the list's scroll position.
  */
@@ -174,7 +178,7 @@ static SDL_Point setlayout(SDL_Point display)
     bannerrect.x = 0;
     bannerrect.y = 0;
     headlinerect.x = display.x - headlinerect.w;
-    headlinerect.y = 2 * _graph.margin;
+    headlinerect.y = bannerrect.y + bannerrect.h - headlinerect.h;
 
     area.x = quitbutton.pos.w + 2 * _graph.margin;
     area.w = (display.x / 2) - area.x;
@@ -349,8 +353,7 @@ static void render(void)
     SDL_RenderClear(_graph.renderer);
 
     SDL_RenderCopy(_graph.renderer, bannertexture, NULL, &bannerrect);
-    SDL_RenderCopy(_graph.renderer, _graph.headlinetexture,
-                   NULL, &headlinerect);
+    SDL_RenderCopy(_graph.renderer, headlinetexture, NULL, &headlinerect);
     renderconfiglist();
     renderscorearea(selection);
     renderimage(IMAGE_OLDICON, iconrect.x, iconrect.y);
@@ -491,9 +494,10 @@ displaymap initlistdisplay(void)
     markersize.x = getimagewidth(IMAGE_STAR);
     markersize.y = getimageheight(IMAGE_STAR);
 
-    bannertexture = loadsplashtexture();
+    bannertexture = loadsplashgraphic();
+    headlinetexture = loadsplashheadline();
     SDL_QueryTexture(bannertexture, NULL, NULL, &bannerrect.w, &bannerrect.h);
-    SDL_QueryTexture(_graph.headlinetexture, NULL, NULL,
+    SDL_QueryTexture(headlinetexture, NULL, NULL,
                      &headlinerect.w, &headlinerect.h);
 
     display.setlayout = setlayout;

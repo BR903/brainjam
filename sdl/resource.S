@@ -22,9 +22,14 @@ gzimages:
 .incbin "sdl/images.bmp.gz"
 gzimages_end:
 
-/* The banner image.
+/* The banner images.
  */
 .align 16
 gzbanner:
 .incbin "sdl/banner.bmp.gz"
 gzbanner_end:
+
+.align 16
+gzheadline:
+.incbin "sdl/headline.bmp.gz"
+gzheadline_end:

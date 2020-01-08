@@ -306,21 +306,6 @@ static SDL_Point measurelayout(SDL_Point size)
     return fullsize;
 }
 
-static SDL_Texture *makebannerheadline(char const *fontfilename, int fontsize)
-{
-    SDL_Surface *image;
-    SDL_Texture *texture;
-    TTF_Font *font;
-
-    font = TTF_OpenFont(fontfilename, fontsize);
-    image = TTF_RenderUTF8_Blended(font, " B R A I N J A M ",
-                                   _graph.defaultcolor);
-    TTF_CloseFont(font);
-    texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
-    SDL_FreeSurface(image);
-    return texture;
-}
-
 /* Complete the setting up of the program's window. Use the size of
  * the playing card graphics to select appropriate font sizes, which
  * in turn are used to determine the size of the layout grid. After
@@ -351,7 +336,6 @@ static int createdisplays(void)
     _graph.largefont = TTF_OpenFont(filename, largefontsize);
     if (!_graph.smallfont || !_graph.largefont)
         return err(filename);
-    _graph.headlinetexture = makebannerheadline(filename, 4 * largefontsize);
     deallocate(filename);
 
     _graph.margin = TTF_FontLineSkip(_graph.smallfont);

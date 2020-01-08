@@ -39,9 +39,13 @@ extern SDL_Surface *getimagesurface(int id);
  */
 extern void finalizeimages(void);
 
-/* Create the titlebar texture for the opening display.
+/* Create the titlebar graphic texture for the opening display.
  */
-extern SDL_Texture *loadsplashtexture(void);
+extern SDL_Texture *loadsplashgraphic(void);
+
+/* Create the titlebar headline texture for the opening display.
+ */
+extern SDL_Texture *loadsplashheadline(void);
 
 /* Render an image texture at the given location on the display.
  */

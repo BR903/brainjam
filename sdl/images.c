@@ -203,14 +203,27 @@ void finalizeimages(void)
     imagesurface = NULL;
 }
 
-/* Return the splash screen's title image as a texture.
+/* Return the splash screen's banner graphic image as a texture.
  */
-SDL_Texture *loadsplashtexture(void)
+SDL_Texture *loadsplashgraphic(void)
 {
     SDL_Surface *image;
     SDL_Texture *texture;
 
     image = SDL_LoadBMP_RW(getzresource(gzbanner), TRUE);
+    texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
+    SDL_FreeSurface(image);
+    return texture;
+}
+
+/* Return the splash screen's banner headline image as a texture.
+ */
+SDL_Texture *loadsplashheadline(void)
+{
+    SDL_Surface *image;
+    SDL_Texture *texture;
+
+    image = SDL_LoadBMP_RW(getzresource(gzheadline), TRUE);
     texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
     SDL_FreeSurface(image);
     return texture;
