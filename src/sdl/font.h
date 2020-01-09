@@ -23,8 +23,8 @@ extern fontrefinfo *findnamedfont(char const *fontname);
  */
 extern TTF_Font *getfontfromref(fontrefinfo const *fontref, int size);
 
-/* Free all memory associated with a font reference. (Calling this
- * function does not invalidate any fonts still in use.)
+/* Free all memory associated with a font reference. Do not call this
+ * function while any derived fonts are still open.
  */
 extern void deallocatefontref(fontrefinfo *fontref);
 

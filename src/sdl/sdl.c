@@ -314,8 +314,10 @@ static SDL_Point measurelayout(SDL_Point size)
 }
 
 /* Create the program's fonts from the given font name, using the
- * playing card graphics to select appropriate sizes. (The font will
- * in turn be used to determine the size of the layout grid.)
+ * playing card drop height to select appropriate character sizes.
+ * Note that the fontref object needs to be preserved for the lifetime
+ * of the fonts, but since the font lifetime is just the lifetime of
+ * the program, this is done by intentionally leaking the pointer.
  */
 static int createfonts(char const *fontname)
 {
@@ -340,14 +342,14 @@ static int createfonts(char const *fontname)
     if (!_graph.largefont)
         return err(fontname);
 
-    deallocatefontref(fontref);
     return TRUE;
 }
 
-/* Complete the setting up of the program's window. After each display
- * has initialized their own resources, they will determine their own
- * layouts, and from this the overall window size is chosen and the
- * window is made visible.
+/* Complete the setting up of the program's window. Allocate our
+ * fonts, which are used to size the layout grid for the displays.
+ * After each display has initialized their own resources, they will
+ * determine their own layouts, and from this the overall window size
+ * is chosen and the window is made visible.
  */
 static int createdisplays(void)
 {

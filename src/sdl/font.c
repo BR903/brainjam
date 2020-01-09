@@ -34,7 +34,52 @@ static int lookupfont(fontrefinfo *fontref);
  */
 static int lookupfont(fontrefinfo *fontref)
 {
-    return FALSE;
+    LOGFONT lf;
+    HFONT hfont;
+    HDC hdc;
+    DWORD size;
+    int result;
+
+    lf.lfHeight = 0;
+    lf.lfWidth = 0;
+    lf.lfEscapement = 0;
+    lf.lfOrientation = 0;
+    lf.lfWeight = FW_REGULAR;
+    lf.lfItalic = FALSE;
+    lf.lfUnderline = FALSE;
+    lf.lfStrikeOut = FALSE;
+    lf.lfCharSet = DEFAULT_CHARSET;
+    lf.lfOutPrecision = OUT_TT_ONLY_PRECIS;
+    lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+    lf.lfQuality = DEFAULT_QUALITY;
+    lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+    snprintf(lf.lfFaceName, sizeof lf.lfFaceName, "%s", fontref->fontname);
+
+    hfont = CreateFontIndirect(&lf);
+    if (!hfont)
+        return FALSE;
+
+    result = FALSE;
+    hdc = CreateCompatibleDC(NULL);
+    if (!hdc)
+        goto done;
+    hfont = SelectObject(hdc, hfont);
+    size = GetFontData(hdc, 0, 0, NULL, 0);
+    if (size == GDI_ERROR)
+        goto done;
+    fontref->databuf = allocate(size);
+    fontref->bufsize = size;
+    GetFontData(hdc, 0, 0, fontref->databuf, size);
+    result = TRUE;
+
+  done:
+    if (hdc) {
+        hfont = SelectObject(hdc, hfont);
+        DeleteDC(hdc);
+    }
+    if (hfont)
+        DeleteObject(hfont);
+    return result;
 }
 
 #elif _WITH_FONTCONFIG  /* using the fontconfig library */
