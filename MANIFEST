@@ -59,8 +59,8 @@ src/sdl/module.mk
 src/sdl/button.c
 src/sdl/button.h
 src/sdl/game.c
-src/sdl/getfont.c
-src/sdl/getfont.h
+src/sdl/font.c
+src/sdl/font.h
 src/sdl/help.c
 src/sdl/images.c
 src/sdl/images.h
@@ -77,6 +77,7 @@ src/sdl/zrwops.c
 src/sdl/zrwops.h
 src/sdl/banner.png
 src/sdl/cardset.png
+src/sdl/headline.png
 src/sdl/abmp.py
 src/sdl/sprites/module.mk
 src/sdl/sprites/back.png
