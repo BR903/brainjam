@@ -218,11 +218,21 @@ static void gameselectionloop(void)
         if (id < 0)
             break;
         settings->configid = id;
-        savercfile(settings);
         f = playgame(id);
         if (!f)
             break;
     }
+}
+
+/* Save the user's current settings to disk.
+ */
+static void savesettings(void)
+{
+    settingsinfo const *settings;
+
+    settings = getcurrentsettings();
+    if (settings)
+        savercfile(settings);
 }
 
 /*
@@ -358,6 +368,7 @@ int main(int argc, char *argv[])
         }
     }
     applysettings(FALSE);
+    atexit(savesettings);
 
     addhelpsection(rulestitle, rulestext, TRUE);
     addhelpsection(branchingredotitle, branchingredotext, FALSE);
