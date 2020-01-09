@@ -1,6 +1,8 @@
 /* sdl/sdl.c: the graphical user interface.
  */
 
+#include <stdio.h>
+#include <string.h>
 #include "SDL.h"
 #include "SDL_ttf.h"
 #include "./gen.h"

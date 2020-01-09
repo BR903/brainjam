@@ -58,9 +58,9 @@ src/redo/types.h
 src/sdl/module.mk
 src/sdl/button.c
 src/sdl/button.h
-src/sdl/game.c
 src/sdl/font.c
 src/sdl/font.h
+src/sdl/game.c
 src/sdl/help.c
 src/sdl/images.c
 src/sdl/images.h

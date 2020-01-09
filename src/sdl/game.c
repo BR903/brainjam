@@ -1,6 +1,7 @@
 /* game.c: the main game display.
  */
 
+#include <stdio.h>
 #include "SDL.h"
 #include "SDL_ttf.h"
 #include "./gen.h"

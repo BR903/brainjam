@@ -2,6 +2,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "SDL.h"
 #include "SDL_ttf.h"
 #include "./gen.h"

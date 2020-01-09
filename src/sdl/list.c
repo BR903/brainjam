@@ -1,6 +1,7 @@
 /* list.c: the list selection display.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "SDL.h"
 #include "SDL_ttf.h"
