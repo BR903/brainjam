@@ -635,7 +635,7 @@ static command_t handletimedevent(int type, timedeventinfo *timedevent)
  */
 static command_t handleevent(SDL_Event *event)
 {
-    SDL_Point size;
+    SDL_Point size, requestedsize;
 
     if (event->type == timedeventid)
         return handletimedevent(event->user.code, event->user.data1);
@@ -652,11 +652,14 @@ static command_t handleevent(SDL_Event *event)
       case SDL_WINDOWEVENT:
         switch (event->window.event) {
           case SDL_WINDOWEVENT_RESIZED:
-            size.x = event->window.data1;
-            size.y = event->window.data2;
-            size = measurelayout(size);
-            if (size.x != event->window.data1 || size.y != event->window.data2)
+          case SDL_WINDOWEVENT_SIZE_CHANGED:
+            requestedsize.x = event->window.data1;
+            requestedsize.y = event->window.data2;
+            size = measurelayout(requestedsize);
+            if (size.x != requestedsize.x || size.y != requestedsize.y) {
                 SDL_SetWindowSize(window, size.x, size.y);
+                return cmd_none;
+            }
             recordwindowsize(size);
             return cmd_redraw;
           case SDL_WINDOWEVENT_EXPOSED:
