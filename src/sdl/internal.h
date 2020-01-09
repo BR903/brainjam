@@ -104,13 +104,6 @@ typedef struct graphicinfo {
     TTF_Font *smallfont;
     TTF_Font *largefont;
 
-    /* The texture of the headline text overlaying the banner. This
-     * shouldn't really be stored here, but this is probably going to
-     * be merged into the banner graphic anyway at some point, so I'm
-     * not motivated to find a better place for it.
-     */
-    SDL_Texture *headlinetexture;
-
     /* The set of colors used for rendering text: regular text, dimmed
      * text, bolded and highlighted text, and finally text background
      * and highlighted text background.

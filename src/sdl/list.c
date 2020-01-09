@@ -345,8 +345,6 @@ static void render(void)
     SDL_RenderClear(_graph.renderer);
 
     SDL_RenderCopy(_graph.renderer, bannertexture, NULL, &bannerrect);
-    SDL_RenderCopy(_graph.renderer, _graph.headlinetexture,
-                   NULL, &headlinerect);
     renderconfiglist();
     renderscorearea(selection);
     renderimage(IMAGE_OLDICON, iconrect.x, iconrect.y);
@@ -489,8 +487,6 @@ displaymap initlistdisplay(void)
 
     bannertexture = loadsplashtexture();
     SDL_QueryTexture(bannertexture, NULL, NULL, &bannerrect.w, &bannerrect.h);
-    SDL_QueryTexture(_graph.headlinetexture, NULL, NULL,
-                     &headlinerect.w, &headlinerect.h);
 
     display.setlayout = setlayout;
     display.render = render;
