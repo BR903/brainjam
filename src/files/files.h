@@ -23,8 +23,8 @@
  * should be pathname of the program. If the program cannot determine
  * the usual default location, then it will attempt to locate the data
  * directory in the same directory as the program. Regardless of how
- * the directory is found, if the chosen directory is not usable, then
- * the return value is false and the program is put in read-only mode.
+ * the directory is chosen, if it cannot be used, then the return
+ * value is false and the program is put in read-only mode.
  */
 extern int setdatadirectory(char const *dir, char const *programpath);
 

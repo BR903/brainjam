@@ -10,6 +10,15 @@
 #include "files/files.h"
 #include "internal.h"
 
+/* Macro to paper over the fact that the mkdir() provided by the
+ * Windows runtime only takes one argument.
+ */
+#ifdef WIN32
+#define createdir(path, perm)  mkdir(path)
+#else
+#define createdir(path, perm)  mkdir(path, perm)
+#endif
+
 /* The directory where all of the user's data files are stored.
  */
 static char *datadir = NULL;
@@ -22,9 +31,9 @@ static int readonly = FALSE;
  */
 static int forcereadonly = FALSE;
 
-/* Verify that the given directory is present, creating it if it
+/* Verify that the given directory is present, or create it if it
  * doesn't exist. The return value is false if the directory could not
- * be created.
+ * be accessed or created.
  */
 static int finddir(char const *dir)
 {
@@ -34,16 +43,18 @@ static int finddir(char const *dir)
     if (dirfp) {
         closedir(dirfp);
         return TRUE;
-    }
-    if (errno == ENOENT)
-        if (mkdir(dir, 0777) == 0)
+    } else if (errno == ENOENT) {
+        if (createdir(dir, 0777) == 0)
             return TRUE;
+    }
     warn("%s: %s", dir, strerror(errno));
     return FALSE;
 }
 
-/* Extract a directory from the given path, if possible. If the return
- * value is not NULL, the caller is responsible for freeing the buffer.
+/* Extract a directory from the given path, if possible. Since Windows
+ * paths can use both kinds of slashes as directory separators, some
+ * extra logic is needed just for that platform. If the return value
+ * is not NULL, the caller is responsible for freeing the buffer.
  */
 static char const *getdirfrompath(char const *path)
 {
@@ -54,11 +65,12 @@ static char const *getdirfrompath(char const *path)
     if (!path || !*path)
         return NULL;
     p = strrchr(path, '/');
-    if (!p) {
+#ifdef WIN32
+    if (!p)
         p = strrchr(path, '\\');
-        if (!p)
-            return NULL;
-    }
+#endif
+    if (!p)
+        return NULL;
     n = p - path;
     p = allocate(n + 1);
     memcpy(p, path, n);
@@ -85,14 +97,15 @@ int getreadonly(void)
     return readonly || forcereadonly;
 }
 
-/* Copy a complete pathname, using datadir as the starting
- * directory if the file is not already an absolute pathname.
+/* Turn a file into a pathname, using datadir as the starting
+ * directory.
  */
 char *mkpath(char const *file)
 {
-    if (!datadir || *file == '/')
+    if (datadir)
+        return fmtallocate("%s/%s", datadir, file);
+    else
         return strallocate(file);
-    return fmtallocate("%s/%s", datadir, file);
 }
 
 /*
@@ -107,12 +120,14 @@ void setreadonly(int flag)
 }
 
 /* Set the data directory, creating it if it does not already exist.
- * If an explicit path for the data directory is not given, then
- * select a path in the user's home directory, or in the program's
- * directory if the home directory is not known, or in the current
- * directory if the program's directory is also not known. If, after
- * all this, the chosen path cannot be used, then the program is
- * forced into read-only mode and false is returned.
+ * If no explicit directory is provided, the function will select one,
+ * located under the user's home directory. If the user's home
+ * directory is not known, then the function attempts to use a
+ * directory in the same location as programpath. If programpath does
+ * not include a directory, the function will attempt to use the
+ * current directory. If, in the end, the chosen directory cannot be
+ * used, then false is returned, and the program enforces read-only
+ * mode for the duration.
  */
 int setdatadirectory(char const *dir, char const *programpath)
 {
@@ -137,5 +152,6 @@ int setdatadirectory(char const *dir, char const *programpath)
         forcereadonly = TRUE;
         return FALSE;
     }
+    forcereadonly = FALSE;
     return TRUE;
 }
