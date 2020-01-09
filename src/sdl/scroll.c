@@ -66,11 +66,9 @@ void scrollrender(scrollbar const *scroll)
     Uint8 r, g, b, a;
 
     SDL_GetRenderDrawColor(_graph.renderer, &r, &g, &b, &a);
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.bkgndcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.bkgndcolor));
     SDL_RenderFillRect(_graph.renderer, &scroll->pos);
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.dimmedcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.dimmedcolor));
     getthumb(scroll, &rect);
     SDL_RenderFillRect(_graph.renderer, &rect);
     SDL_SetRenderDrawColor(_graph.renderer, r, g, b, a);

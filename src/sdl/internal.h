@@ -10,11 +10,12 @@
 #include "redo/types.h"
 
 /* SDL is not entirely consistent about using the SDL_Color struct;
- * very often its API calls for three separate integer arguments. This
- * macro helps reduce verbosity in those cases, by allow one SDL_Color
- * argument to provide all three.
+ * very often its API calls for separate integer arguments. These
+ * macros help reduce verbosity in this case, breaking out an
+ * SDL_Color struct into multiple arguments.
  */
-#define colors(c) (c).r, (c).g, (c).b
+#define colors3(c)  (c).r, (c).g, (c).b
+#define colors4(c)  (c).r, (c).g, (c).b, (c).a
 
 /* The list of displays that the game provides.
  */

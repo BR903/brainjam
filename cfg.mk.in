@@ -1,0 +1,33 @@
+# ./cfg.mk: build customization settings.
+
+# The thing to build.
+NAME := @PACKAGE_TARNAME@
+VERSION := @PACKAGE_VERSION@
+
+# Define to include the text-terminal version of the UI.
+# Undefine to remove dependency on the ncursesw library.
+@NCURSES_LINE@
+
+# Define to include the graphical version of the UI.
+# Undefine to remove dependency on SDL2, SDL2_ttf, and zlib.
+@SDL_LINE@
+
+# Define to allow the program to automatically find a system font.
+# Undefine to remove dependency on the fontconfig library.
+@FONTCONFIG_LINE@
+
+# Define to build with debugging symbols. Undefine to compile with
+# optimizations.
+@DEBUG_LINE@
+
+# Change these symbols to control the build tools that are used.
+CC := @CC@
+PKG_CONFIG := @PKG_CONFIG@
+SDL2_CONFIG := @SDL2_CONFIG@
+
+# Change these symbols to control where files get installed.
+prefix := @prefix@
+exec_prefix := @exec_prefix@
+datarootdir := @datarootdir@
+bindir := $(DESTDIR)@bindir@
+mandir := $(DESTDIR)@mandir@

@@ -19,7 +19,8 @@
 
 /* Convenience macro for initializing an SDL_Color struct.
  */
-#define setcolor(c, rr, gg, bb) ((c).r = (rr), (c).g = (gg), (c).b = (bb))
+#define setcolor(c, rr, gg, bb) \
+    ((c).r = (rr), (c).g = (gg), (c).b = (bb), (c).a = SDL_ALPHA_OPAQUE)
 
 /* The set of available timer-initiated events.
  */
@@ -587,7 +588,7 @@ static command_t handletimedevent(int type, timedeventinfo *timedevent)
         timedevent->type = event_none;
         return cmd_redraw;
       case event_unget:
-        cmd = (command_t)(long)timedevent->data;
+        cmd = (command_t)(intptr_t)timedevent->data;
         timedevent->type = event_none;
         return cmd;
       case event_animate:
@@ -618,7 +619,7 @@ static command_t handletimedevent(int type, timedeventinfo *timedevent)
  */
 static command_t handleevent(SDL_Event *event)
 {
-    SDL_Point size;
+    SDL_Point size, requestedsize;
 
     if (event->type == timedeventid)
         return handletimedevent(event->user.code, event->user.data1);
@@ -635,11 +636,14 @@ static command_t handleevent(SDL_Event *event)
       case SDL_WINDOWEVENT:
         switch (event->window.event) {
           case SDL_WINDOWEVENT_RESIZED:
-            size.x = event->window.data1;
-            size.y = event->window.data2;
-            size = measurelayout(size);
-            if (size.x != event->window.data1 || size.y != event->window.data2)
+          case SDL_WINDOWEVENT_SIZE_CHANGED:
+            requestedsize.x = event->window.data1;
+            requestedsize.y = event->window.data2;
+            size = measurelayout(requestedsize);
+            if (size.x != requestedsize.x || size.y != requestedsize.y) {
                 SDL_SetWindowSize(window, size.x, size.y);
+                return cmd_none;
+            }
             recordwindowsize(size);
             return cmd_redraw;
           case SDL_WINDOWEVENT_EXPOSED:
@@ -1012,7 +1016,7 @@ static command_t sdl_getinput(void)
  */
 static void sdl_ungetinput(command_t cmd, int msec)
 {
-    scheduletimedevent(event_unget, msec, (void*)(long)cmd);
+    scheduletimedevent(event_unget, msec, (void*)(intptr_t)cmd);
 }
 
 /* Indicate that a user action was invalid or otherwise rejected.

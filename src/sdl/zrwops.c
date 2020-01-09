@@ -43,7 +43,8 @@ static int startinflate(zrwops *zrw)
  * found, or an error occurs. As with fread(), the return value is the
  * number of complete elements stored.
  */
-static size_t _read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum)
+static size_t zrwops_read(SDL_RWops *context, void *ptr,
+                          size_t size, size_t maxnum)
 {
     zrwops *zrw;
     size_t n;
@@ -78,7 +79,7 @@ static size_t _read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum)
  * forwards. Seeking forwards is done by reading and discarding the
  * result. Seeking relative to the end of the stream is not supported.
  */
-static Sint64 _seek(SDL_RWops *context, Sint64 offset, int whence)
+static Sint64 zrwops_seek(SDL_RWops *context, Sint64 offset, int whence)
 {
     zrwops *zrw;
     int pos, n;
@@ -121,7 +122,7 @@ static Sint64 _seek(SDL_RWops *context, Sint64 offset, int whence)
 
 /* The close function frees everything.
  */
-static int _close(SDL_RWops *context)
+static int zrwops_close(SDL_RWops *context)
 {
     zrwops *zrw;
 
@@ -136,8 +137,8 @@ static int _close(SDL_RWops *context)
 
 /* This program has no need to implement a write function.
  */
-static size_t _write(SDL_RWops *context, void const *ptr,
-                     size_t size, size_t num)
+static size_t zrwops_write(SDL_RWops *context, void const *ptr,
+                           size_t size, size_t num)
 {
     (void)context;
     (void)ptr;
@@ -149,7 +150,7 @@ static size_t _write(SDL_RWops *context, void const *ptr,
 
 /* The size function is also not needed.
  */
-static Sint64 _size(SDL_RWops *context)
+static Sint64 zrwops_size(SDL_RWops *context)
 {
     (void)context;
     SDL_Unsupported();
@@ -189,11 +190,11 @@ SDL_RWops *RWFromZStream(void const *input, int size)
         return NULL;
     }
 
-    rwops->size = _size;
-    rwops->seek = _seek;
-    rwops->read = _read;
-    rwops->write = _write;
-    rwops->close = _close;
+    rwops->size = zrwops_size;
+    rwops->seek = zrwops_seek;
+    rwops->read = zrwops_read;
+    rwops->write = zrwops_write;
+    rwops->close = zrwops_close;
     rwops->hidden.unknown.data1 = zrw;
     return rwops;
 }

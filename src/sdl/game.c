@@ -449,11 +449,9 @@ static void createcardanimation(char card, SDL_Rect from, SDL_Rect to,
  */
 static void renderoptions(void)
 {
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.bkgndcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.bkgndcolor));
     SDL_RenderFillRect(_graph.renderer, &dialog);
-    SDL_SetRenderDrawColor(_graph.renderer, colors(_graph.defaultcolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
     SDL_RenderDrawLines(_graph.renderer, dialogoutline, 6);
 }
 
@@ -595,8 +593,7 @@ static void render(void)
     card_t tableau[TABLEAU_PLACE_COUNT][MAX_TABLEAU_DEPTH];
     int showmoveable, i, j;
 
-    SDL_SetRenderDrawColor(_graph.renderer, colors(tablecolor),
-                           SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(tablecolor));
     SDL_RenderClear(_graph.renderer);
     if (!gameplay)
         return;
