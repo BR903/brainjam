@@ -15,7 +15,7 @@
 #include "internal.h"
 #include "images.h"
 #include "button.h"
-#include "getfont.h"
+#include "font.h"
 
 /* Convenience macro for initializing an SDL_Color struct.
  */
@@ -51,6 +51,12 @@ typedef struct numbercacheinfo {
     int         w;              /* width of cached texture */
     int         h;              /* height of cached texture */
 } numbercacheinfo;
+
+/* A generic font name that will hopefully identify an actual font.
+ * This is only used if the user doesn't specify a name in the
+ * initialization file.
+ */
+static char const *defaultfontname = "freeserif";
 
 /* The help text for basic game play.
  */
@@ -307,20 +313,47 @@ static SDL_Point measurelayout(SDL_Point size)
     return fullsize;
 }
 
-/* Complete the setting up of the program's window. Use the size of
- * the playing card graphics to select appropriate font sizes, which
- * in turn are used to determine the size of the layout grid. After
- * each display has initialized their own resources, they will
- * determine their own layouts, and from this the overall window size
- * is chosen and the window is made visible.
+/* Create the program's fonts from the given font name, using the
+ * playing card graphics to select appropriate sizes. (The font will
+ * in turn be used to determine the size of the layout grid.)
+ */
+static int createfonts(char const *fontname)
+{
+    fontrefinfo *fontref;
+    int smallfontsize, largefontsize;
+
+    if (!fontname)
+        fontname = defaultfontname;
+    fontref = findnamedfont(fontname);
+    if (!fontref) {
+        SDL_SetError("Unable to locate a font with the name \"%s\"", fontname);
+        return err("Font Lookup");
+    }
+
+    smallfontsize = (_graph.dropheight + 1) / 2;
+    largefontsize = smallfontsize + (_graph.dropheight + 4) / 8;
+
+    _graph.smallfont = getfontfromref(fontref, smallfontsize);
+    if (!_graph.smallfont)
+        return err(fontname);
+    _graph.largefont = getfontfromref(fontref, largefontsize);
+    if (!_graph.largefont)
+        return err(fontname);
+
+    deallocatefontref(fontref);
+    return TRUE;
+}
+
+/* Complete the setting up of the program's window. After each display
+ * has initialized their own resources, they will determine their own
+ * layouts, and from this the overall window size is chosen and the
+ * window is made visible.
  */
 static int createdisplays(void)
 {
-    char *filename;
     char const *ws;
     char const *hs;
     SDL_Point displaysize;
-    int smallfontsize, largefontsize;
 
     setcolor(_graph.defaultcolor, 0, 0, 0);
     setcolor(_graph.dimmedcolor, 96, 96, 96);
@@ -329,15 +362,8 @@ static int createdisplays(void)
     setcolor(_graph.lightbkgndcolor, 213, 213, 213);
     settextcolor(_graph.defaultcolor);
 
-    smallfontsize = (_graph.dropheight + 1) / 2;
-    largefontsize = smallfontsize + (_graph.dropheight + 4) / 8;
-
-    filename = getfontfilename(lookuprcsetting("font"));
-    _graph.smallfont = TTF_OpenFont(filename, smallfontsize);
-    _graph.largefont = TTF_OpenFont(filename, largefontsize);
-    if (!_graph.smallfont || !_graph.largefont)
-        return err(filename);
-    deallocate(filename);
+    if (!createfonts(lookuprcsetting("font")))
+        return FALSE;
 
     _graph.margin = TTF_FontLineSkip(_graph.smallfont);
 
