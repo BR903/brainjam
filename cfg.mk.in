@@ -25,8 +25,6 @@ VERSION := @PACKAGE_VERSION@
 
 # Change these symbols to control the build tools that are used.
 CC := @CC@
-
-# A Windows cross-build requires some extra build tools.
 ifdef ENABLE_WINDOWS
 WINDRES := @WINDRES@
 endif

@@ -72,6 +72,15 @@ else
   with_sdl_default=yes
   with_ncurses_default=no
   with_fontconfig_default=no
+  AC_CHECK_PROG(check_prog, [icotool], [yes], [no])
+  if test "$check_prog" != "yes" ; then
+    AC_MSG_ERROR([could not find the icotool utility.])
+  fi
+  : ${WINDRES=windres}
+  AC_CHECK_PROG(check_prog, [$WINDRES], [yes], [no])
+  if test "$check_prog" != "yes" ; then
+    AC_MSG_ERROR([could not find the $WINDRES utility.])
+  fi
 fi
 
 
