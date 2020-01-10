@@ -12,7 +12,7 @@ solitaire programs, Brain Jam comes with a large but finite number of
 initial orderings, all of which are guaranteed to be solvable. Thus
 there is no luck factor in playing Brain Jam.
 
-Once you have solved a given configuration, you can then  go back and
+Once you have solved a given configuration, you can then go back and
 work to find a new solution with fewer moves.
 
 
@@ -70,15 +70,9 @@ default is "--with-sdl".)
   --without-fontconfig
 
 This flag will remove the program's dependency on the fontconfig
-library. (The default is "--with-fontconfig".) This will cause the
-program to require a full path to a font file to be supplied when the
-program runs. The path can be added to the initialization file
-"brainjam.ini" (see "Files" below), with a line such as:
-
-  font=/usr/share/fonts/opentype/freefont/FreeSerif.otf
-
-(Alternately, the path can be hard-coded into the binary by editing
-"src/sdl/getfont.c" before compiling. Hey, I don't judge.)
+library. (The default is "--with-fontconfig".) If you remove
+fontconfig support, you will need to supply the font's location
+explicitly; see the "Font" section below for details.
 
 
  * Installing
@@ -99,7 +93,9 @@ directory, for those who prefer to read plain text files.
  * Files
 
 Brain Jam creates a directory "~/.brainjam" for storing your
-individual settings and game state.
+individual settings and game state. (This is Unix-specific; under
+Windows, Brain Jam will create a subdirectory named "save" in the
+directory that contains brainjam.exe.)
 
 Two files in this directory are worth mentioning specifically. The
 file "brainjam.ini" stores your current settings, such as the number
@@ -114,11 +110,42 @@ The other files in this directory have names of the form "session-*",
 and store undo history for each game.
 
 
+ * Font
+
+By default, Brain Jam attempts to choose a general-purpose serif font
+from the available system-installed fonts. You can tell Brain Jam to
+prefer a specific font by editing "brainjam.ini" and adding a line
+giving a font family name, e.g.:
+
+  font=inter
+
+If you're not sure what family name to supply, you can use the
+"fc-match" utility at the command line to see what a family name
+resolves to. (Conversely, you can run "fc-query" on an explicit font
+filename to see what its family name is.)
+
+If you prefer, you can provide an explicit path to the font of your
+choice, e.g.:
+
+  font=/usr/share/fonts/truetype/lato/Lato-Regular.ttf
+
+Note that if you're using a Brain Jam built without fontconfig
+support, then this "option" is actually mandatory in order for the
+program to run.
+
+(Alternately, the path to your preferred font could be hard-coded into
+the binary directly by editing "src/sdl/font.c" before compiling. Hey,
+I don't judge.)
+
+
  * Websites
 
 The home page for this program is at:
 
   http://www.muppetlabs.com/~breadbox/software/brainjam.html
+
+From here you can download the latest source tree, as well as
+pre-built Windows binaries.
 
 The website for the original Brain Jam program is at:
 

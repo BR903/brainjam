@@ -1,0 +1,80 @@
+HOW TO COMPILE THIS CODE FOR WINDOWS ON A LINUX HOST
+
+Here are the steps I took in order to cross-compile a Windows
+executable on a Linux machine:
+
+1. Install the mingw32 cross-compiling tools. On a modern Debian-based
+   system this involves simply running "sudo apt install mingw32". The
+   package creates a directory tree under /usr/x86_64-w64-mingw32 (for
+   a 64-bit kernel), as well as installing build tools named
+   x86_64-w64-mingw32-gcc, x86_64-w64-mingw32-ld, etcetera, under
+   /usr/bin. Once these are installed, you should be able to use the
+   cross-build.sh script in this directory as a wrapper around
+   invocations of ./configure and make, in order to automatically
+   orient those processes to your mingw32 tools.
+
+2. Install Windows versions of the dependent libraries. The Windows
+   binary depends on SDL2, SDL2_ttf, and zlib. (The fontconfig library
+   is not applicable, as the Windows API has its own method for font
+   management. ncurses is only available on Windows, since it doesn't
+   have any equivalent to termcap/terminfo.) The project home pages
+   for SDL2 and SDL2_ttf both provide zipfiles of development packages
+   for mingw32, with simple instructions for installation. For zlib,
+   the only pre-built packages I could find were for very old versions
+   of the library, so I had to grab the source tree and build and
+   install it myself.
+
+3. The Windows build script also uses a program called icotool. On a
+   Debian-based system, icotool is part of the "icoutils" package.
+   (ImageMagick does provide a tool for building Windows icons as
+   well, namely "ppmtowinicon". I didn't use that since it is more
+   cumbersome, requiring the source PNGs to first be broken out into
+   PPM/PGM pairs. However the ImageMagick tools are probably more
+   ubiquitous, so that might be the better solution?)
+
+4. With all of that out of the way, you should be able to proceed
+   directly to building Brain Jam. Run the configuration tool via
+   cross-build.sh and specifying the "--enable-windows" flag. Thus,
+   from Brain Jam's top-level directory, run:
+
+       src/windows/cross-build.sh configure --enable-windows
+
+   (Or copy cross-build.sh to the top-level directory first; I only
+   have it there to keep all of the windows-specific files in one
+   place.) If the configure script fails because it can't find a build
+   tool, you may need to explicitly provide variable definitions on
+   the configure command line. (Ideally, that should all be taken care
+   of for you by cross-build.sh, but I haven't really tested it
+   widely.)
+
+5. Assuming the configure script produced a sensible makefile include,
+   use the cross-build.sh script again, this time to run make:
+
+       src/windows/cross-build.sh make
+
+   If the build fails, it is likely due either to some part of the
+   environment pointing to the wrong directory tree, or the wrong
+   build tool being used.
+
+6. Assuming the build succeeds, the resulting executable will be
+   located at "src/brainjam". No, I couldn't be bothered to have it
+   correctly named. Just manually rename it to "src/brainjam.exe".
+
+Congratulations! You now have a Windows binary. In order to use it,
+you need to copy it to your Windows machine, along with the DLLs that
+it depends on. In the Windows world, it's pretty common to store DLLs
+in the same directory as your binary. The alternative (storing them in
+a central Windows system directory) runs the risk of breaking other
+programs if they're dependent on an earlier version of the same
+library.
+
+By default, Brain Jam will create a subdirectory called "save"
+underneath the directory where brainjam.exe is stored, and it will use
+this to store the user session data and such. If the user has defined
+a value for the HOME environment variable, however, Brain Jam will
+instead create a subdirectory called ".brainjam" under that. That may
+not be the right behavior for Windows? I believe that Windows users
+generally don't have a HOME environment variable set, and if they do
+it's because they probably want something that acts like a Unix home
+directory. But I'm not sure if this is the best approach, so this
+behavior may change before 1.0.
