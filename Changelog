@@ -1,5 +1,18 @@
+* 2020 January 10: version 0.8
 
-* January 2020: version 0.7
+	There is now a proper ./configure script. The various build
+	configurations are implemented as options to configure.
+
+	We have Windows support! Cross-compiling for Windows is working,
+	and pre-built binaries have been uploaded to the website. There
+	are still some weird rendering bugs on Windows that don't appear
+	on Linux, though.
+
+	Lots of little bug fixes, as they are identified.
+
+	Lots of documentation tweaks.
+	
+* 2020 January 6: version 0.7
 	
 	The initial public release. The program is a fully working beta
 	version, though still lacking some things like as a proper
