@@ -125,6 +125,7 @@ PATH="$prefix/bin:$PATH"
 export PATH
 export CC="$TARGET-gcc -static-libgcc"
 export CXX="$TARGET-g++ -static-libgcc"
+export WINDRES="$TARGET-windres"
 if test -d "$prefix/lib/pkgconfig" ; then
   export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
 fi

@@ -38,6 +38,14 @@ if test "$check_prog" != "yes" ; then
 fi
 
 
+dnl * Set up some default values.
+dnl *
+
+with_ncurses_default=check
+with_sdl_default=check
+with_fontconfig_default=check
+
+
 dnl * The option --enable-debug creates a debug build.
 dnl *
 
@@ -51,18 +59,34 @@ else
 fi
 
 
+dnl * The option --enable-windows creates a Windows cross-build.
+dnl *
+
+AC_ARG_ENABLE(windows,
+              AC_HELP_STRING([--enable-windows], [Cross-build for Windows]),
+	      [:], [enable_windows=no])
+if test $enable_windows = no ; then
+  WINDOWS_LINE="#ENABLE_WINDOWS=1"
+else
+  WINDOWS_LINE="ENABLE_WINDOWS=1"
+  with_sdl_default=yes
+  with_ncurses_default=no
+  with_fontconfig_default=no
+fi
+
+
 dnl * Define the options that create library dependencies.
 dnl *
 
 AC_ARG_WITH(ncurses,
             AC_HELP_STRING([--with-ncurses], [Link with ncursesw (default)]),
-	    [], [with_ncurses=check])
+	    [], [with_ncurses=$with_ncurses_default])
 AC_ARG_WITH(sdl,
             AC_HELP_STRING([--with-sdl], [Link with SDL2 (default)]),
-	    [], [with_sdl=check])
+	    [], [with_sdl=$with_sdl_default])
 AC_ARG_WITH(fontconfig,
          AC_HELP_STRING([--with-fontconfig], [Link with fontconfig (default)]),
-	    [], [with_fontconfig=check])
+	    [], [with_fontconfig=$with_fontconfig_default])
 
 
 dnl * Check for the presence of dependent libraries.
@@ -148,10 +172,11 @@ dnl *
 
 AC_CONFIG_FILES(src/cfg.mk:cfg.mk.in)
 
-AC_SUBST(SDL2_CONFIG)
 AC_SUBST(DEBUG_LINE)
+AC_SUBST(WINDOWS_LINE)
 AC_SUBST(NCURSES_LINE)
 AC_SUBST(SDL_LINE)
 AC_SUBST(FONTCONFIG_LINE)
+AC_SUBST(WINDRES)
 
 AC_OUTPUT

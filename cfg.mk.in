@@ -20,10 +20,16 @@ VERSION := @PACKAGE_VERSION@
 # optimizations.
 @DEBUG_LINE@
 
+# Define to cross-build for the Windows platform.
+@WINDOWS_LINE@
+
 # Change these symbols to control the build tools that are used.
 CC := @CC@
-PKG_CONFIG := @PKG_CONFIG@
-SDL2_CONFIG := @SDL2_CONFIG@
+
+# A Windows cross-build requires some extra build tools.
+ifdef ENABLE_WINDOWS
+WINDRES := @WINDRES@
+endif
 
 # Change these symbols to control where files get installed.
 prefix := @prefix@

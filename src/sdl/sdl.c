@@ -670,10 +670,8 @@ static command_t handleevent(SDL_Event *event)
             requestedsize.x = event->window.data1;
             requestedsize.y = event->window.data2;
             size = measurelayout(requestedsize);
-            if (size.x != requestedsize.x || size.y != requestedsize.y) {
+            if (size.x != requestedsize.x || size.y != requestedsize.y)
                 SDL_SetWindowSize(window, size.x, size.y);
-                return cmd_none;
-            }
             recordwindowsize(size);
             return cmd_redraw;
           case SDL_WINDOWEVENT_EXPOSED:

@@ -18,22 +18,13 @@
 # The configuration include file defines NAME and VERSION.
 include src/cfg.mk
 
-# "make all" is delegated to the src makefile.
-all:
+# The usual targets are delegated to the src makefile.
+all install clean:
 	$(MAKE) -C src $@
-
-# "make install" is delegated to the src makefile.
-install:
-	$(MAKE) -C src $@
-
-# "make clean" deletes the usual files, but also files created by ./configure.
-clean:
-	$(MAKE) -C src $@
-	rm -f src/cfg.mk
 
 # "make spotless" wipes out everything that can be recreated.
 spotless: clean
-	rm -rf configure autom4te.cache config.*
+	rm -rf configure autom4te.cache config.* src/cfg.mk
 	rm -f $(NAME)-*.tar.gz
 
 # "make dist" builds the distribution tarball.

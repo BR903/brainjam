@@ -69,6 +69,11 @@ include $(patsubst %,%/module.mk,$(MODULES))
 OBJ := $(patsubst %.c,%.o,$(filter %.c,$(SRC))) \
        $(patsubst %.S,%.o,$(filter %.S,$(SRC)))
 
+# Some extra tasks for making a windows build.
+ifdef ENABLE_WINDOWS
+include windows/windows.mk
+endif
+
 #
 # The build rules.
 #

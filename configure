@@ -587,11 +587,12 @@ PACKAGE_URL='http://www.muppetlabs.com/~breadbox/software/brainjam.html'
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+WINDRES
 FONTCONFIG_LINE
 SDL_LINE
 NCURSES_LINE
+WINDOWS_LINE
 DEBUG_LINE
-SDL2_CONFIG
 check_prog
 EGREP
 GREP
@@ -646,6 +647,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_debug
+enable_windows
 with_ncurses
 with_sdl
 with_fontconfig
@@ -1280,6 +1282,7 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          Build with debugging info
+  --enable-windows        Cross-build for Windows
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -3313,6 +3316,12 @@ fi
 
 
 
+with_ncurses_default=check
+with_sdl_default=check
+with_fontconfig_default=check
+
+
+
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then :
   enableval=$enable_debug; :
@@ -3328,12 +3337,30 @@ fi
 
 
 
+# Check whether --enable-windows was given.
+if test "${enable_windows+set}" = set; then :
+  enableval=$enable_windows; :
+else
+  enable_windows=no
+fi
+
+if test $enable_windows = no ; then
+  WINDOWS_LINE="#ENABLE_WINDOWS=1"
+else
+  WINDOWS_LINE="ENABLE_WINDOWS=1"
+  with_sdl_default=yes
+  with_ncurses_default=no
+  with_fontconfig_default=no
+fi
+
+
+
 
 # Check whether --with-ncurses was given.
 if test "${with_ncurses+set}" = set; then :
   withval=$with_ncurses;
 else
-  with_ncurses=check
+  with_ncurses=$with_ncurses_default
 fi
 
 
@@ -3341,7 +3368,7 @@ fi
 if test "${with_sdl+set}" = set; then :
   withval=$with_sdl;
 else
-  with_sdl=check
+  with_sdl=$with_sdl_default
 fi
 
 
@@ -3349,7 +3376,7 @@ fi
 if test "${with_fontconfig+set}" = set; then :
   withval=$with_fontconfig;
 else
-  with_fontconfig=check
+  with_fontconfig=$with_fontconfig_default
 fi
 
 
@@ -3549,6 +3576,7 @@ fi
 
 
 ac_config_files="$ac_config_files src/cfg.mk:cfg.mk.in"
+
 
 
 
