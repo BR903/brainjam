@@ -230,6 +230,39 @@ static void panic(char const *message)
     exit(EXIT_FAILURE);
 }
 
+/* Store a texture to be destroyed at a later time. This deferral of
+ * texture-freeing is done to work around a bug in SDL 2.0.10. The fix
+ * for this bug has been committed, so when SDL 2.0.12 is released,
+ * this function should be removed, and calls to it replaced by calls
+ * to SDL_DestroyTexture().
+ */
+static void releasetexture(SDL_Texture *texture)
+{
+    static SDL_Texture **texturedump = NULL;
+    static int texturedumpsize = 0;
+    static int texturecount = 0;
+    int i;
+
+    if (!texture) {
+        for (i = 0 ; i < texturecount ; ++i)
+            SDL_DestroyTexture(texturedump[i]);
+        texturecount = 0;
+        return;
+    }
+
+    if (texturecount >= texturedumpsize) {
+        texturedumpsize = texturecount + 1;
+        texturedump = reallocate(texturedump,
+                                 texturedumpsize * sizeof *texturedump);
+    }
+    texturedump[texturecount++] = texture;
+}
+
+/* Proceed with the deferred texture cleanup. This should be invoked
+ * just after calling SDL_RenderPresent().
+ */
+#define garbagecollecttextures()  (releasetexture(NULL))
+
 /*
  * Initialization of resources.
  */
@@ -725,6 +758,7 @@ static void render(void)
         flashdisplay();
     }
     SDL_RenderPresent(_graph.renderer);
+    garbagecollecttextures();
 }
 
 /* Automatically translate keypad key events to regular keys, so that
@@ -914,7 +948,7 @@ int drawtext(char const *string, int x, int y, int align, TTF_Font *font)
     rect.h = image->h;
     SDL_FreeSurface(image);
     SDL_RenderCopy(_graph.renderer, texture, NULL, &rect);
-    SDL_DestroyTexture(texture);
+    releasetexture(texture);
     return rect.w;
 }
 
@@ -941,7 +975,7 @@ int drawnumber(int number, int x, int y, int align, TTF_Font *font)
 
     if (i == cachesize) {
         if (cache[0].texture)
-            SDL_DestroyTexture(cache[0].texture);
+            releasetexture(cache[0].texture);
         i = cachesize - 1;
         memmove(cache, cache + 1, i * sizeof *cache);
         sprintf(buf, "%d", number);
