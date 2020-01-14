@@ -49,11 +49,6 @@ can use "--prefix", "--exec-prefix", "--datarootdir", "--bindir",
 and/or "--mandir" to control where the files will be installed. The
 following flags can also be used to modify the nature of the program:
 
-  --enable-debug
-
-If present, the program will be built with debugging symbols. The
-default is "--disable-debug". 
-
   --without-ncurses
 
 This flag will remove the program's dependency on the ncursesw
@@ -74,6 +69,11 @@ library. (The default is "--with-fontconfig".) If you remove
 fontconfig support, you will need to supply the font's location
 explicitly; see the "Font" section below for details.
 
+  --enable-debug
+
+If present, the program will be built with debugging symbols. The
+default is "--disable-debug". 
+
 
  * Installing
 
@@ -92,22 +92,20 @@ directory, for those who prefer to read plain text files.
 
  * Files
 
-Brain Jam creates a directory "~/.brainjam" for storing your
-individual settings and game state. (This is Unix-specific; under
-Windows, Brain Jam will create a subdirectory named "save" in the
-directory that contains brainjam.exe.)
+Brain Jam creates a directory "~/.config/brainjam" for storing your
+individual settings and game state. There are two files in this
+directory. The file "brainjam.ini" stores your current settings, such
+as the number of the most recent game. The file "brainjam.sol"
+contains your best solutions for each game you've completed. Note that
+these files intentionally use the same filename and format as the
+original Windows program. If you used this program, you should be able
+to copy your old files over and have all of your existing solutions
+available in this program.
 
-Two files in this directory are worth mentioning specifically. The
-file "brainjam.ini" stores your current settings, such as the number
-of the most recent game. The file "brainjam.sol" contains your best
-solutions for each game you've completed. Note that these files
-intentionally use the same filename and format as the original Windows
-program. If you used this program, you should be able to copy your old
-files over and have all of your existing solutions available in this
-program.
-
-The other files in this directory have names of the form "session-*",
-and store undo history for each game.
+Brain Jam also creates a directory "~/.local/share/brainjam" for
+storing your undo history for each game. These files are not
+human-readable. (If you're curious to know more about them, see the
+functions in "src/files/sessionio.c".)
 
 
  * Font

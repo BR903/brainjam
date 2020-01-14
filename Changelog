@@ -1,3 +1,14 @@
+* 2020 Jan 14: version 0.8.1
+
+	Addressed Windows rendering bug. (It was caused by a bug in SDL2,
+	which will be fixed in the next version. This workaround just
+	avoids triggering the bug for now.)
+	
+	Changed save dirs to conform to the XDG standard.
+
+	Many small code and documentation tweaks, some that fix bugs and
+	some that are just small improvements.
+	
 * 2020 Jan 10: version 0.8
 
 	There is now a proper ./configure script. The various build

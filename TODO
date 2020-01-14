@@ -1,16 +1,10 @@
 
-* Add code to use XDG dirs: XDG_CONFIG_HOME (or HOME/.config) for
-  brainjam.ini, XDG_DATA_HOME (or HOME/.local/share) for the rest. If
-  neither are defined, use HOME/.brainjam for both. If HOME is
-  undefined try to use ./save.
-
 * BUG (?): On Wine, the window comes up all-black after being restored
-  from a minimized state. It's unclear if this happens on real Windows
-  hosts, or if it's just an issue with Wine. But the solution seems to
-  be to create a brand-new renderer and re-create all of the existing
-  textures from scratch. I haven't found any documentation on this,
-  though, so I'm not sure I believe this is a real issue, or just the
-  fault of something I'm doing.
+  from a minimized state. I haven't seen this happen on an actual
+  Windows host, but then I haven't been able to test it widely. The
+  solution seems to be to create a brand-new renderer and re-create
+  all of the existing textures from scratch, which is a pain in the
+  neck if this only affects Wine users. Seems unlikely, though.
 
 * Come up with a more attractive layout for the opening screen?
 
