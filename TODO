@@ -1,8 +1,16 @@
 
-* BUG: Highlight rectangle on config list is black on Windows (wtf).
+* Add code to use XDG dirs: XDG_CONFIG_HOME (or HOME/.config) for
+  brainjam.ini, XDG_DATA_HOME (or HOME/.local/share) for the rest. If
+  neither are defined, use HOME/.brainjam for both. If HOME is
+  undefined try to use ./save.
 
-* BUG: On Wine the window comes up all-black after being un-minimized.
-  It's unclear how much this happens on real Windows hosts.
+* BUG (?): On Wine, the window comes up all-black after being restored
+  from a minimized state. It's unclear if this happens on real Windows
+  hosts, or if it's just an issue with Wine. But the solution seems to
+  be to create a brand-new renderer and re-create all of the existing
+  textures from scratch. I haven't found any documentation on this,
+  though, so I'm not sure I believe this is a real issue, or just the
+  fault of something I'm doing.
 
 * Come up with a more attractive layout for the opening screen?
 
@@ -18,6 +26,9 @@
   that individual reserves and tableau piles do not keep their
   identities, but are simply listed in some fixed ordering. (It is not
   clear if this will in turn require extra state data to be appended.)
+  Moves will also need to be stored differently internally, recording
+  the card being moved instead of the place it came from. That will
+  change the encoding of the session files.
 
 * Add feature to generate a new layout, random but guaranteed to be
   solvable. Such games would not have a configuration ID and would not

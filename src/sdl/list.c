@@ -182,6 +182,11 @@ static SDL_Point setlayout(SDL_Point display)
     headlinerect.x -= headlinerect.w;
     headlinerect.y = bannerrect.y + bannerrect.h - headlinerect.h;
 
+    iconrect.w = getimagewidth(IMAGE_OLDICON);
+    iconrect.h = getimageheight(IMAGE_OLDICON);
+    iconrect.x = display.x - iconrect.w - _graph.margin;
+    iconrect.y = bannerrect.y + bannerrect.h + _graph.margin;
+
     area.x = quitbutton.pos.w + 2 * _graph.margin;
     area.w = (display.x / 2) - area.x;
     area.y = bannerrect.y + bannerrect.h + _graph.margin;
@@ -236,14 +241,10 @@ static SDL_Point setlayout(SDL_Point display)
     scorenumber.y = scorearea.y;
     scorearea.h = 4 * textheight;
 
-    iconrect.w = getimagewidth(IMAGE_OLDICON);
-    iconrect.h = getimageheight(IMAGE_OLDICON);
-    iconrect.x = scorearea.x + iconrect.w;
-    iconrect.y = scorearea.y + scorearea.h + iconrect.h;
-
-    size.x = iconrect.w + listrect.w + scorearea.w + helpbutton.pos.w;
+    size.x = listrect.w + scorearea.w + quitbutton.pos.w + helpbutton.pos.w;
     size.x += 6 * _graph.margin;
-    size.y = bannerrect.h + 8 * rowheight + 2 * _graph.margin;
+    size.y = bannerrect.h + 8 * rowheight + playbutton.pos.h;
+    size.y += 4 * _graph.margin;
     return size;
 }
 
@@ -309,12 +310,15 @@ static void renderconfiglist(void)
     char buf[16];
     int id, i, y;
 
-    scrollrender(&scroll);
     drawlargetext("Game",
                   listrect.x + listrect.w / 2, listrect.y - rowheight - 2, 0);
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
     SDL_RenderDrawLine(_graph.renderer, listrect.x, listrect.y - 1,
                        listrect.x + listrect.w, listrect.y - 1);
+    SDL_RenderDrawLine(_graph.renderer,
+                       listrect.x, listrect.y + listrect.h + 1,
+                       listrect.x + listrect.w, listrect.y + listrect.h + 1);
+
     SDL_RenderSetClipRect(_graph.renderer, &listrect);
     y = listrect.y - scroll.value % rowheight;
     for (i = 0 ; y < listrect.y + listrect.h ; ++i, y += rowheight) {
@@ -338,9 +342,7 @@ static void renderconfiglist(void)
     }
     settextcolor(_graph.defaultcolor);
     SDL_RenderSetClipRect(_graph.renderer, NULL);
-    SDL_RenderDrawLine(_graph.renderer,
-                       listrect.x, listrect.y + listrect.h + 1,
-                       listrect.x + listrect.w, listrect.y + listrect.h + 1);
+    scrollrender(&scroll);
 }
 
 /* Render all components of the of the list display.

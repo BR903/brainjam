@@ -88,6 +88,12 @@ endif
 # messages when the .d files haven't been generated yet.)
 -include $(OBJ:.o=.d)
 
+# Put the version number in a form that the C code can easily access.
+# (This is a hack: if the version number changes, the file won't get
+# update until after a "make clean".)
+./version.h:
+	echo '#define VERSION_ID "$(VERSION)"' > $@
+
 # The program is built from the object files.
 $(PROG): $(OBJ)
 
@@ -104,9 +110,3 @@ clean:
 # Alternately, the cclean rule only removes the program and object files.
 cclean:
 	rm -f $(PROG) $(OBJ)
-
-# Put the version number in a form that the C code can easily access.
-# (This is a hack: if the version number changes, the file won't get
-# update until after a "make clean".)
-./version.h:
-	echo '#define VERSION_ID "$(VERSION)"' > $@

@@ -745,6 +745,7 @@ static void render(void)
 {
     int i;
 
+    SDL_RenderClear(_graph.renderer);
     displays[displayed].render();
 
     for (i = 0 ; i < buttoncount ; ++i)

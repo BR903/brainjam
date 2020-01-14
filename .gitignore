@@ -13,4 +13,6 @@ src/sdl/*.bmp.gz
 src/sdl/images.png
 src/sdl/imageids.h
 src/sdl/layout.h
+src/windows/*.ico
 src/brainjam
+src/brainjam.exe
