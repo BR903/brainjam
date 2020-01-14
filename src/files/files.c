@@ -1,7 +1,6 @@
 /* files/files.c: managing the program's directories.
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -267,7 +266,5 @@ int setfiledirectories(char const *overridedir, char const *executablepath)
     }
     if (!datadir)
         forcereadonly = TRUE;
-    fprintf(stderr, "settings dir = %s\n", settingsdir);
-    fprintf(stderr, "data dir = %s\n", datadir);
     return TRUE;
 }
