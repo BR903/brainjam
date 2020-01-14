@@ -17,16 +17,16 @@
 #include "./types.h"
 #include "redo/types.h"
 
-/* Set the directory for storing the program's data files. If dir is
- * NULL, then a default directory location is selected. The directory
- * is created if it does not already exist. The programpath argument
- * should be pathname of the program. If the program cannot determine
- * the usual default location, then it will attempt to locate the data
- * directory in the same directory as the program. Regardless of how
+/* Select the directories for storing the program's data files. If dir
+ * is NULL, then default locations are selected. The directories are
+ * created if they do not already exist. The executable argument
+ * should be the path to the program itself. If the function cannot
+ * determine the usual default locations, then it will attempt to use
+ * a directory in the same directory as the program. Regardless of how
  * the directory is chosen, if it cannot be used, then the return
  * value is false and the program is put in read-only mode.
  */
-extern int setdatadirectory(char const *dir, char const *programpath);
+extern int setfiledirectories(char const *overridedir, char const *executable);
 
 /* Set the value of the read-only flag. If the read-only flag is true,
  * all functions that write to files will automatically fail.

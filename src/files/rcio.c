@@ -103,7 +103,7 @@ int loadrcfile(settingsinfo *settings)
     int lineno;
     int id, n, ch;
 
-    filename = mkpath("brainjam.ini");
+    filename = mksettingspath("brainjam.ini");
     fp = fopen(filename, "r");
     if (!fp) {
         if (errno == ENOENT) {
@@ -173,7 +173,7 @@ int savercfile(settingsinfo const *settings)
 
     if (getreadonly())
         return FALSE;
-    filename = mkpath("brainjam.ini");
+    filename = mksettingspath("brainjam.ini");
     fp = fopen(filename, "w");
     if (!fp) {
         perror(filename);
@@ -183,7 +183,7 @@ int savercfile(settingsinfo const *settings)
     deallocate(filename);
     fprintf(fp, "\n[General]\n");
     if (settings->configid >= 0)
-        fprintf(fp, "lastgame=%d\n", settings->configid);
+        fprintf(fp, "lastgame=%04d\n", settings->configid);
     if (settings->animation >= 0)
         fprintf(fp, "animation=%c\n", settings->animation ? '1' : '0');
     if (settings->autoplay >= 0)

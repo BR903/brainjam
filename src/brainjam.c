@@ -312,9 +312,9 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
 
     while ((ch = getopt_long(argc, argv, optstring, options, NULL)) != EOF) {
         switch (ch) {
-          case 'D':     datadir = optarg;               break;
-          case 't':     settings->forcetextmode = 1;    break;
-          case 'r':     settings->readonly = 1;         break;
+          case 'D':     datadir = optarg;                       break;
+          case 't':     settings->forcetextmode = TRUE;         break;
+          case 'r':     settings->readonly = TRUE;              break;
           case 'H':     yowzitch();
           case 'V':     printflowedtext(versiontext);
           case 'L':     printflowedtext(licensetext);
@@ -340,7 +340,9 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
         settings->configid = (int)id;
     }
 
-    setdatadirectory(datadir, argv[0]);
+    if (settings->readonly == TRUE)
+        setreadonly(settings->readonly);
+    setfiledirectories(datadir, argv[0]);
     return TRUE;
 }
 

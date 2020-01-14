@@ -115,7 +115,7 @@ void setsessionfilename(char const *filename)
 {
     if (sessionfilename)
         deallocate(sessionfilename);
-    sessionfilename = mkpath(filename);
+    sessionfilename = mkdatapath(filename);
 }
 
 /* Read the game tree stored in the session file and recreate it,

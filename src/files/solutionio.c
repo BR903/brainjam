@@ -30,7 +30,7 @@ solutioninfo *loadsolutionfile(int *pcount)
     int lineno, maxcount;
     int size, id, n;
 
-    filename = mkpath("brainjam.sol");
+    filename = mksettingspath("brainjam.sol");
     fp = fopen(filename, "r");
     if (!fp) {
         if (errno != ENOENT)
@@ -83,7 +83,7 @@ int savesolutionfile(solutioninfo const *solutions, int count)
 
     if (getreadonly())
         return FALSE;
-    filename = mkpath("brainjam.sol");
+    filename = mksettingspath("brainjam.sol");
     fp = fopen(filename, "w");
     if (!fp) {
         perror(filename);
