@@ -65,6 +65,10 @@ GENRES :=
 # build rules for generated resources).
 include $(patsubst %,%/module.mk,$(MODULES))
 
+#
+# Dependency generation.
+#
+
 # The complete list of object files is generated from the source file list.
 OBJ := $(patsubst %.c,%.o,$(filter %.c,$(SRC))) \
        $(patsubst %.S,%.o,$(filter %.S,$(SRC)))
@@ -73,10 +77,6 @@ OBJ := $(patsubst %.c,%.o,$(filter %.c,$(SRC))) \
 ifdef ENABLE_WINDOWS
 include windows/windows.mk
 endif
-
-#
-# The build rules.
-#
 
 # The dependency include files are built from the source files.
 %.d: %.c
@@ -88,11 +88,13 @@ endif
 # messages when the .d files haven't been generated yet.)
 -include $(OBJ:.o=.d)
 
-# Put the version number in a form that the C code can easily access.
-# (This is a hack: if the version number changes, the file won't get
-# update until after a "make clean".)
-./version.h:
-	echo '#define VERSION_ID "$(VERSION)"' > $@
+# Special rule that copies the version number to a C header file.
+./version.h: ./cfg.mk
+	sed -n 's/^VERSION := \(.*\)/#define VERSION_ID \"\1\"/p' $^ > $@
+
+#
+# The top-level build rules.
+#
 
 # The program is built from the object files.
 $(PROG): $(OBJ)
@@ -105,7 +107,7 @@ install: $(PROG)
 # The clean rule deletes the program, object files, dependency files,
 # and generated resources.
 clean:
-	rm -f $(PROG) $(OBJ) $(OBJ:.o=.d) $(GENRES) version.h
+	rm -f $(PROG) $(OBJ) $(OBJ:.o=.d) $(GENRES) ./version.h
 
 # Alternately, the cclean rule only removes the program and object files.
 cclean:
