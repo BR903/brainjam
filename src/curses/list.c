@@ -115,6 +115,25 @@ static void drawlisttext(void)
  * Running the list display.
  */
 
+/* Return the entry in the (visible) configuration list that was
+ * clicked on, or -1 if the most recent mouse event did not represent
+ * a selection of a list entry.
+ */
+static int findmouseselection(void)
+{
+    MEVENT event;
+
+    if (getmouse(&event) != OK)
+        return -1;
+    if (!(event.bstate & BUTTON1_CLICKED))
+        return -1;
+    if (event.y <= configlisty || event.y >= configlisty + pageheight)
+        return -1;
+    if (event.x < configlistx || event.x >= directionsx)
+        return -1;
+    return event.y - configlisty - 1;
+}
+
 /* Output a scrollable list of configurations, initially centered on a
  * chosen configuration, and manage the I/O for moving around and
  * selecting an entry. The return value is the configuration selected
@@ -122,8 +141,7 @@ static void drawlisttext(void)
  */
 static int runselectionloop(int selected)
 {
-    int total;
-    int top;
+    int total, top, n;
 
     total = getconfigurationcount();
     for (;;) {
@@ -161,6 +179,11 @@ static int runselectionloop(int selected)
           case '?':
             if (!runhelp(listhelptitle))
                 return -1;
+            break;
+          case KEY_MOUSE:
+            n = findmouseselection();
+            if (n >= 0)
+                return top + n;
             break;
         }
     }

@@ -141,7 +141,7 @@ static int startup(void)
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
-    mousemask(BUTTON1_CLICKED | BUTTON2_CLICKED, NULL);
+    mousemask(BUTTON1_CLICKED | BUTTON2_CLICKED | BUTTON_SHIFT, NULL);
     if (has_colors()) {
         start_color();
         init_pair(1, COLOR_BLACK, 0);
