@@ -291,7 +291,8 @@ static int handlenavkey(gameplayinfo *gameplay, redo_session *session, int cmd)
 
     if (!branchingredo) {
         switch (cmd) {
-          case cmd_erase:               cmd = cmd_undo;         break;
+          case cmd_undo10:              cmd = cmd_nop;          break;
+          case cmd_redo10:              cmd = cmd_nop;          break;
           case cmd_undotobranch:        cmd = cmd_nop;          break;
           case cmd_redotobranch:        cmd = cmd_nop;          break;
           case cmd_switchtobetter:      cmd = cmd_nop;          break;

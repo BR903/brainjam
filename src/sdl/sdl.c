@@ -1122,7 +1122,6 @@ uimap sdl_initializeui(void)
 {
     uimap ui;
 
-
     if (!startup() || !createdisplays()) {
         ui.rendergame = NULL;
         return ui;
