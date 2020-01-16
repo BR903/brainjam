@@ -9,7 +9,6 @@
 #
 # make [all]    = build the program binary
 # make install  = install the program and man page
-# make dist     = build the distribution tarball
 # make clean    = delete all files created by the configuration & build process
 # make spotless = delete all files created from other files
 
@@ -26,11 +25,3 @@ all install clean:
 spotless: clean
 	rm -rf configure autom4te.cache config.* src/cfg.mk
 	rm -f $(NAME)-*.tar.gz
-
-# "make dist" builds the distribution tarball.
-dist:
-	rm -f $(NAME)-$(VERSION).tar.gz
-	mkdir $(NAME)-$(VERSION)
-	tar -cf- `cat MANIFEST` | tar -C $(NAME)-$(VERSION) -xf-
-	tar -czf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
-	rm -r $(NAME)-$(VERSION)
