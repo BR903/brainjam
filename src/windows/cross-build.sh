@@ -19,6 +19,7 @@ usage ()
 {
   echo "Usage: cross-build.sh [OPTIONS] configure [CONFIGURE-PARAM ...]"
   echo "       cross-build.sh [OPTIONS] make [MAKE-PARAM ...]"
+  echo "       cross-build.sh [OPTIONS] exec [CMD PARAM...]"
   echo "       cross-build.sh [OPTIONS] check"
   echo "Prepare the environment for cross-compiling using mingw32 tools."
   echo ""
@@ -29,9 +30,10 @@ usage ()
   echo "  --version             Display the version information and exit"
   echo ""
   echo "After any options to cross-build.sh should be the verb \"configure\","
-  echo "\"make\", or \"check\". This tool should be run from the directory"
-  echo "containing the configure script or makefile, as per usual. The verb"
-  echo "\"check\" just validates the target and prefix."
+  echo "\"make\", \"exec\", or \"check\". This tool should be run from the"
+  echo "directory containing the configure script or makefile, as per usual."
+  echo "The verb \"exec\" runs an arbitrary shell command. The verb \"check\""
+  echo "just validates the target and prefix, and exits."
   exit
 }
 
@@ -143,6 +145,9 @@ case "$verb" in
     ;;
   make)
     exec ${MAKE-make} "$@"
+    ;;
+  exec)
+    exec "$@"
     ;;
   check)
     echo "Target: $TARGET"
