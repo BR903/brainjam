@@ -263,7 +263,8 @@ PNG into a transparent bitmap.
 DATA RESOURCES
 
 C does not have a way to directly import a data file into a program as
-a C object. So, in order to accomplish this, the program makes use of
-short assembly files. The GNU assembler provides a directive, .incbin,
-which has the desired functionality. A shared header file declares the
-data as an extern variable, which can then be used in the C program.
+a C object. So, in order to accomplish this, the program uses short
+bits of inline assembly, which take advantage of the .incbin assembler
+directive. A macro defined in ./incbin.h provides the boilerplate for
+including data files in this way, and for declaring the C variables
+that access the data.
