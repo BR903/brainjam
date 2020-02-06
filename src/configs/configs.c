@@ -4,8 +4,16 @@
 #include <string.h>
 #include "./types.h"
 #include "./decls.h"
+#include "./incbin.h"
 #include "configs/configs.h"
-#include "resource.h"
+
+/* The size in bytes of the data describing a single configuration.
+ */
+#define SIZE_CONFIG 32
+
+/* The complete array of configuration data.
+ */
+INCBIN("configs/configs.bin", configurations, configurations_end);
 
 /* Find the setup data for a configuration.
  */
@@ -18,11 +26,11 @@ static void const *getconfigurationsetup(int id)
  * External functions.
  */
 
-/* Return the number of configurations.
+/* Compute the number of configurations.
  */
 int getconfigurationcount(void)
 {
-    return configuration_size / SIZE_CONFIG;
+    return (configurations_end - configurations) / SIZE_CONFIG;
 }
 
 /* The best known solution size is stored in the first seven bits of

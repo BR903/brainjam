@@ -2,7 +2,7 @@
 
 ifdef WITH_SDL
 
-SRC += sdl/sdl.c sdl/zrwops.c sdl/resource.S sdl/font.c
+SRC += sdl/sdl.c sdl/zrwops.c sdl/font.c
 SRC += sdl/images.c sdl/button.c sdl/scroll.c sdl/help.c sdl/list.c sdl/game.c
 GENRES += $(shell sed -n 's/^\.incbin *\"\(.*\)\"/\1/p' sdl/resource.S)
 SRCRES += $(GENRES:.bmp.gz=.png) sdl/abmp.py

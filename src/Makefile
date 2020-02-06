@@ -29,7 +29,6 @@ all: $(PROG)
 # The default build tool options are pretty tame.
 CPPFLAGS := 
 CFLAGS := -Wall -Wextra
-ASFLAGS := -Wall -Wextra
 LDFLAGS := -Wall -Wextra
 LDLIBS := 
 
@@ -37,7 +36,6 @@ LDLIBS :=
 # Otherwise, turn on optimization.
 ifdef ENABLE_DEBUG
 override CFLAGS += -g -O0
-override ASFLAGS += -g
 override LDFLAGS += -g
 else
 override CFLAGS += -O2
@@ -81,8 +79,6 @@ endif
 # The dependency include files are built from the source files.
 %.d: %.c
 	./depend.sh $< $@ $(CC) $(CPPFLAGS) $(CFLAGS)
-%.d: %.S
-	./depend.sh $< $@ $(CC) $(CPPFLAGS) $(ASFLAGS)
 
 # Include the dependency data. (The dash prefix suppresses error
 # messages when the .d files haven't been generated yet.)

@@ -1,6 +1,6 @@
 # configs/module.mk: build rules for the configs module.
 
-SRC += configs/configs.c configs/resource.S
+SRC += configs/configs.c
 GENRES += configs/configs.bin
 SRCRES += configs/configs.txt configs/mkconfigs.py
 

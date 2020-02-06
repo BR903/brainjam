@@ -3,14 +3,12 @@
 # Usage: depend.sh SRCFILE DEPFILE [CC [CFLAGS]]
 #
 # Output a dependency file for the given source file that includes the
-# dependency file itself as a target.
-#
-# gcc doesn't recognize the .incbin assembler directive as creating a
-# dependency, so when the source file is of type .S, the script has to
-# find these itself. Since binary data files can't themselves be
-# dependent on other files, this approach should be effective. (Though
-# note that it is susceptible to error if e.g. the string ".incbin"
-# appears in a comment.)
+# dependency file itself as a target. Additionally, look for uses of
+# the INCBIN macro, and add any data files included into the source as
+# dependencies. (Since this latter task is being done with a regular
+# expression instead of by parsing the actual C, it is necessarily
+# imperfect and depends upon the code being written in a normal
+# fashion.)
 
 src="$1"
 dir=$(dirname "$src")
@@ -24,12 +22,6 @@ else
 fi
 
 printf '%s %s/' "$dep" "$dir" >"$dep"
-case "$src" in
-  *.S)
-    "$CC" -MM -MG "$@" "$src" | sed 's/$/ \\/' >>"$dep"
-    echo $(sed -n 's/^.*\.incbin[ \t]*\"\([^\"]*\)\".*/\1/p' "$src") >>"$dep"
-    ;;
-  *)
-    "$CC" -MM -MG "$@" "$src" >>"$dep"
-    ;;
-esac
+"$CC" -MM -MG "$@" "$src" | sed '$s/$/ \\/' >>"$dep"
+echo $(sed -n 's/^.*INCBIN[ \t]*([ \t]*\"\([^\"]*\)\".*$/\1/p' "$src") >>"$dep"
+

@@ -17,6 +17,7 @@ src/commands.h
 src/decls.h
 src/gen.c
 src/gen.h
+src/incbin.h
 src/settings.c
 src/settings.h
 src/types.h
@@ -26,8 +27,6 @@ src/depend.sh
 src/configs/module.mk
 src/configs/configs.c
 src/configs/configs.h
-src/configs/resource.h
-src/configs/resource.S
 src/configs/configs.txt
 src/configs/mkconfigs.py
 src/curses/module.mk
@@ -66,8 +65,6 @@ src/sdl/images.c
 src/sdl/images.h
 src/sdl/internal.h
 src/sdl/list.c
-src/sdl/resource.h
-src/sdl/resource.S
 src/sdl/scroll.c
 src/sdl/scroll.h
 src/sdl/sdl.c
