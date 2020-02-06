@@ -23,66 +23,7 @@ struct fontrefinfo {
  */
 static int lookupfont(fontrefinfo *fontref);
 
-#if WIN32  /* using the Windows API */
-
-#include <windows.h>
-
-/* Use the Windows system API to look up a font by name. Unfortunately
- * the object that Windows returns cannot be turned into a filename.
- * Instead a pointer to the font data is obtained instead and copied
- * into a private buffer.
- */
-static int lookupfont(fontrefinfo *fontref)
-{
-    LOGFONT lf;
-    HFONT hfont;
-    HDC hdc;
-    DWORD size;
-    int result;
-
-    lf.lfHeight = 0;
-    lf.lfWidth = 0;
-    lf.lfEscapement = 0;
-    lf.lfOrientation = 0;
-    lf.lfWeight = FW_REGULAR;
-    lf.lfItalic = FALSE;
-    lf.lfUnderline = FALSE;
-    lf.lfStrikeOut = FALSE;
-    lf.lfCharSet = DEFAULT_CHARSET;
-    lf.lfOutPrecision = OUT_TT_ONLY_PRECIS;
-    lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-    lf.lfQuality = DEFAULT_QUALITY;
-    lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-    snprintf(lf.lfFaceName, sizeof lf.lfFaceName, "%s", fontref->fontname);
-
-    hfont = CreateFontIndirect(&lf);
-    if (!hfont)
-        return FALSE;
-
-    result = FALSE;
-    hdc = CreateCompatibleDC(NULL);
-    if (!hdc)
-        goto done;
-    hfont = SelectObject(hdc, hfont);
-    size = GetFontData(hdc, 0, 0, NULL, 0);
-    if (size == GDI_ERROR)
-        goto done;
-    fontref->databuf = allocate(size);
-    fontref->bufsize = size;
-    GetFontData(hdc, 0, 0, fontref->databuf, size);
-    result = TRUE;
-
-  done:
-    if (hdc) {
-        hfont = SelectObject(hdc, hfont);
-        DeleteDC(hdc);
-    }
-    if (hfont)
-        DeleteObject(hfont);
-    return result;
-}
-
-#elif _WITH_FONTCONFIG  /* using the fontconfig library */
+#if _WITH_FONTCONFIG  /* using the fontconfig library */
 
 #include <fontconfig/fontconfig.h>
 
@@ -155,11 +96,79 @@ static int lookupfont(fontrefinfo *fontref)
     return result;
 }
 
+#elif WIN32  /* using the Windows API */
+
+#include <windows.h>
+
+/* Use the Windows system API to look up a font by name. Unfortunately
+ * the object that Windows returns cannot be turned into a filename.
+ * Instead a pointer to the font data is obtained instead and copied
+ * into a private buffer.
+ */
+static int lookupfont(fontrefinfo *fontref)
+{
+    LOGFONT lf;
+    HFONT hfont;
+    HDC hdc;
+    DWORD size;
+    int result;
+
+    lf.lfHeight = 0;
+    lf.lfWidth = 0;
+    lf.lfEscapement = 0;
+    lf.lfOrientation = 0;
+    lf.lfWeight = FW_REGULAR;
+    lf.lfItalic = FALSE;
+    lf.lfUnderline = FALSE;
+    lf.lfStrikeOut = FALSE;
+    lf.lfCharSet = DEFAULT_CHARSET;
+    lf.lfOutPrecision = OUT_TT_ONLY_PRECIS;
+    lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+    lf.lfQuality = DEFAULT_QUALITY;
+    lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+    snprintf(lf.lfFaceName, sizeof lf.lfFaceName, "%s", fontref->fontname);
+
+    hfont = CreateFontIndirect(&lf);
+    if (!hfont)
+        return FALSE;
+
+    result = FALSE;
+    hdc = CreateCompatibleDC(NULL);
+    if (!hdc)
+        goto done;
+    hfont = SelectObject(hdc, hfont);
+    size = GetFontData(hdc, 0, 0, NULL, 0);
+    if (size == GDI_ERROR)
+        goto done;
+    fontref->databuf = allocate(size);
+    fontref->bufsize = size;
+    GetFontData(hdc, 0, 0, fontref->databuf, size);
+    result = TRUE;
+
+  done:
+    if (hdc) {
+        hfont = SelectObject(hdc, hfont);
+        DeleteDC(hdc);
+    }
+    if (hfont)
+        DeleteObject(hfont);
+    return result;
+}
+
+#elif __APPLE__  /* using the iOS API */
+
+/* Use the iOS system API to look up a font by name.
+ */
+static int lookupfont(fontrefinfo *fontref)
+{
+    return FALSE;
+}
+
 #else  /* without help */
 
 /* As a last ditch effort, this variable can be modified to point to a
  * preferred font on the local machine. This is not a great font, but
- * it is relatively common.
+ * it is fairly common on Debian-based Linux distros.
  */
 static char const *defaultfontfilename =
     "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf";
