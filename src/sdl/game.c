@@ -145,6 +145,9 @@ static SDL_Point setlayout(SDL_Point display)
     reserves.w = foundations.w;
     reserves.h = foundations.h + lineheight;
 
+    status.x = reserves.x - 2 * spacing.x - getimagewidth(IMAGE_DONE) / 2;
+    status.y = reserves.y + (reserves.h - getimageheight(IMAGE_DONE)) / 2;
+
     tableau.x = _graph.margin + spacing.x;
     tableau.y = reserves.y + reserves.h + 2 * spacing.y;
     tableau.w = 8 * _graph.cardsize.x + 7 * spacing.x;
@@ -175,10 +178,8 @@ static SDL_Point setlayout(SDL_Point display)
     bettercount.x = movecount.x;
     bettercount.y = movecount.y + largelineheight;
 
-    status.x = sidebar.x + (sidebar.w - getimagewidth(IMAGE_DONE)) / 2;
-    status.y = bettercount.y + lineheight + 2 * spacing.y;
-    bookmark.x = status.x;
-    bookmark.y = status.y + getimageheight(IMAGE_DONE) + spacing.y;
+    bookmark.x = sidebar.x + (sidebar.w - getimagewidth(IMAGE_DONE)) / 2;
+    bookmark.y = bettercount.y + lineheight + 4 * spacing.y;
 
     optionsbutton.pos.x = sidebar.x;
     optionsbutton.pos.y = bookmark.y + getimageheight(IMAGE_BOOKMARK) +
