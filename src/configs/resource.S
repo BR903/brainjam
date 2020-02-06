@@ -10,7 +10,7 @@
 configurations:
 .incbin "configs/configs.bin"
 
-/* The number of configurations stored in the array.
+/* The size of the configurations array in bytes.
  */
 configuration_size:
 .int . - configurations

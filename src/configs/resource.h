@@ -25,7 +25,7 @@
  */
 EXTERN(unsigned char const, configurations, [])
 
-/* The total number of configurations.
+/* The total size of the configuration data in bytes.
  */
 EXTERN(int const, configuration_size,)
 
