@@ -26,8 +26,7 @@ fi
 printf '%s %s/' "$dep" "$dir" >"$dep"
 case "$src" in
   *.S)
-    "$CC" -MM -MG "$@" "$src" | head -c-1 >>"$dep"
-    echo " \\" >>"$dep"
+    "$CC" -MM -MG "$@" "$src" | sed 's/$/ \\/' >>"$dep"
     echo $(sed -n 's/^.*\.incbin[ \t]*\"\([^\"]*\)\".*/\1/p' "$src") >>"$dep"
     ;;
   *)
