@@ -12,7 +12,7 @@
 # make clean    = delete all files created by the configuration & build process
 # make spotless = delete all files created from other files
 
-.PHONY: all install dist clean spotless
+.PHONY: all install clean spotless
 
 # The configuration include file defines NAME and VERSION.
 include src/cfg.mk
