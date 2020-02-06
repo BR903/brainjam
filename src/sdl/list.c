@@ -155,6 +155,19 @@ static command_t setselection(int id)
 }
 
 /*
+ *
+ */
+
+static void copyselectedsolution(void)
+{
+    solutioninfo const *solution;
+
+    solution = getsolutionfor(selection);
+    if (solution)
+        SDL_SetClipboardText(solution->text);
+}
+
+/*
  * Placement of display elements.
  */
 
@@ -387,6 +400,8 @@ static command_t handlekeyevent(SDL_Keysym key)
     if (key.mod & KMOD_CTRL) {
         if (key.sym == SDLK_r)
             return setselection(pickrandomunsolved());
+        if (key.sym == SDLK_c)
+            copyselectedsolution();
         return cmd_none;
     }
 
