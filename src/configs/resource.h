@@ -27,6 +27,6 @@ EXTERN(unsigned char const, configurations, [])
 
 /* The total number of configurations.
  */
-EXTERN(int const, configuration_count,)
+EXTERN(int const, configuration_size,)
 
 #endif

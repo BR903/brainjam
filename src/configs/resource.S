@@ -12,5 +12,5 @@ configurations:
 
 /* The number of configurations stored in the array.
  */
-configuration_count:
-.int (. - configurations) / SIZE_CONFIG
+configuration_size:
+.int . - configurations

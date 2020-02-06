@@ -22,7 +22,7 @@ static void const *getconfigurationsetup(int id)
  */
 int getconfigurationcount(void)
 {
-    return configuration_count;
+    return configuration_size / SIZE_CONFIG;
 }
 
 /* The best known solution size is stored in the first seven bits of
