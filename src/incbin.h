@@ -17,7 +17,7 @@
  */
 #ifdef __APPLE__
 #define INCBIN(filename, symbol, endsymbol)             \
-    static unsigned char const symbol[], endsymbol[];   \
+    extern unsigned char const symbol[], endsymbol[];   \
     __asm__(".globl _" #symbol "\n"                     \
             ".globl _" #endsymbol "\n"                  \
             "_" #symbol ":\n"                           \
@@ -25,7 +25,7 @@
             "_" #endsymbol ":\n")
 #else
 #define INCBIN(filename, symbol, endsymbol)             \
-    static unsigned char const symbol[], endsymbol[];   \
+    extern unsigned char const symbol[], endsymbol[];   \
     __asm__(".globl " #symbol "\n"                      \
             ".globl " #endsymbol "\n"                   \
             #symbol ":\n"                               \

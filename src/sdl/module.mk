@@ -2,10 +2,12 @@
 
 ifdef WITH_SDL
 
+SDLIMAGES = sdl/banner.png sdl/cardset.png sdl/headline.png sdl/images.png
+
 SRC += sdl/sdl.c sdl/zrwops.c sdl/font.c
 SRC += sdl/images.c sdl/button.c sdl/scroll.c sdl/help.c sdl/list.c sdl/game.c
-GENRES += $(shell sed -n 's/^\.incbin *\"\(.*\)\"/\1/p' sdl/resource.S)
-SRCRES += $(GENRES:.bmp.gz=.png) sdl/abmp.py
+GENRES += $(SDLIMAGES:.png=.bmp.gz)
+SRCRES += $(SDLIMAGES) sdl/abmp.py
 
 override CFLAGS += $(shell pkg-config --cflags sdl2 SDL2_ttf zlib)
 override LDLIBS += $(shell pkg-config --libs sdl2 SDL2_ttf zlib)
