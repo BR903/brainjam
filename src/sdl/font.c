@@ -155,15 +155,6 @@ static int lookupfont(fontrefinfo *fontref)
     return result;
 }
 
-#elif __APPLE__  /* using the iOS API */
-
-/* Use the iOS system API to look up a font by name.
- */
-static int lookupfont(fontrefinfo *fontref)
-{
-    return FALSE;
-}
-
 #else  /* without help */
 
 /* As a last ditch effort, this variable can be modified to point to a
