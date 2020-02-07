@@ -262,7 +262,8 @@ static void yowzitch(void)
         "Usage: brainjam [OPTIONS] [ID]\n"
         "Play Brain Jam.\n"
         "\n"
-        "  -D, --datadir=DIR     Store session data in DIR [~/.brainjam]\n"
+        "  -C, --cfgdir=DIR      Store config data in DIR\n"
+        "  -D, --datadir=DIR     Store session data in DIR\n"
         "  -t, --textmode        Use the non-graphical interface\n"
         "  -r, --readonly        Don't modify any files\n"
         "      --help            Display this help text and exit\n"
@@ -293,8 +294,9 @@ static void rhoulz(void)
  */
 static int readcmdline(int argc, char *argv[], settingsinfo *settings)
 {
-    static char const *optstring = "D:tr";
+    static char const *optstring = "C:D:tr";
     static struct option const options[] = {
+        { "cfgdir", required_argument, NULL, 'C' },
         { "datadir", required_argument, NULL, 'D' },
         { "textmode", no_argument, NULL, 't' },
         { "readonly", no_argument, NULL, 'r' },
@@ -305,6 +307,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
         { 0, 0, 0, 0 }
     };
 
+    char *cfgdir = NULL;
     char *datadir = NULL;
     char *p;
     long id;
@@ -312,6 +315,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
 
     while ((ch = getopt_long(argc, argv, optstring, options, NULL)) != EOF) {
         switch (ch) {
+          case 'C':     cfgdir = optarg;                        break;
           case 'D':     datadir = optarg;                       break;
           case 't':     settings->forcetextmode = TRUE;         break;
           case 'r':     settings->readonly = TRUE;              break;
@@ -342,7 +346,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
 
     if (settings->readonly == TRUE)
         setreadonly(settings->readonly);
-    setfiledirectories(datadir, argv[0]);
+    setfiledirectories(cfgdir, datadir, argv[0]);
     return TRUE;
 }
 

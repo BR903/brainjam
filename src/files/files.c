@@ -161,20 +161,24 @@ static int choosedirectories(void)
             return FALSE;
     }
 
-    if (settingsroot)
-        settingsroot = strallocate(settingsroot);
-    else
-        settingsroot = fmtallocate("%s/.config", homedir);
-    if (dataroot)
-        dataroot = strallocate(dataroot);
-    else
-        dataroot = fmtallocate("%s/.local/share", homedir);
+    if (!settingsdir) {
+        if (settingsroot)
+            settingsroot = strallocate(settingsroot);
+        else
+            settingsroot = fmtallocate("%s/.config", homedir);
+        settingsdir = verifydirindir(settingsroot, "brainjam");
+        deallocate(settingsroot);
+    }
 
-    settingsdir = verifydirindir(settingsroot, "brainjam");
-    datadir = verifydirindir(dataroot, "brainjam");
+    if (!datadir) {
+        if (dataroot)
+            dataroot = strallocate(dataroot);
+        else
+            dataroot = fmtallocate("%s/.local/share", homedir);
+        datadir = verifydirindir(dataroot, "brainjam");
+        deallocate(dataroot);
+    }
 
-    deallocate(settingsroot);
-    deallocate(dataroot);
     return TRUE;
 }
 
@@ -192,8 +196,10 @@ static int choosehomelessdirectories(char const *executablepath)
     if (!executabledir)
         return FALSE;
 
-    settingsdir = verifydirindir(executabledir, "save");
-    datadir = verifydirindir(executabledir, "save");
+    if (!settingsdir)
+        settingsdir = verifydirindir(executabledir, "save");
+    if (!datadir)
+        datadir = verifydirindir(executabledir, "save");
 
     deallocate(executabledir);
     return TRUE;
@@ -247,24 +253,33 @@ void setreadonly(int flag)
 }
 
 /* Locate the directories that the program will use for its files,
- * creating them if they do not already exist. If overridedir names a
- * valid directory, then it will be used instead of the program's
- * default directories.
+ * creating them if they do not already exist. Either or both override
+ * directory arguments can be NULL, in which case the program will
+ * supply default values.
  */
-int setfiledirectories(char const *overridedir, char const *executablepath)
+int setfiledirectories(char const *overridecfgdir, char const *overridedatadir,
+                       char const *executablepath)
 {
-    if (overridedir) {
-        if (isdir(overridedir)) {
-            settingsdir = strallocate(overridedir);
-            datadir = strallocate(overridedir);
+    if (overridecfgdir) {
+        if (isdir(overridecfgdir)) {
+            settingsdir = strallocate(overridecfgdir);
         } else {
-            warn("%s: %s", overridedir, strerror(errno));
+            warn("%s: %s", overridecfgdir, strerror(errno));
         }
-    } else {
+    }
+    if (overridedatadir) {
+        if (isdir(overridedatadir)) {
+            settingsdir = strallocate(overridedatadir);
+        } else {
+            warn("%s: %s", overridedatadir, strerror(errno));
+        }
+    }
+    if (!settingsdir || !datadir) {
         if (!choosedirectories())
             choosehomelessdirectories(executablepath);
     }
-    if (!datadir)
+
+    if (!settingsdir || !datadir)
         forcereadonly = TRUE;
     return TRUE;
 }

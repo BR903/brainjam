@@ -17,19 +17,23 @@
 #include "./types.h"
 #include "redo/types.h"
 
-/* Select the directories for storing the program's data files. If dir
- * is NULL, then default locations are selected. The directories are
- * created if they do not already exist. The executable argument
- * should be the path to the program itself. If the function cannot
- * determine the usual default locations, then it will attempt to use
- * a directory in the same directory as the program. Regardless of how
- * the directory is chosen, if it cannot be used, then the return
- * value is false and the program is put in read-only mode.
+/* Select the directories for storing the program's data files. cfgdir
+ * specifies the directory for storing the game's settings, and
+ * datadir specifies the directory for storing the user's data
+ * (specifically, game history). If either argument is NULL, then
+ * default locations are selected. The directories are created if they
+ * do not already exist. The executable argument should be the path to
+ * the program itself, i.e. argv[0]. If the function cannot determine
+ * the usual default locations, then it will attempt to use a
+ * directory in the same directory as the program. Regardless of how
+ * the directories are chosen, if they cannot be accessed, then the
+ * return value is false and the program is put in read-only mode.
  */
-extern int setfiledirectories(char const *overridedir, char const *executable);
+extern int setfiledirectories(char const *cfgdir, char const *datadir,
+                              char const *executable);
 
-/* Set the value of the read-only flag. If the read-only flag is true,
- * all functions that write to files will automatically fail.
+/* Set read-only mode on or off. When in read-only mode, all functions
+ * that write to files will quietly fail.
  */
 extern void setreadonly(int flag);
 

@@ -22,9 +22,13 @@ Press \fB?\fR or \fBF1\fR to view help within the game. The in-game
 help includes information on the rules of Brain Jam and how to play.
 .SH OPTIONS
 .TP
-\fB\-D\fR, \fB\-\-datadir\fR=\fIDIR\fR
-Use \fIDIR\fR as the user's data directory for storing session data
-and game solutions. The default data directory is \fI~/.brainjam\fR.
+\fB\-C\fR, \fB\-\-cfgdir\fR=\fICFGDIR\fR
+Use \fICFGDIR\fR as the directory for storing settings and solutions
+data. The default directory is \fI~/.config/brainjam\fR.
+.TP
+\fB\-D\fR, \fB\-\-datadir\fR=\fIDATADIR\fR
+Use \fIDATADIR\fR as the user's data directory for storing session
+data. The default directory is \fI~/.local/share/brainjam\fR.
 .TP
 \fB\-t\fR, \fB\-\-textmode\fR
 Force \fBBrain Jam\fR to run in the terminal. The default behavior is
@@ -48,13 +52,13 @@ Display the software license and exit.
 Display the rules of the game and exit.
 .SH FILES
 .TP
-.IR DATADIR /brainjam.ini
+.IR CFGDIR /brainjam.ini
 The game's persistent settings.
 .TP
-.IR DATADIR /brainjam.sol
+.IR CFGDIR /brainjam.sol
 The solutions to your completed games.
 .TP
-.IR DATADIR /session-*
+\fIDATADIR\fR/session-\fINNNN\fR
 Move history for each game.
 .SH LICENSE
 This program is free software; it is distributed under the terms of
