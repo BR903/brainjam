@@ -10,7 +10,7 @@
 #ifndef _sdl_scroll_h_
 #define _sdl_scroll_h_
 
-#include "SDL.h"
+#include <SDL.h>
 
 /* The data used to manage a scrollbar on the display. (To disable a
  * scrollbar, set the range field to 0.)

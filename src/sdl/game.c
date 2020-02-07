@@ -2,8 +2,8 @@
  */
 
 #include <stdio.h>
-#include "SDL.h"
-#include "SDL_ttf.h"
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include "./gen.h"
 #include "./types.h"
 #include "./decls.h"

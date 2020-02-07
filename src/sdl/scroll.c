@@ -1,7 +1,7 @@
 /* sdl/scroll.c: managing a scrollbar element.
  */
 
-#include "SDL.h"
+#include <SDL.h>
 #include "./gen.h"
 #include "internal.h"
 #include "scroll.h"

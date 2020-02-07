@@ -11,7 +11,7 @@
 #ifndef _sdl_zrwops_h_
 #define _sdl_zrwops_h_
 
-#include "SDL_rwops.h"
+#include <SDL.h>
 
 /* Return a RWops object that inflates a buffer containing data
  * compressed by either zlib or gzip.

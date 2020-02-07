@@ -4,7 +4,7 @@
  * compiled into the binary and used to build the user interface.
  */
 
-#include "SDL.h"
+#include <SDL.h>
 #include "./gen.h"
 #include "./types.h"
 #include "./incbin.h"

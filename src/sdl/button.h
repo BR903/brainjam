@@ -9,7 +9,7 @@
 #ifndef _sdl_button_h_
 #define _sdl_button_h_
 
-#include "SDL.h"
+#include <SDL.h>
 
 /* The button state flags. A button's state value is a bitwise-or of
  * zero or more flags.

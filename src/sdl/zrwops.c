@@ -3,8 +3,7 @@
 
 #include <stdlib.h>
 #include <zlib.h>
-#include "SDL_rwops.h"
-#include "SDL_error.h"
+#include <SDL.h>
 #include "zrwops.h"
 
 /* The data that needs to be retained in between invocations. This is

@@ -2,8 +2,8 @@
  */
 
 #include <stdlib.h>
-#include <ncurses.h>
 #include <time.h>
+#include <ncurses.h>
 #include "./types.h"
 #include "./settings.h"
 #include "redo/types.h"

@@ -4,7 +4,7 @@
 #ifndef _sdl_font_h_
 #define _sdl_font_h_
 
-#include "SDL_ttf.h"
+#include <SDL_ttf.h>
 
 /* A reference to the data of a truetype font.
  */

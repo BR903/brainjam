@@ -7,7 +7,7 @@
 #ifndef _sdl_images_h_
 #define _sdl_images_h_
 
-#include "SDL.h"
+#include <SDL.h>
 #include "./types.h"
 
 /* Include the list of available image IDs, generated from the sprite

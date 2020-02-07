@@ -4,8 +4,8 @@
 #ifndef _sdl_internal_h_
 #define _sdl_internal_h_
 
-#include "SDL.h"
-#include "SDL_ttf.h"
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include "./types.h"
 #include "redo/types.h"
 

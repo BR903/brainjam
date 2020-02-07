@@ -1,8 +1,8 @@
 /* sdl/button.c: button creation.
  */
 
-#include "SDL.h"
-#include "SDL_ttf.h"
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include "./gen.h"
 #include "internal.h"
 #include "images.h"
