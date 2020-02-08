@@ -121,6 +121,8 @@ int loadrcfile(settingsinfo *settings)
         n = strlen(buf);
         if (n > 0 && buf[n - 1] == '\n') {
             buf[--n] = '\0';
+            if (n > 0 && buf[n - 1] == '\r')
+                buf[--n] = '\0';
         } else if (n == sizeof buf - 1) {
             for (;;) {
                 ch = fgetc(fp);
