@@ -269,7 +269,7 @@ int setfiledirectories(char const *overridecfgdir, char const *overridedatadir,
     }
     if (overridedatadir) {
         if (isdir(overridedatadir)) {
-            settingsdir = strallocate(overridedatadir);
+            datadir = strallocate(overridedatadir);
         } else {
             warn("%s: %s", overridedatadir, strerror(errno));
         }
