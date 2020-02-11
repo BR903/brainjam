@@ -542,7 +542,9 @@ static int sethover(int x, int y)
 
     which = -1;
     for (i = 0 ; i < buttoncount ; ++i) {
-        if (buttons[i]->display != displayed || !buttons[i]->visible)
+        if (buttons[i]->display != displayed)
+            continue;
+        if (!buttons[i]->visible || buttons[i]->state == BSTATE_DISABLED)
             continue;
         if (rectcontains(&buttons[i]->pos, x, y)) {
             which = i;

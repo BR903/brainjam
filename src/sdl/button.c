@@ -104,7 +104,7 @@ static SDL_Surface *makeshadedsurface(int w, int h, int shadowdepth)
  */
 void makegraphicbutton(button *pushbutton, SDL_Surface *graphic)
 {
-    int mods[] = { 160, 191, 128, 255 };
+    int const mods[] = { 160, 192, 160, 255 };
     SDL_Surface *image, *bkgnd;
     SDL_Rect rect;
     Uint32 color;
@@ -141,6 +141,8 @@ void makegraphicbutton(button *pushbutton, SDL_Surface *graphic)
     rect.h = graphic->h;
     for (i = 0 ; i < 4 ; ++i) {
         SDL_SetSurfaceColorMod(graphic, mods[i], mods[i], mods[i]);
+        SDL_SetSurfaceAlphaMod(graphic,
+                               i == BSTATE_DISABLED ? 128 : SDL_ALPHA_OPAQUE);
         SDL_BlitSurface(graphic, NULL, image, &rect);
         rect.y += pushbutton->pos.h;
     }
@@ -277,7 +279,7 @@ void makecheckbox(button *chkbox, char const *str)
  */
 void makepopupbutton(button *popup, SDL_Surface *graphic)
 {
-    int const dark = 128, dim = 160, semidim = 192, normal = 255;
+    int const mods[] = { 160, 192, 160, 255 };
     SDL_Surface *image, *bkgnd;
     SDL_Rect rect;
     Uint32 bkgndval, textval;
@@ -306,46 +308,23 @@ void makepopupbutton(button *popup, SDL_Surface *graphic)
     textval = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
     SDL_FillRect(image, &rect, bkgndval);
     drawrect(image, textval, rect.x, rect.y, rect.w, rect.h);
-    rect.y += popup->pos.h;
-    SDL_FillRect(image, &rect, bkgndval);
-    drawopenrect(image, textval, &rect);
-    rect.y += popup->pos.h;
-    SDL_FillRect(image, &rect, bkgndval);
-    drawopenrect(image, textval, &rect);
-    rect.y += popup->pos.h;
-    SDL_FillRect(image, &rect, 0x00808080); /*??*/
-    drawopenrect(image, textval, &rect);
-    rect.y += popup->pos.h;
-    SDL_FillRect(image, &rect, bkgndval);
-    drawopenrect(image, textval, &rect);
+    for (i = 0 ; i < 4 ; ++i) {
+        rect.y += popup->pos.h;
+        SDL_FillRect(image, &rect, bkgndval);
+        drawopenrect(image, textval, &rect);
+    }
 
     rect.x = (popup->pos.w - graphic->w) / 2;
     rect.y = (popup->pos.h - graphic->h) / 2;
     rect.w = graphic->w;
     rect.h = graphic->h;
-    SDL_SetSurfaceColorMod(graphic, dim, dim, dim);
-    SDL_BlitSurface(graphic, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_SetSurfaceColorMod(graphic, semidim, semidim, semidim);
-    SDL_BlitSurface(graphic, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_SetSurfaceColorMod(graphic, dark, dark, dark);
-    SDL_BlitSurface(graphic, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_SetSurfaceColorMod(graphic, normal, normal, normal);
-    SDL_BlitSurface(graphic, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_SetSurfaceColorMod(graphic, dim, dim, dim);
-    SDL_BlitSurface(graphic, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_SetSurfaceColorMod(graphic, semidim, semidim, semidim);
-    SDL_BlitSurface(graphic, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_SetSurfaceColorMod(graphic, dark, dark, dark);
-    SDL_BlitSurface(graphic, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_SetSurfaceColorMod(graphic, normal, normal, normal);
-    SDL_BlitSurface(graphic, NULL, image, &rect);
+    for (i = 0 ; i < 8 ; ++i) {
+        SDL_SetSurfaceColorMod(graphic, mods[i % 4], mods[i % 4], mods[i % 4]);
+        SDL_SetSurfaceAlphaMod(graphic,
+                            i % 4 == BSTATE_DISABLED ? 128 : SDL_ALPHA_OPAQUE);
+        SDL_BlitSurface(graphic, NULL, image, &rect);
+        rect.y += popup->pos.h;
+    }
 
     popup->texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
     SDL_FreeSurface(image);

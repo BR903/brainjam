@@ -849,15 +849,12 @@ displaymap initgamedisplay(void)
     addbutton(&optionsbutton);
 
     makecheckbox(&animchkbox, "Animate cards");
-    if (cardanimation)
-        animchkbox.state |= BSTATE_SELECT;
     animchkbox.cmd = cmd_none;
     animchkbox.display = DISPLAY_GAME;
     animchkbox.visible = 0;
     addbutton(&animchkbox);
 
     makecheckbox(&autochkbox, "Auto-play on foundations");
-    autochkbox.state |= BSTATE_SELECT;
     autochkbox.cmd = cmd_none;
     autochkbox.display = DISPLAY_GAME;
     autochkbox.visible = 0;

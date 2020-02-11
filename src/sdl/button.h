@@ -19,6 +19,12 @@
 #define BSTATE_DOWN     2       /* button is held down */
 #define BSTATE_SELECT   4       /* button is selected */
 
+/* Because in practice a button cannot be pushed down without also
+ * having the mouse hovering, the state of down-on-hover-off is
+ * repurposed to indicate a disabled button.
+ */
+#define BSTATE_DISABLED BSTATE_DOWN
+
 /* The data needed to display and monitor interaction with buttons.
  * After creating a button, the program should fill in the display
  * value, the pos's x and y values, the cmd value, and optionally the
