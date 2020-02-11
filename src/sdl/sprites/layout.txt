@@ -11,16 +11,20 @@
 # affect their size, or if images are added or removed.
 
 # IMAGE      X   Y   W   H
-oldicon      0   0  32  32
-stuck       32   0  48  48
-done        80   0  48  48
-bookmark     0  64  48  32
-write        0  32  24  24
-check       24  48  16  16
-star        40  48  16  16
-back        56  48  24  24
-help        80  48  24  24
-quit       104  48  24  24
-play        56  72  24  24
-random      80  72  24  24
-options    104  72  24  24
+stuck        0   0  48  48
+done        48   0  48  48
+prev        96   0  16  16
+random      96  16  16  16
+next        96  32  16  16
+oldicon      0  48  32  32
+bookmark    32  48  48  32
+check       88  48  16  16
+star        88  64  16  16
+write        0  80  24  24
+back        24  80  24  24
+help        48  80  24  24
+quit        72  80  24  24
+clip         0 104  24  24
+play        24 104  24  24
+shuffle     48 104  24  24
+options     72 104  24  24

@@ -21,7 +21,8 @@ static int selection;
 
 /* The various buttons that appear on the list display.
  */
-static button helpbutton, quitbutton, playbutton, randombutton;
+static button helpbutton, quitbutton, playbutton, shufflebutton;
+static button prevbutton, randbutton, nextbutton, clipbutton;
 
 /* The scrollbar for the selection list.
  */
@@ -63,6 +64,16 @@ static int clampscrollpos(int n)
     return n;
 }
 
+/* Update the display's state after the selection has changed.
+ */
+static void updateselection(void)
+{
+    if (getsolutionfor(selection))
+        clipbutton.state = BSTATE_NORMAL;
+    else
+        clipbutton.state = BSTATE_DISABLED;
+}
+
 /* Choose a scroll position for the list that ensures that the current
  * selection is visible. (Or at least that it is mostly visible -- it's
  * considered acceptable for it to be partially off the edge.)
@@ -96,9 +107,11 @@ static void normalizeselection(void)
     if (pos < scroll.value - rowheight / 3) {
         pos = scroll.value + 2 * rowheight / 3;
         selection = pos / rowheight;
+        updateselection();
     } else if (pos > scroll.value + scroll.pagesize - rowheight / 2) {
         pos = scroll.value + scroll.pagesize - rowheight / 2;
         selection = pos / rowheight;
+        updateselection();
     }
 }
 
@@ -147,21 +160,23 @@ static command_t setselection(int id)
         id = 0;
     else if (id >= count)
         id = count - 1;
-    if (selection == id)
-        return cmd_none;
     selection = id;
+    updateselection();
     scrolllist(normalizeposition());
     return cmd_redraw;
 }
 
 /*
- *
+ * Clipboard function.
  */
 
-static void copyselectedsolution(void)
+/* Copy the text of the selected game's solution to the clipboard.
+ */
+static void copyselectedsolution(int selected)
 {
     solutioninfo const *solution;
 
+    (void)selected;
     solution = getsolutionfor(selection);
     if (solution)
         SDL_SetClipboardText(solution->text);
@@ -213,7 +228,7 @@ static SDL_Point setlayout(SDL_Point display)
     if (w < size.x)
         w = size.x;
     w += 2 * markersize.x;
-    listrect.w = playbutton.pos.w + randombutton.pos.w + _graph.margin;
+    listrect.w = playbutton.pos.w + shufflebutton.pos.w + _graph.margin;
     if (listrect.w < w)
         listrect.w = w;
     listrect.x = area.x + (area.w - listrect.w) / 2;
@@ -221,10 +236,20 @@ static SDL_Point setlayout(SDL_Point display)
     listrect.h = area.y + area.h - listrect.y;
     listrect.h -= _graph.margin + playbutton.pos.h;
 
-    randombutton.pos.x = listrect.x;
-    randombutton.pos.y = area.y + area.h - randombutton.pos.h;
+    prevbutton.pos.x = listrect.x - prevbutton.pos.w - _graph.margin;
+    prevbutton.pos.y = listrect.y + (listrect.h - 3 * prevbutton.pos.h) / 2;
+    randbutton.pos.x = prevbutton.pos.x;
+    randbutton.pos.y = prevbutton.pos.y + prevbutton.pos.h;
+    nextbutton.pos.x = randbutton.pos.x;
+    nextbutton.pos.y = randbutton.pos.y + randbutton.pos.h;
+
+    shufflebutton.pos.x = listrect.x;
+    shufflebutton.pos.y = area.y + area.h - shufflebutton.pos.h;
     playbutton.pos.x = listrect.x + listrect.w - playbutton.pos.w;
-    playbutton.pos.y = randombutton.pos.y;
+    playbutton.pos.y = shufflebutton.pos.y;
+
+    clipbutton.pos.x = playbutton.pos.x + playbutton.pos.w + 2 * _graph.margin;
+    clipbutton.pos.y = playbutton.pos.y;
 
     scroll.pos.x = listrect.x + listrect.w + _graph.margin / 2;
     scroll.pos.y = listrect.y;
@@ -382,7 +407,23 @@ static command_t moveselection(int delta)
     return setselection(selection + delta);
 }
 
-/* Change the current selection to a random (unsolved) configuration.
+/* Move the current selection to the previous unsolved configuration.
+ */
+static void selectbackward(int selected)
+{
+    (void)selected;
+    setselection(findnextunsolved(selection, -1));
+}
+
+/* Move the current selection to the next unsolved configuration.
+ */
+static void selectforward(int selected)
+{
+    (void)selected;
+    setselection(findnextunsolved(selection, +1));
+}
+
+/* Move the current selection to a random unsolved configuration.
  */
 static void selectrandom(int selected)
 {
@@ -401,7 +442,7 @@ static command_t handlekeyevent(SDL_Keysym key)
         if (key.sym == SDLK_r)
             return setselection(pickrandomunsolved());
         if (key.sym == SDLK_c)
-            copyselectedsolution();
+            copyselectedsolution(TRUE);
         return cmd_none;
     }
 
@@ -415,8 +456,11 @@ static command_t handlekeyevent(SDL_Keysym key)
       case SDLK_RETURN:   return cmd_select;
       case SDLK_KP_ENTER: return cmd_select;
       case SDLK_TAB:
-        return setselection(findnextunsolved(selection,
-                                             key.mod & KMOD_SHIFT ? -1 : +1));
+        if (key.mod & KMOD_SHIFT)
+            selectbackward(TRUE);
+        else
+            selectforward(TRUE);
+        return cmd_redraw;
     }
     return cmd_none;
 }
@@ -495,15 +539,35 @@ displaymap initlistdisplay(void)
     quitbutton.cmd = cmd_quit;
     addbutton(&quitbutton);
 
+    makeimagebutton(&prevbutton, IMAGE_PREV);
+    prevbutton.display = DISPLAY_LIST;
+    prevbutton.action = selectbackward;
+    addbutton(&prevbutton);
+
+    makeimagebutton(&randbutton, IMAGE_RANDOM);
+    randbutton.display = DISPLAY_LIST;
+    randbutton.action = selectrandom;
+    addbutton(&randbutton);
+
+    makeimagebutton(&nextbutton, IMAGE_NEXT);
+    nextbutton.display = DISPLAY_LIST;
+    nextbutton.action = selectforward;
+    addbutton(&nextbutton);
+
     makeimagebutton(&playbutton, IMAGE_PLAY);
     playbutton.display = DISPLAY_LIST;
     playbutton.cmd = cmd_select;
     addbutton(&playbutton);
 
-    makeimagebutton(&randombutton, IMAGE_RANDOM);
-    randombutton.display = DISPLAY_LIST;
-    randombutton.action = selectrandom;
-    addbutton(&randombutton);
+    makeimagebutton(&shufflebutton, IMAGE_SHUFFLE);
+    shufflebutton.display = DISPLAY_LIST;
+    shufflebutton.cmd = cmd_nop;
+    addbutton(&shufflebutton);
+
+    makeimagebutton(&clipbutton, IMAGE_CLIP);
+    clipbutton.display = DISPLAY_LIST;
+    clipbutton.action = copyselectedsolution;
+    addbutton(&clipbutton);
 
     markersize.x = getimagewidth(IMAGE_STAR);
     markersize.y = getimageheight(IMAGE_STAR);
