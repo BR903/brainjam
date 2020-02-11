@@ -6,13 +6,10 @@
   all of the existing textures from scratch, which is a pain in the
   neck if this only affects Wine users. Seems unlikely, though.
 
-* Come up with a more attractive layout for the opening screen?
+* Come up with a more attractive layout for the opening screen.
 
 * Add unit tests for the game logic code. This will probably also
   require new Makefile rules.
-
-* Add feature to copy solutions to the clipboard. This presumably
-  means adding a new button to the list display.
 
 * Improve the calculation of solution equivalence, so that two states
   that differ only in (say) the ordering of reserve cards are seen as
