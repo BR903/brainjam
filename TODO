@@ -25,11 +25,7 @@
   solvable. Such games would not have a configuration ID and would not
   generate saved solutions. These differences might require changes in
   a few different areas of the existing code. However, such a feature
-  would allow users to play the game more than 1500 times. (Algorithm
-  to generate a new, solvable game: Start at the final state and make
-  random inverse moves. An inverse move into the tableau onto a
-  non-sequential card is permanent, causing the card to become
-  unavailable for further moves. A decreasing temperature, in the
-  manner of simulated annealing, causes the frequency of permanent
-  moves to slowly increase, until the end when all cards are forced
-  into the tableau.)
+  would allow users to play the game more than 1500 times. This will
+  require finding an algorithm that reliably generates a new,
+  solvable, not boring game. I've managed to work out how to do the
+  first two, but the third has completely eluded my efforts so far.

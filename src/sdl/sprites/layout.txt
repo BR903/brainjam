@@ -25,6 +25,6 @@ back        24  80  24  24
 help        48  80  24  24
 quit        72  80  24  24
 clip         0 104  24  24
-play        24 104  24  24
-shuffle     48 104  24  24
-options     72 104  24  24
+shuffle     24 104  24  24
+options     48 104  24  24
+play        72 104  40  24

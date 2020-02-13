@@ -21,7 +21,7 @@ static int selection;
 
 /* The various buttons that appear on the list display.
  */
-static button helpbutton, quitbutton, playbutton, shufflebutton;
+static button helpbutton, quitbutton, playbutton;
 static button prevbutton, randbutton, nextbutton, clipbutton;
 
 /* The scrollbar for the selection list.
@@ -228,11 +228,11 @@ static SDL_Point setlayout(SDL_Point display)
     if (w < size.x)
         w = size.x;
     w += 2 * markersize.x;
-    listrect.w = playbutton.pos.w + shufflebutton.pos.w + _graph.margin;
-    if (listrect.w < w)
-        listrect.w = w;
+    if (w < playbutton.pos.w)
+        w = playbutton.pos.w;
     listrect.x = area.x + (area.w - listrect.w) / 2;
     listrect.y = area.y + rowheight + 2;
+    listrect.w = w;
     listrect.h = area.y + area.h - listrect.y;
     listrect.h -= _graph.margin + playbutton.pos.h;
 
@@ -243,10 +243,8 @@ static SDL_Point setlayout(SDL_Point display)
     nextbutton.pos.x = randbutton.pos.x;
     nextbutton.pos.y = randbutton.pos.y + randbutton.pos.h;
 
-    shufflebutton.pos.x = listrect.x;
-    shufflebutton.pos.y = area.y + area.h - shufflebutton.pos.h;
-    playbutton.pos.x = listrect.x + listrect.w - playbutton.pos.w;
-    playbutton.pos.y = shufflebutton.pos.y;
+    playbutton.pos.x = listrect.x + (listrect.w - playbutton.pos.w) / 2;
+    playbutton.pos.y = area.y + area.h - playbutton.pos.h;
 
     clipbutton.pos.x = playbutton.pos.x + playbutton.pos.w + 2 * _graph.margin;
     clipbutton.pos.y = playbutton.pos.y;
@@ -301,8 +299,8 @@ static void renderscorearea(int id)
     static char const *directions[] = {
         "Select one of the games",
         "from the list and press play.",
-        "Press shuffle to select",
-        "a random game."
+        "Or use the spin button",
+        "to select a random game."
     };
     solutioninfo const *solution;
     char buf[8];
@@ -558,11 +556,6 @@ displaymap initlistdisplay(void)
     playbutton.display = DISPLAY_LIST;
     playbutton.cmd = cmd_select;
     addbutton(&playbutton);
-
-    makeimagebutton(&shufflebutton, IMAGE_SHUFFLE);
-    shufflebutton.display = DISPLAY_LIST;
-    shufflebutton.cmd = cmd_nop;
-    addbutton(&shufflebutton);
 
     makeimagebutton(&clipbutton, IMAGE_CLIP);
     clipbutton.display = DISPLAY_LIST;
