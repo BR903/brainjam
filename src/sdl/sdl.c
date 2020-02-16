@@ -60,6 +60,34 @@ typedef struct numbercacheinfo {
  */
 static char const *defaultfontname = "freeserif";
 
+/* The help text for the initial list display. (Since this might be
+ * the first instructions that the user sees, it tries to be a little
+ * extra friendly.)
+ */
+static char const *listcommandshelptitle = "Selecting a Game";
+static char const *listcommandshelptext =
+    "Brain Jam contains hundreds of pre-dealt decks, each of which is"
+    " guaranteed to be solvable. Each deck is identified by a number, shown in"
+    " the list in the center.\n"
+    "\n"
+    "Scroll through the list to select a game, and then press the play button"
+    " to start playing that game.\n"
+    "\n"
+    "Games that you have already solved are marked in the list with a check"
+    " mark. (A star will mark games for which you have found the smallest"
+    " possible solution.)\n"
+    "\n"
+    "To the left of the list are up and down buttons. These buttons move the"
+    " current selection up and down, but skip over games that you have already"
+    " solved. (You can also use the Tab key to move the selection up and down"
+    " like this.) The middle button, marked with a spinner, will move the"
+    " selection to a random unsolved game.\n"
+    "\n"
+    "The clipboard button to the right will be enabled when you select a game"
+    " that you have solved. Pressing it will copy your solution to the"
+    " clipboard. The solution is represented as a series of A-L letters, each"
+    " letter representing a move.";
+
 /* The help text for basic game play.
  */
 static char const *gameplayhelptitle = "How to Play";
@@ -1100,13 +1128,17 @@ static int sdl_changesettings(settingsinfo *settings)
 }
 
 /* Run the configuration list UI and return the user's selection.
+ * Within this function, the help section on the list display is
+ * present.
  */
 static int sdl_selectconfig(int configid)
 {
     char buf[32];
 
     SDL_SetWindowTitle(window, "Brain Jam");
+    sdl_addhelpsection(listcommandshelptitle, listcommandshelptext, TRUE);
     configid = runlistdisplay(configid);
+    sdl_addhelpsection(listcommandshelptitle, NULL, TRUE);
     if (configid >= 0) {
         sprintf(buf, "Brain Jam - game %04d", configid);
         SDL_SetWindowTitle(window, buf);
