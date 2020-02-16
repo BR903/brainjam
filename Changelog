@@ -1,3 +1,9 @@
+* 2020 Feb 16: version 0.8.3
+
+	Revamped the initial display a little bit, adding buttons for
+	navigating unsolved games. A clipboard button has also been added
+	for copying solutions.
+
 * 2020 Feb 07: version 0.8.2
 
 	Many code changes to make the code more portable. The program now
