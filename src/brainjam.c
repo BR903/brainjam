@@ -263,7 +263,7 @@ static void yowzitch(void)
         "Play Brain Jam.\n"
         "\n"
         "  -C, --cfgdir=DIR      Store config data in DIR\n"
-        "  -D, --datadir=DIR     Store session data in DIR\n"
+        "  -D, --datadir=DIR     Store all program data in DIR\n"
         "  -t, --textmode        Use the non-graphical interface\n"
         "  -r, --readonly        Don't modify any files\n"
         "      --help            Display this help text and exit\n"
@@ -328,6 +328,9 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
             return FALSE;
         }
     }
+    if (!cfgdir && datadir)
+        cfgdir = datadir;
+
     if (optind + 1 < argc) {
         warn("%s: invalid argument: \"%s\"", argv[0], argv[optind + 1]);
         warn("(try \"--help\" for more inforfmation)");

@@ -278,6 +278,8 @@ int setfiledirectories(char const *overridecfgdir, char const *overridedatadir,
         if (!choosedirectories())
             choosehomelessdirectories(executablepath);
     }
+    if (!settingsdir && datadir)
+        settingsdir = strallocate(datadir);
 
     if (!settingsdir || !datadir)
         forcereadonly = TRUE;

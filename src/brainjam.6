@@ -9,31 +9,34 @@ is a playing-card puzzle game created by Peter Liepa, based
 on "Baker's Game", as described by Martin Gardner in the June 1968
 issue of Scientific American.
 .PP
-Brain Jam begins by presenting a list of available games. Each game
-uses the same rules but a differently shuffled deck. Each game has a
-known best solution, so after solving a particular game you can also
-return to in order to improve your solution.
+\fBBrain Jam\fR begins by presenting a list of available games. Each
+game uses the same rules but a differently shuffled deck. Each game
+has a known best solution, so after solving a particular game you can
+also return to in order to improve your solution.
 .PP
-If an \fIID\fR is supplied on the command line, Brain Jam will begin
-with that game selected. Otherwise, Brain Jam defaults to your most
+If an \fIID\fR is supplied on the command line, the program will begin
+with that game selected. Otherwise, it defaults to selecting your most
 recently played game.
 .PP
 Press \fB?\fR or \fBF1\fR to view help within the game. The in-game
-help includes information on the rules of Brain Jam and how to play.
+help includes information on the rules of \fBBrain Jam\fR and how to
+navigate the user interface.
 .SH OPTIONS
 .TP
-\fB\-C\fR, \fB\-\-cfgdir\fR=\fICFGDIR\fR
-Use \fICFGDIR\fR as the directory for storing settings and solutions
-data. The default directory is \fI~/.config/brainjam\fR.
+\fB\-C\fR, \fB\-\-cfgdir\fR=\fIDIR\fR
+Use \fIDIR\fR as the directory for storing the program's settings.
+The default directory is \fI~/.config/brainjam\fR.
 .TP
-\fB\-D\fR, \fB\-\-datadir\fR=\fIDATADIR\fR
-Use \fIDATADIR\fR as the user's data directory for storing session
-data. The default directory is \fI~/.local/share/brainjam\fR.
+\fB\-D\fR, \fB\-\-datadir\fR=\fIDIR\fR
+Use \fIDIR\fR as the user's data directory for storing session data.
+The default directory is \fI~/.local/share/brainjam\fR. Note that
+using this option automatically sets \fIDIR\fR as the directory for
+the program's settings as well, unless \fI\-\-cfgdir\fR is also used.
 .TP
 \fB\-t\fR, \fB\-\-textmode\fR
-Force \fBBrain Jam\fR to run in the terminal. The default behavior is
-to open a graphical window, and to use a text-based interface only if
-no graphics system is available.
+Force the program to run in the terminal. The default behavior is to
+open a graphical window, and to use a text-based interface only if the
+graphics system is unavailable.
 .TP
 \fB\-r\fR, \fB\-\-readonly\fR
 Run in read-only mode. No data files will be changed, and no game
