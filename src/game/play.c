@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stddef.h>
+#include <string.h>
 #include "./gen.h"
 #include "./types.h"
 #include "./decls.h"
@@ -34,10 +35,6 @@ typedef struct handlemoveparams {
  */
 static int const autoplaydelay = 100;
 
-/* How long to wait before retrying a conflicting move (in milliseconds).
- */
-static int const retrydelay = 100;
-
 /* True if auto-play on foundations is enabled.
  */
 static int autoplay = TRUE;
@@ -61,6 +58,11 @@ static redo_position *backone = NULL;
 /* The stack of bookmarked game states.
  */
 static stackentry *positionstack = NULL;
+
+/* The queue of buffered user commands.
+ */
+static command_t commandbuffer[6];
+static int bufferedcommandcount = 0;
 
 /*
  * The bookmark stack.
@@ -99,6 +101,52 @@ static redo_position *popposition(void)
     positionstack = entry->next;
     deallocate(entry);
     return pos;
+}
+
+/*
+ * Providing a queue of commands.
+ */
+
+/* Store a command on the queue of buffered commands. The return value
+ * is false if the queue is already full. If the queue is almost full,
+ * the command will be ignored if it is a repetition of the last
+ * command.
+ */
+static int buffercommand(command_t cmd)
+{
+    int const commandbuffersize = sizeof commandbuffer / sizeof *commandbuffer;
+
+    if (bufferedcommandcount >= commandbuffersize)
+        return FALSE;
+    if (bufferedcommandcount >= commandbuffersize - 2)
+        if (cmd == commandbuffer[bufferedcommandcount - 1])
+            return FALSE;
+    commandbuffer[bufferedcommandcount] = cmd;
+    ++bufferedcommandcount;
+    return TRUE;
+}
+
+/* Return true if the command buffer is not empty.
+ */
+static int commandsinbuffer(void)
+{
+    return bufferedcommandcount > 0;
+}
+
+/* Remove and return the oldest command in the command buffer. Return
+ * zero if the buffer is empty.
+ */
+static command_t unbuffercommand(void)
+{
+    command_t cmd;
+
+    if (bufferedcommandcount <= 0)
+        return cmd_none;
+    cmd = commandbuffer[0];
+    --bufferedcommandcount;
+    memmove(commandbuffer, commandbuffer + 1,
+            bufferedcommandcount * sizeof *commandbuffer);
+    return cmd;
 }
 
 /*
@@ -195,7 +243,10 @@ static void handlemove_callback(void *data)
             showsolutionwrite();
         }
     }
-    if (autoplay)
+
+    if (commandsinbuffer())
+        ungetinput(unbuffercommand(), 0);
+    else if (autoplay)
         ungetinput(cmd_autoplay, animation ? 0 : autoplaydelay);
 }
 
@@ -221,7 +272,7 @@ static int handlemove(gameplayinfo *gameplay, redo_session *session,
     if (gameplay->locked & ((1 << move.from) | (1 << move.to)))
         return FALSE;
     if (gameplay->locked) {
-        ungetinput(movecmd, retrydelay);
+        buffercommand(movecmd);
         return FALSE;
     }
 
