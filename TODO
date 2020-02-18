@@ -26,13 +26,6 @@ Before 1.0:
 * Is there an equivalent for Windows, without going the full
   wininstall route? Is it enough to just create a self-extracting zip?
 
-* BUG (?): On Wine, the window comes up all-black after being restored
-  from a minimized state. I haven't seen this happen on an actual
-  Windows host, but then I haven't been able to test it widely. The
-  solution seems to be to create a brand-new renderer and re-create
-  all of the existing textures from scratch, which is a pain in the
-  neck if this only affects Wine users. Seems unlikely, though.
-
 * Make a full pass through the documentation, looking for errors and
   outdated information.
 
