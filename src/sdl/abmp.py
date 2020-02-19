@@ -18,21 +18,23 @@
 # long, in BGRA order, and read left-to-right, bottom-to-top.
 
 from PIL import Image
+import os
 import sys
 
 # Format a 32-bit value as a 4-byte little-endian string.
 def int32(number):
-    return (chr(number & 0xFF) +
-            chr((number >> 8) & 0xFF) +
-            chr((number >> 16) & 0xFF) +
-            chr((number >> 24) & 0xFF))
+    return bytearray([ number & 0xFF,
+                       (number >> 8) & 0xFF,
+                       (number >> 16) & 0xFF,
+                       (number >> 24) & 0xFF ])
 
 # Write out the header of a 32-bit bitmap with the given dimensions.
 def writebmpheader(out, width, height):
+    magic = bytearray([ 66, 77 ])
     headersize = 0x36
     bpp32flag = 0x00200001
     filesize = headersize + 4 * width * height
-    out.write('BM')
+    out.write(bytearray(magic))
     out.write(int32(filesize))
     out.write(int32(0))
     out.write(int32(headersize))
@@ -49,10 +51,10 @@ def writebmp(out, image):
     pixels = image.load()
     lines = []
     for y in range(0, height):
-        line = ''
+        line = bytearray()
         for x in range(0, width):
             r, g, b, a = pixels[x, y]
-            line += chr(b) + chr(g) + chr(r) + chr(a)
+            line.extend([ b, g, r, a ])
         lines.insert(0, line)
     for line in lines:
         out.write(line)
@@ -64,13 +66,13 @@ def pngtobmp(pngfilename, bmpfilename=None):
         image = Image.open(pngfilename)
     except IOError as e:
         sys.exit('%s: %s\n' % (pngfilename, e.strerror))
-    if bmpfilename:
-        try:
+    try:
+        if bmpfilename:
             outfile = open(bmpfilename, 'wb')
-        except IOError as e:
-            sys.exit('%s: %s\n' % (bmpfilename, e.strerror))
-    else:
-        outfile = sys.stdout
+        else:
+            outfile = os.fdopen(sys.stdout.fileno(), 'wb')
+    except IOError as e:
+        sys.exit('%s: %s\n' % (bmpfilename or 'stdout', e.strerror))
     writebmp(outfile, image)
 
 

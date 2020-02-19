@@ -33,6 +33,7 @@
 # remaining cards comes next, with the bottom card of the deck being
 # the remaining unchosen card.
 
+import os
 import sys
 
 # Each card is encoded by a single letter.
@@ -68,7 +69,7 @@ def deckseq(deck):
 # set by the following items). It is an error to request output with
 # leftover bits in the last byte.
 def outputbits(seq):
-    out = ''
+    out = bytearray()
     byte = 0
     bitpos = 128
     for (value, size) in seq:
@@ -79,7 +80,7 @@ def outputbits(seq):
                 byte |= bitpos
             bitpos >>= 1
             if bitpos == 0:
-                out += chr(byte)
+                out.append(byte)
                 byte = 0
                 bitpos = 128
     if bitpos != 128:
@@ -100,8 +101,9 @@ def translate(filename, out):
         line = line.strip()
         if not line or line.startswith('#'):
             continue
-        makeconfig(line, sys.stdout)
+        makeconfig(line, out)
     f.close()
 
 
-translate(sys.argv[1], sys.stdout)
+out = os.fdopen(sys.stdout.fileno(), 'wb')
+translate(sys.argv[1], out)
