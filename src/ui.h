@@ -54,6 +54,12 @@ typedef struct uimap {
      */
     void (*ungetinput)(command_t cmd, int msec);
 
+    /* Enable or disable the display of move key guides. When the feature
+     * is enabled, the letter corresponding to each place is displayed
+     * above the place. The new setting is returned.
+     */
+    int (*setshowkeyguidesflag)(int flag);
+
     /* Enable or disable card animations. The new setting is returned.
      */
     int (*setcardanimationflag)(int flag);
@@ -109,6 +115,7 @@ extern uimap _ui;
 #define rendergame(rp)               (_ui.rendergame(rp))
 #define getinput()                   (_ui.getinput())
 #define ungetinput(ch, ms)           (_ui.ungetinput(ch, ms))
+#define setshowkeyguidesflag(f)      (_ui.setshowkeyguidesflag(f))
 #define setcardanimationflag(f)      (_ui.setcardanimationflag(f))
 #define ding()                       (_ui.ding())
 #define showsolutionwrite()          (_ui.showsolutionwrite())

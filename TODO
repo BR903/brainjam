@@ -29,7 +29,8 @@ Before 1.0:
 * Make a full pass through the documentation, looking for errors and
   outdated information.
 
-* Make a full pass through the comments and code, likewise.
+* Make a full pass through the comments and code, likewise. Add
+  copyright/license notice to all source files.
 
 After 1.0:
 

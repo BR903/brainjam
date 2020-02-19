@@ -17,8 +17,8 @@
 static int const foundationx = 0;       /* left edge of the foundations */
 static int const tableaux = 2;          /* left edge of the tableau stacks */
 static int const reservex = 36;         /* left edge of the reserves */
-static int const toprowy = 0;           /* y-coordinate of the top row */
-static int const tableauy = 2;          /* top edge of the tableau stacks */
+static int const toprowy = 1;           /* y-coordinate of the top row */
+static int const tableauy = 4;          /* top edge of the tableau stacks */
 static int const cardspacingx = 8;      /* horizontal space between cards */
 static int const rightcolumnx = 70;     /* left edge of information column */
 static int const bottomareay = 19;      /* top edge of bottom-right corner */
@@ -27,6 +27,10 @@ static int const bottomareay = 19;      /* top edge of bottom-right corner */
  * stop being visible.
  */
 static time_t saveiconshown = 0;
+
+/* True if the move key guides should be displayed.
+ */
+static int showkeyguides;
 
 /*
  * Input management.
@@ -248,6 +252,9 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
         drawcard(gameplay->inplay[reserveplace(i)], MODEID_RESERVE);
         move(toprowy + 1, reservex - 1 + i * cardspacingx);
         drawnavinfo(gameplay, position, reserveplace(i), showmoveable);
+        if (showkeyguides)
+            mvaddch(toprowy - 1, reservex + i * cardspacingx + 2,
+                    'A' + reserveplace(i));
     }
 
     for (i = 0 ; i < NCARDS ; ++i) {
@@ -262,6 +269,9 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
     for (i = 0 ; i < TABLEAU_PLACE_COUNT ; ++i) {
         move(tableauy + gameplay->depth[i], tableaux - 1 + i * cardspacingx);
         drawnavinfo(gameplay, position, indextoplace(i), showmoveable);
+        if (showkeyguides)
+            mvaddch(tableauy - 1, tableaux + i * cardspacingx + 2,
+                    'A' + tableauplace(i));
     }
 
     textmode(MODEID_HIGHLIGHT);
@@ -319,6 +329,14 @@ command_t curses_getinput(void)
     if (cmd == cmd_showhelp)
         cmd = runhelp(NULL) ? cmd_nop : cmd_quitprogram;
     return cmd;
+}
+
+/* Enable or disable the display of move key guides.
+ */
+int curses_setshowkeyguidesflag(int flag)
+{
+    showkeyguides = flag;
+    return flag;
 }
 
 /* Animations are not available in this UI.

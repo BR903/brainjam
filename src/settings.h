@@ -17,6 +17,7 @@ struct settingsinfo {
     int configid;               /* the ID of the last visited configuration */
     int autoplay;               /* setting for autoplaying on foundations */
     int animation;              /* setting for animating card movements */
+    int showkeys;               /* setting for displaying move key guides */
     int branching;              /* setting for enabling branching undo */
     int forcetextmode;          /* true if the terminal UI should be used */
     int readonly;               /* true to prevent files from being changed */

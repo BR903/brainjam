@@ -1169,6 +1169,7 @@ uimap sdl_initializeui(void)
     ui.rendergame = sdl_rendergame;
     ui.getinput = sdl_getinput;
     ui.ungetinput = sdl_ungetinput;
+    ui.setshowkeyguidesflag = sdl_setshowkeyguidesflag;
     ui.setcardanimationflag = sdl_setcardanimationflag;
     ui.ding = sdl_ding;
     ui.showsolutionwrite = sdl_showsolutionwrite;

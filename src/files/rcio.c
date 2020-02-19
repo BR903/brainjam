@@ -147,6 +147,9 @@ int loadrcfile(settingsinfo *settings)
                 warn("brainjam.ini:%d: invalid lastgame value", lineno);
                 continue;
             }
+        } else if (!strcmp(buf, "showkeys")) {
+            if (settings->showkeys < 0)
+                settings->showkeys = strcmp(val, "0");
         } else if (!strcmp(buf, "animation")) {
             if (settings->animation < 0)
                 settings->animation = strcmp(val, "0");
@@ -186,6 +189,8 @@ int savercfile(settingsinfo const *settings)
     fprintf(fp, "\n[General]\n");
     if (settings->configid >= 0)
         fprintf(fp, "lastgame=%04d\n", settings->configid);
+    if (settings->showkeys >= 0)
+        fprintf(fp, "showkeys=%c\n", settings->showkeys ? '1' : '0');
     if (settings->animation >= 0)
         fprintf(fp, "animation=%c\n", settings->animation ? '1' : '0');
     if (settings->autoplay >= 0)

@@ -262,8 +262,9 @@ static int runoptions(settingsinfo *settings)
     char const *checked[2] = { "\342\227\246", "\342\200\242" };
     char const *able[2] = { "disable", "enable" };
     char const *abled[2] = { "disabled", "enabled" };
-    int autoplay, branching;
+    int autoplay, branching, showkeys;
 
+    showkeys = settings->showkeys ? 1 : 0;
     autoplay = settings->autoplay ? 1 : 0;
     branching = settings->branching ? 1 : 0;
     for (;;) {
@@ -271,27 +272,34 @@ static int runoptions(settingsinfo *settings)
         textmode(MODEID_MARKED);
         mvaddstr(0, 16, "OPTIONS");
         textmode(MODEID_NORMAL);
-        mvaddstr(2, 1, checked[autoplay]);
-        mvprintw(2, 4, "Autoplay on foundations is %s.", abled[autoplay]);
-        mvprintw(3, 4, "Use ctrl-A to %s this feature.", able[1 - autoplay]);
-        mvaddstr(4, 4, "When this feature is enabled, cards that can be");
-        mvaddstr(5, 4, "played on a foundation pile are moved automatically.");
-        mvaddstr(7, 1, checked[branching]);
-        mvprintw(7, 4, "Branching redo is %s.", abled[branching]);
-        mvprintw(8, 4, "Use ctrl-B to %s this feature.", able[1 - branching]);
-        mvaddstr(9, 4, "When this feature is enabled, all undone states are");
-        mvaddstr(10,4, "remembered, and can be revisited at any later point.");
-        mvaddstr(12,4, "Use Q or Ret to return to the game.");
+        mvaddstr(2, 1, checked[showkeys]);
+        mvprintw(2, 4, "Display of move keys is %s.", abled[showkeys]);
+        mvprintw(3, 4, "Use ctrl-K to %s this feature.", able[1 - showkeys]);
+        mvaddstr(4, 4, "When this feature is enabled, the keyboard keys");
+        mvaddstr(5, 4, "to move are shown just above each card position.");
+        mvaddstr(7, 1, checked[autoplay]);
+        mvprintw(7, 4, "Autoplay on foundations is %s.", abled[autoplay]);
+        mvprintw(8, 4, "Use ctrl-A to %s this feature.", able[1 - autoplay]);
+        mvaddstr(9, 4, "When this feature is enabled, cards that can be");
+        mvaddstr(10,4, "played on a foundation pile are moved automatically.");
+        mvaddstr(12,1, checked[branching]);
+        mvprintw(12,4, "Branching redo is %s.", abled[branching]);
+        mvprintw(13,4, "Use ctrl-B to %s this feature.", able[1 - branching]);
+        mvaddstr(14,4, "When this feature is enabled, all undone states are");
+        mvaddstr(15,4, "remembered, and can be revisited at any later point.");
+        mvaddstr(17,4, "Use Q or Ret to return to the game.");
         refresh();
         switch (getkey()) {
           case '\001':  autoplay = 1 - autoplay;        break;
           case '\002':  branching = 1 - branching;      break;
+          case '\013':  showkeys = 1 - showkeys;        break;
           case '\n':    goto done;
           case 'q':     goto done;
           case 'Q':     return FALSE;
         }
     }
   done:
+    settings->showkeys = showkeys;
     settings->autoplay = autoplay;
     settings->branching = branching;
     return TRUE;
@@ -350,6 +358,7 @@ uimap curses_initializeui(void)
     ui.rendergame = curses_rendergame;
     ui.getinput = curses_getinput;
     ui.ungetinput = curses_ungetinput;
+    ui.setshowkeyguidesflag = curses_setshowkeyguidesflag;
     ui.setcardanimationflag = curses_setcardanimationflag;
     ui.ding = curses_ding;
     ui.showsolutionwrite = curses_showsolutionwrite;

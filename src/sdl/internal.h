@@ -254,6 +254,7 @@ extern displaymap inithelpdisplay(void);
 
 /* Defined in game.c.
  */
+extern int sdl_setshowkeyguidesflag(int flag);
 extern int sdl_setcardanimationflag(int flag);
 extern void sdl_movecard(card_t card, position_t from, position_t to,
                          void (*callback)(void*), void *data);

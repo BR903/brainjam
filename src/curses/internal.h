@@ -55,6 +55,7 @@ extern int runhelp(char const *title);
  */
 extern void curses_rendergame(renderparams const *params);
 extern command_t curses_getinput(void);
+extern int curses_setshowkeyguidesflag(int flag);
 extern int curses_setcardanimationflag(int flag);
 extern void curses_movecard(card_t card, position_t from, position_t to,
                             void (*callback)(void*), void *data);

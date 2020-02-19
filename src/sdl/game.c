@@ -55,7 +55,7 @@ static button helpbutton, backbutton, optionsbutton;
 
 /* Checkboxes appearing in the options popup dialog.
  */
-static button animchkbox, autochkbox, redochkbox;
+static button keyschkbox, animchkbox, autochkbox, redochkbox;
 
 /* The locations of the components of the game display.
  */
@@ -77,13 +77,15 @@ static SDL_Point bestknowncount;        /* position of the lowest count */
  */
 static SDL_Rect placeloc[NPLACES];
 
-/* Image of a dot (made via the bullet character).
+/* Image of a dot (made via the bullet character), and its size.
  */
 static SDL_Texture *dot;
-
-/* Size of the dot image.
- */
 static SDL_Point dotsize;
+
+/* Images of keyboard keys for the each place, and the size of one key.
+ */
+static SDL_Texture *keyguidetexture;
+static int keyguidesize;
 
 /* The visible state of the game. Because the display can require
  * redisplay due to events not initiated by the calling code, the
@@ -183,7 +185,7 @@ static SDL_Point setlayout(SDL_Point display)
 
     optionsbutton.pos.x = sidebar.x;
     optionsbutton.pos.y = bookmark.y + getimageheight(IMAGE_BOOKMARK) +
-                          _graph.margin;
+                          3 * _graph.margin;
 
     bestknowncount.x = movecount.x;
     bestknowncount.y = sidebar.y + sidebar.h - lineheight;
@@ -196,14 +198,16 @@ static SDL_Point setlayout(SDL_Point display)
     saveiconpos.x = sidebar.x;
     saveiconpos.y = bestknowncount.y - saveiconpos.h;
 
-    dialog.w = animchkbox.pos.w;
+    dialog.w = keyschkbox.pos.w;
+    if (dialog.w < animchkbox.pos.w)
+        dialog.w = animchkbox.pos.w;
     if (dialog.w < autochkbox.pos.w)
         dialog.w = autochkbox.pos.w;
     if (dialog.w < redochkbox.pos.w)
         dialog.w = redochkbox.pos.w;
     dialog.w += 6 * _graph.margin;
-    dialog.h = animchkbox.pos.h + autochkbox.pos.h + redochkbox.pos.h;
-    dialog.h = dialog.h + 4 * lineheight;
+    dialog.h = keyschkbox.pos.h + animchkbox.pos.h +
+               autochkbox.pos.h + redochkbox.pos.h + 5 * lineheight;
     dialog.x = optionsbutton.pos.x - dialog.w;
     dialog.y = optionsbutton.pos.y + (optionsbutton.pos.h - dialog.h) / 2;
 
@@ -220,8 +224,10 @@ static SDL_Point setlayout(SDL_Point display)
     dialogoutline[5].x = dialogoutline[4].x;
     dialogoutline[5].y = optionsbutton.pos.y + optionsbutton.pos.h;
 
-    animchkbox.pos.x = dialog.x + 2 * _graph.margin;
-    animchkbox.pos.y = dialog.y + lineheight;
+    keyschkbox.pos.x = dialog.x + 2 * _graph.margin;
+    keyschkbox.pos.y = dialog.y + lineheight;
+    animchkbox.pos.x = keyschkbox.pos.x;
+    animchkbox.pos.y = keyschkbox.pos.y + keyschkbox.pos.h + lineheight;
     autochkbox.pos.x = animchkbox.pos.x;
     autochkbox.pos.y = animchkbox.pos.y + animchkbox.pos.h + lineheight;
     redochkbox.pos.x = autochkbox.pos.x;
@@ -327,6 +333,7 @@ static void animcleanup(void *data, int done)
 static void setoptionsdisplay(int visible)
 {
     setbitflag(optionsbutton.state, BSTATE_SELECT, visible);
+    keyschkbox.visible = visible;
     animchkbox.visible = visible;
     autochkbox.visible = visible;
     redochkbox.visible = visible;
@@ -439,6 +446,60 @@ static void createcardanimation(char card, SDL_Rect from, SDL_Rect to,
     anim->callback = animcleanup;
     anim->data = params;
     startanimation(anim, 10);
+}
+
+/*
+ *
+ */
+
+/* Create a texture containing graphics of the keys for each place.
+ */
+static void makekeyguides(void)
+{
+    static SDL_Color const keytextcolor = { 175, 175, 191, 0 };
+    static SDL_Color const keycolor = { 0, 0, 0, 0 };
+
+    SDL_Surface *letters[MOVEABLE_PLACE_COUNT];
+    SDL_Surface *image;
+    SDL_Rect rect;
+    int lettersize, i;
+
+    lettersize = 0;
+    for (i = 0 ; i < MOVEABLE_PLACE_COUNT ; ++i) {
+        letters[i] = TTF_RenderGlyph_Shaded(_graph.largefont, 'A' + i,
+                                            keytextcolor, keycolor);
+        if (lettersize < letters[i]->h)
+            lettersize = letters[i]->h;
+    }
+    keyguidesize = lettersize + 2;
+    rect.w = 4 * keyguidesize;
+    rect.h = (MOVEABLE_PLACE_COUNT / 4) * keyguidesize;
+    image = SDL_CreateRGBSurface(SDL_SWSURFACE, rect.w, rect.h,
+                                 32, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_FillRect(image, NULL,
+                 SDL_MapRGB(image->format, colors3(keytextcolor)));
+    for (i = 0 ; i < MOVEABLE_PLACE_COUNT ; ++i) {
+        rect.x = (i % 4) * keyguidesize + 1;
+        rect.y = (i / 4) * keyguidesize + 1;
+        rect.w = lettersize;
+        rect.h = lettersize;
+        SDL_FillRect(image, &rect,
+                     SDL_MapRGB(image->format, colors3(keycolor)));
+        rect.x += (lettersize - letters[i]->w) / 2;
+        rect.y += (lettersize - letters[i]->h) / 2;
+        rect.w = letters[i]->w;
+        rect.h = letters[i]->h;
+        SDL_BlitSurface(letters[i], NULL, image, &rect);
+        SDL_FreeSurface(letters[i]);
+    }
+    keyguidetexture = SDL_CreateTextureFromSurface(_graph.renderer, image);
+    /*SDL_SetTextureAlphaMod(keyguidetexture, 128);*/
+    SDL_FreeSurface(image);
+}
+    
+static void setkeyguides(int enable)
+{
+    setbitflag(keyschkbox.state, BSTATE_SELECT, enable);
 }
 
 /*
@@ -562,6 +623,28 @@ static void renderbetterinfo(redo_position const *position)
     }
 }
 
+/* Output the image of keys at the head of each place's location.
+ */
+static void renderkeyguides(void)
+{
+    SDL_Rect src, dest;
+    int i;
+
+    if (!keyguidetexture)
+        makekeyguides();
+    for (i = 0 ; i < MOVEABLE_PLACE_COUNT ; ++i) {
+        src.x = (i % 4) * keyguidesize;
+        src.y = (i / 4) * keyguidesize;
+        src.w = keyguidesize;
+        src.h = keyguidesize;
+        dest.x = placeloc[i].x + 3 * (placeloc[i].w - keyguidesize) / 4;
+        dest.y = placeloc[i].y - keyguidesize / 2;
+        dest.w = keyguidesize;
+        dest.h = keyguidesize;
+        SDL_RenderCopy(_graph.renderer, keyguidetexture, &src, &dest);
+    }
+}
+
 /* Generate the contents of an array that represent the cards of the
  * tableau. (Using the array to render the cards simplifies the
  * process of ensuring that they overlap each other properly.)
@@ -622,6 +705,9 @@ static void render(void)
         rendernavinfo(gameplay, position, i,
                       (j - 1) * _graph.dropheight, showmoveable);
     }
+
+    if (keyschkbox.state & BSTATE_SELECT)
+        renderkeyguides();
 
     drawlargenumber(position->movecount, movecount.x, movecount.y, +1);
     renderbetterinfo(position);
@@ -805,10 +891,12 @@ void showoptions(settingsinfo *settings, int display)
 {
     if (settings) {
         if (display) {
+            setbitflag(keyschkbox.state, BSTATE_SELECT, settings->showkeys);
             setbitflag(animchkbox.state, BSTATE_SELECT, settings->animation);
             setbitflag(autochkbox.state, BSTATE_SELECT, settings->autoplay);
             setbitflag(redochkbox.state, BSTATE_SELECT, settings->branching);
         } else {
+            settings->showkeys = keyschkbox.state & BSTATE_SELECT;
             settings->animation = animchkbox.state & BSTATE_SELECT;
             settings->autoplay = autochkbox.state & BSTATE_SELECT;
             settings->branching = redochkbox.state & BSTATE_SELECT;
@@ -848,6 +936,13 @@ displaymap initgamedisplay(void)
     optionsbutton.cmd = cmd_changesettings;
     addbutton(&optionsbutton);
 
+    makecheckbox(&keyschkbox, "Show move keys");
+    keyschkbox.cmd = cmd_none;
+    keyschkbox.display = DISPLAY_GAME;
+    keyschkbox.visible = 0;
+    keyschkbox.action = setkeyguides;
+    addbutton(&keyschkbox);
+
     makecheckbox(&animchkbox, "Animate cards");
     animchkbox.cmd = cmd_none;
     animchkbox.display = DISPLAY_GAME;
@@ -875,6 +970,14 @@ displaymap initgamedisplay(void)
 /*
  * API functions.
  */
+
+/* Change the key guide setting, updating the checkbox as necessary.
+ */
+int sdl_setshowkeyguidesflag(int flag)
+{
+    setbitflag(keyschkbox.state, BSTATE_SELECT, flag);
+    return flag;
+}
 
 /* Change the animation setting, updating the checkbox as necessary.
  */
