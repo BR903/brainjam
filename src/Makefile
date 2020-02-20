@@ -97,8 +97,10 @@ $(PROG): $(OBJ)
 
 # The install rule copies the program and the man page.
 install: $(PROG)
-	install -D ./$(PROG) $(bindir)
-	install -D ./$(NAME).6 $(mandir)/man6
+	install -d $(bindir)
+	install -d $(mandir)/man6
+	install ./$(PROG) $(bindir)
+	install ./$(NAME).6 $(mandir)/man6
 
 # The clean rule deletes the program, object files, dependency files,
 # and generated resources.
