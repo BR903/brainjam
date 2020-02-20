@@ -80,14 +80,17 @@ src/sdl/sprites/module.mk
 src/sdl/sprites/back.png
 src/sdl/sprites/bookmark.png
 src/sdl/sprites/check.png
+src/sdl/sprites/clip.png
 src/sdl/sprites/done.png
 src/sdl/sprites/help.png
 src/sdl/sprites/next.png
 src/sdl/sprites/oldicon.png
 src/sdl/sprites/options.png
 src/sdl/sprites/play.png
+src/sdl/sprites/prev.png
 src/sdl/sprites/quit.png
 src/sdl/sprites/random.png
+src/sdl/sprites/shuffle.png
 src/sdl/sprites/star.png
 src/sdl/sprites/stuck.png
 src/sdl/sprites/write.png
