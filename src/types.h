@@ -31,11 +31,6 @@ typedef unsigned char position_t;
  */
 typedef char movecmd_t;
 
-/* A moveid is a packed value that contains two place values,
- * indicating the source place and the destination place.
- */
-typedef unsigned char moveid_t;
-
 /* A command is a value that either a move command or one of several
  * other possible values such as undo, quit, etc.
  */

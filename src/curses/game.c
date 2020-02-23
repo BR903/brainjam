@@ -170,9 +170,9 @@ static void drawnavinfo(gameplayinfo const *gameplay,
     unshiftpos = NULL;
     shiftpos = NULL;
     for (branch = position->next ; branch ; branch = branch->cdr) {
-        if (branch->move == moveindex1(place))
+        if (branch->move == cardtomoveid1(gameplay->inplay[place]))
             unshiftpos = branch->p;
-        else if (branch->move == moveindex2(place))
+        else if (branch->move == cardtomoveid2(gameplay->inplay[place]))
             shiftpos = branch->p;
     }
 
@@ -236,9 +236,9 @@ static void drawbetterinfo(redo_position const *position)
 static void drawgamedisplay(gameplayinfo const *gameplay,
                             redo_position const *position, int bookmark)
 {
-    position_t pos;
+    card_t card;
     int showmoveable;
-    int i, x, y;
+    int i, y;
 
     showmoveable = shouldmarkmoveable(gameplay);
 
@@ -254,24 +254,21 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
         drawnavinfo(gameplay, position, reserveplace(i), showmoveable);
         if (showkeyguides)
             mvaddch(toprowy - 1, reservex + i * cardspacingx + 2,
-                    'A' + reserveplace(i));
-    }
-
-    for (i = 0 ; i < NCARDS ; ++i) {
-        pos = gameplay->state[i];
-        if (!istableaupos(pos))
-            continue;
-        x = tableauposindex(pos);
-        y = tableauposdepth(pos);
-        move(tableauy + y, tableaux + x * cardspacingx);
-        drawcard(indextocard(i), MODEID_NORMAL);
+                    placetomovecmd2(reserveplace(i)));
     }
     for (i = 0 ; i < TABLEAU_PLACE_COUNT ; ++i) {
-        move(tableauy + gameplay->depth[i], tableaux - 1 + i * cardspacingx);
-        drawnavinfo(gameplay, position, indextoplace(i), showmoveable);
+        y = gameplay->depth[tableauplace(i)];
+        move(tableauy + y, tableaux + i * cardspacingx - 1);
+        drawnavinfo(gameplay, position, tableauplace(i), showmoveable);
+        card = gameplay->inplay[tableauplace(i)];
+        while (y--) {
+            move(tableauy + y, tableaux + i * cardspacingx);
+            drawcard(card, MODEID_NORMAL);
+            card = gameplay->state[cardtoindex(card)];
+        }
         if (showkeyguides)
             mvaddch(tableauy - 1, tableaux + i * cardspacingx + 2,
-                    'A' + tableauplace(i));
+                    placetomovecmd2(tableauplace(i)));
     }
 
     textmode(MODEID_HIGHLIGHT);

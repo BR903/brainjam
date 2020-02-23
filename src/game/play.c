@@ -150,6 +150,44 @@ static command_t unbuffercommand(void)
 }
 
 /*
+ * Solutions.
+ */
+
+/* Return a buffer containing the sequence of moves commands
+ * representing the user's current solution. The user is responsible
+ * for freeing the returned buffer. The return value is NULL if the
+ * solution could not be retrieved.
+ */
+static char *createsolutionstring(gameplayinfo *gameplay,
+                                  redo_session *session)
+{
+    redo_position const *position;
+    redo_branch const *branch;
+    char *string;
+    int size, i;
+
+    position = redo_getfirstposition(session);
+    size = position->solutionsize;
+    string = allocate(size + 1);
+    for (i = 0 ; i < size ; ++i) {
+        for (branch = position->next ; branch ; branch = branch->cdr)
+            if (branch->p->solutionsize == size)
+                break;
+        if (!branch) {
+            warn("failed to create solution: no correct move at %d", i + 1);
+            string[i] = '?';
+            continue;
+        }
+        restoresavedstate(gameplay, position);
+        string[i] = moveidtocmd(gameplay, branch->move);
+        position = branch->p;
+    }
+    restoresavedstate(gameplay, currentposition);
+    string[size] = '\0';
+    return string;
+}
+
+/*
  * How cards are moved.
  */
 
@@ -211,6 +249,8 @@ static void handlemove_callback(void *data)
     redo_session *session;
     redo_position *pos;
     moveinfo move;
+    char *buf;
+    int moveid;
 
     params = data;
     gameplay = params->gameplay;
@@ -219,9 +259,10 @@ static void handlemove_callback(void *data)
     deallocate(params);
 
     finishmove(gameplay, move);
+    moveid = mkmoveid(move.card, ismovecmd2(move.cmd));
 
     backone = currentposition;
-    pos = redo_getnextposition(currentposition, movecmdtoindex(move.cmd));
+    pos = redo_getnextposition(currentposition, moveid);
     if (pos) {
         currentposition = pos;
         return;
@@ -229,8 +270,7 @@ static void handlemove_callback(void *data)
 
     if (currentposition->next && !branchingredo)
         eraseundonepositions(session, currentposition->next->p);
-    currentposition = redo_addposition(session, currentposition,
-                                       movecmdtoindex(move.cmd),
+    currentposition = redo_addposition(session, currentposition, moveid,
                                        &gameplay->state, gameplay->endpoint,
                                        redo_check);
 
@@ -238,7 +278,9 @@ static void handlemove_callback(void *data)
     if (pos->solutionsize != gameplay->bestsolution) {
         if (!gameplay->bestsolution ||
                         gameplay->bestsolution > pos->solutionsize) {
-            savesolution(gameplay->configid, session);
+            buf = createsolutionstring(gameplay, session);
+            savesolution(gameplay->configid, buf);
+            deallocate(buf);
             gameplay->bestsolution = pos->solutionsize;
             showsolutionwrite();
         }
@@ -276,7 +318,9 @@ static int handlemove(gameplayinfo *gameplay, redo_session *session,
         return FALSE;
     }
 
-    srcpos = gameplay->state[cardtoindex(move.card)];
+    srcpos = placetopos(move.from);
+    if (istableaupos(srcpos))
+        srcpos += gameplay->depth[move.from] - 1;
     destpos = placetopos(move.to);
     if (istableaupos(destpos))
         destpos += gameplay->depth[move.to];
@@ -378,7 +422,7 @@ static int handlenavkey(gameplayinfo *gameplay, redo_session *session, int cmd)
       case cmd_redo:
         if (currentposition->next)
             handlemove(gameplay, session,
-                       indextomovecmd(currentposition->next->move));
+                       moveidtocmd(gameplay, currentposition->next->move));
         break;
       case cmd_undo10:
         pos = currentposition;

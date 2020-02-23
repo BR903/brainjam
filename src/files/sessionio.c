@@ -10,20 +10,21 @@
 #include "files/files.h"
 #include "internal.h"
 
-/* Special byte values used in the session files.
+/* A byte in a session file is a combination of a move id plus a bit
+ * indicating the value of the better flag.
  */
-#define START_BRANCH    0x20    /* begin a sequence of sibling branches */
-#define SIBLING_BRANCH  0x40    /* mark the separation between branches */
-#define CLOSE_BRANCH    0x60    /* end a sequence of sibling branches */
-
-/* A byte in a session file is either one of the special values listed
- * above, or it is a combination of a move value plus a bit indicating
- * the value of the better flag.
- */
-#define BETTER_FLAG     0x80
-#define MOVE_MASK       0x1F
+#define BETTER_FLAG 0x80
+#define MOVE_MASK 0x7F
 #define movevalue(branch) \
     (((branch)->move & MOVE_MASK) | ((branch)->p->better ? BETTER_FLAG : 0))
+
+/* There are three special byte values used as delimiters in the
+ * session files. Impossible card values are used to avoid collision
+ * with valid move IDs.
+ */
+#define START_BRANCH   mkcard(14, 0)    /* start a sequence of branches */
+#define SIBLING_BRANCH mkcard(14, 1)    /* separate two sibling branches */
+#define CLOSE_BRANCH   mkcard(14, 2)    /* end a sequence of branches */
 
 /* The name of the current session file.
  */
@@ -48,7 +49,7 @@ static void savesession_branchrecurse(redo_branch const *branch);
  */
 static int loadsession_recurse(redo_position *position)
 {
-    int moveindex, byte;
+    int moveid, byte;
 
     for (;;) {
         byte = fgetc(fp);
@@ -61,13 +62,13 @@ static int loadsession_recurse(redo_position *position)
                 restoresavedstate(gameplay, position);
             continue;
         }
-        moveindex = byte & MOVE_MASK;
-        if (!applymove(gameplay, indextomovecmd(moveindex))) {
+        moveid = byte & MOVE_MASK;
+        if (!applymove(gameplay, moveidtocmd(gameplay, moveid))) {
             warn("%s:%ld: unable to reinstantiate session tree",
                  sessionfilename, ftell(fp));
             continue;
         }
-        position = redo_addposition(session, position, moveindex,
+        position = redo_addposition(session, position, moveid,
                         &gameplay->state, gameplay->endpoint,
                         byte & BETTER_FLAG ? redo_checklater : redo_nocheck);
     }

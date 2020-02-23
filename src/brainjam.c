@@ -164,7 +164,8 @@ static redo_session *setupsession(gameplayinfo *gameplay)
 
     sprintf(buf, "session-%04d", gameplay->configid);
     setsessionfilename(buf);
-    session = redo_beginsession(&gameplay->state, sizeof gameplay->state, 0);
+    session = redo_beginsession(&gameplay->state,
+                                SIZE_REDO_STATE, CMPSIZE_REDO_STATE);
     redo_setgraftbehavior(session, redo_graftandcopy);
     loadsession(session, gameplay);
 

@@ -123,35 +123,15 @@ solutioninfo const *getnextsolution(solutioninfo const *solution)
     return solution;
 }
 
-/* Extract the user's solution from the given redo session and add it
- * to the list of solutions. If a solution already exists for this
- * configuration, it is replaced.
+/* Add a solution to the list and update the solution file. If a
+ * solution already exists for this configuration, it is replaced.
  */
-int savesolution(int configid, redo_session const *session)
+int savesolution(int configid, char const *text)
 {
-    redo_position const *position;
-    redo_branch const *branch;
     solutioninfo *solution;
-    char *text;
-    int size, i;
+    int size;
 
-    position = redo_getfirstposition(session);
-    size = position->solutionsize;
-    text = allocate(size + 1);
-    for (i = 0 ; i < size ; ++i) {
-        for (branch = position->next ; branch ; branch = branch->cdr)
-            if (branch->p->solutionsize == size)
-                break;
-        if (!branch) {
-            warn("savesolution: move %d: no correct move", i + 1);
-            deallocate(text);
-            return FALSE;
-        }
-        text[i] = indextomovecmd(branch->move);
-        position = branch->p;
-    }
-    text[i] = '\0';
-
+    size = strlen(text);
     solution = getsolution(configid);
     if (!solution)
         solution = addsolution(configid);
@@ -160,7 +140,7 @@ int savesolution(int configid, redo_session const *session)
              solution->size, size);
     if (solution->text)
         deallocate(solution->text);
-    solution->text = text;
+    solution->text = strallocate(text);
     solution->size = size;
     return savesolutionfile(solutions, solutioncount);
 }
@@ -173,7 +153,7 @@ int replaysolution(gameplayinfo *gameplay, redo_session *session)
 {
     solutioninfo const *solution;
     redo_position *position;
-    int i, r;
+    int moveid, i, r;
 
     solution = getsolution(gameplay->configid);
     if (!solution)
@@ -186,13 +166,14 @@ int replaysolution(gameplayinfo *gameplay, redo_session *session)
                  gameplay->configid, i, solution->text[i]);
             break;
         }
+        moveid = mkmoveid(gameplay->inplay[movecmdtoplace(solution->text[i])],
+                          ismovecmd2(solution->text[i]));
         if (!applymove(gameplay, solution->text[i])) {
             warn("game %d: move %d: unable to apply move \"%c\" in solution",
                  gameplay->configid, i, solution->text[i]);
             break;
         }
-        position = redo_addposition(session, position,
-                                    movecmdtoindex(solution->text[i]),
+        position = redo_addposition(session, position, moveid,
                                     &gameplay->state, gameplay->endpoint,
                                     redo_nocheck);
     }
