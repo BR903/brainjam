@@ -45,10 +45,6 @@ typedef struct animcleanupparams {
  */
 static SDL_Color const tablecolor = { 175, 191, 239, 0 };
 
-/* The unicode codepoint for a circular bullet character.
- */
-static int const dotchar = 0x2022;
-
 /* Pushbuttons that are found in the game display.
  */
 static button helpbutton, backbutton, optionsbutton;
@@ -81,6 +77,11 @@ static SDL_Rect placeloc[NPLACES];
  */
 static SDL_Texture *dot;
 static SDL_Point dotsize;
+
+/* Image of an equal sign and its size.
+ */
+static SDL_Texture *equal;
+static SDL_Point equalsize;
 
 /* Images of keyboard keys for the each place, and the size of one key.
  */
@@ -600,6 +601,7 @@ static void rendernavinfo(gameplayinfo const *gameplay,
 static void renderbetterinfo(redo_position const *position)
 {
     redo_position const *bp;
+    SDL_Rect rect;
     int isbetter;
 
     if (!position || !position->better)
@@ -614,13 +616,19 @@ static void renderbetterinfo(redo_position const *position)
     } else {
         isbetter = FALSE;
     }
-    if (isbetter) {
-        if (!bp->solutionsize)
-            settextcolor(_graph.dimmedcolor);
-        drawsmallnumber(bp->movecount, bettercount.x, bettercount.y, +1);
-        if (!bp->solutionsize)
-            settextcolor(_graph.defaultcolor);
-    }
+    if (!isbetter)
+        return;
+
+    if (!bp->solutionsize)
+        settextcolor(_graph.dimmedcolor);
+    rect.x = bettercount.x - 2 * equalsize.x;
+    rect.y = bettercount.y;
+    rect.w = equalsize.x;
+    rect.h = equalsize.y;
+    rect.x -= drawsmallnumber(bp->movecount, bettercount.x, bettercount.y, +1);
+    SDL_RenderCopy(_graph.renderer, equal, NULL, &rect);
+    if (!bp->solutionsize)
+        settextcolor(_graph.defaultcolor);
 }
 
 /* Output the image of keys at the head of each place's location.
@@ -909,8 +917,16 @@ void showoptions(settingsinfo *settings, int display)
  */
 displaymap initgamedisplay(void)
 {
+    int const dotchar = 0x2022;
     displaymap display;
     SDL_Surface *image;
+
+    image = TTF_RenderGlyph_Blended(_graph.smallfont, '=',
+                                    _graph.defaultcolor);
+    equalsize.x = image->w;
+    equalsize.y = image->h;
+    equal = SDL_CreateTextureFromSurface(_graph.renderer, image);
+    SDL_FreeSurface(image);
 
     image = TTF_RenderGlyph_Blended(_graph.smallfont, dotchar,
                                     _graph.defaultcolor);
