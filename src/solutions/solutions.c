@@ -74,9 +74,14 @@ static void deallocatesolutions(void)
  */
 int initializesolutions(void)
 {
-    if (!solutions) {
-        solutions = loadsolutionfile(&solutioncount);
-        atexit(deallocatesolutions);
+    int n;
+
+    if (!solutioncount) {
+        n = loadsolutionfile(&solutions);
+        if (n > 0) {
+            solutioncount = n;
+            atexit(deallocatesolutions);
+        }
     }
     return solutioncount;
 }

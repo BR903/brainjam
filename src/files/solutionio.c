@@ -17,11 +17,12 @@
  */
 
 /* Read the solution file, if it hasn't been read already, and return
- * a pointer to the array of solutioninfo structs. The caller inherits
- * ownership of the array. The unusual formatting of the information
- * in this file is inherited from the original Windows program.
+ * the array of solutioninfo structs through psolutions. The caller
+ * inherits ownership of the array. The unusual formatting of the
+ * information in this file is inherited from the original Windows
+ * program.
  */
-solutioninfo *loadsolutionfile(int *pcount)
+int loadsolutionfile(solutioninfo **psolutions)
 {
     char buf[512];
     solutioninfo *solutions;
@@ -33,18 +34,20 @@ solutioninfo *loadsolutionfile(int *pcount)
     filename = mksettingspath("brainjam.sol");
     fp = fopen(filename, "r");
     if (!fp) {
-        if (errno != ENOENT)
+        if (errno == ENOENT) {
+            deallocate(filename);
+            return 0;
+        } else {
             perror(filename);
-        deallocate(filename);
-        *pcount = 0;
-        return NULL;
+            deallocate(filename);
+            return -1;
+        }
     }
     deallocate(filename);
     if (!fgets(buf, sizeof buf, fp) || memcmp(buf, "[Solutions]", 11)) {
         fclose(fp);
         fprintf(stderr, "brainjam.sol: invalid solution file\n");
-        *pcount = 0;
-        return NULL;
+        return -1;
     }
     maxcount = getconfigurationcount();
     solutions = allocate(maxcount * sizeof *solutions);
@@ -68,9 +71,8 @@ solutioninfo *loadsolutionfile(int *pcount)
     }
     fclose(fp);
 
-    solutions = reallocate(solutions, n * sizeof *solutions);
-    *pcount = n;
-    return solutions;
+    *psolutions = reallocate(solutions, n * sizeof *solutions);
+    return n;
 }
 
 /* Rewrite the solution file.

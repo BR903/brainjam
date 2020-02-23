@@ -75,12 +75,12 @@ extern void storercsetting(char const *key, char const *value);
  * The solutions file.
  */
 
-/* Read the solution file and return the array of solutions, or NULL
- * if the solution file cannot be read. pcount will receive the number
- * of solutions in the returned array. The caller is responsible for
- * freeing the array.
+/* Read the solution file and return the array of solutions through
+ * the provided pointer. The return value is the size of the array on
+ * success, or -1 if the solution file cannot be read. The caller is
+ * responsible for freeing the array.
  */
-extern solutioninfo *loadsolutionfile(int *pcount);
+extern int loadsolutionfile(solutioninfo **psolutions);
 
 /* Write the given array of solutions to the solution file. The return
  * value is false if an error occurs.

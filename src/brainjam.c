@@ -236,6 +236,31 @@ static void savesettings(void)
 }
 
 /*
+ * Data validation.
+ */
+
+/* Load every data file in the user's directories, in order to trigger
+ * all warnings or error messages for invalid or unreadable files.
+ */
+static void validatefiles(void)
+{
+    gameplayinfo thegame;
+    redo_session *session;
+    solutioninfo *solutions;
+    int id;
+
+    loadrcfile(getcurrentsettings());
+    loadsolutionfile(&solutions);
+    for (id = 0 ; id < getconfigurationcount() ; ++id) {
+        thegame.configid = id;
+        initializegame(&thegame);
+        session = setupsession(&thegame);
+        closesession(session);
+    }
+    exit(EXIT_SUCCESS);
+}
+
+/*
  * Command-line parsing code.
  */
 
@@ -266,6 +291,7 @@ static void yowzitch(void)
         "  -D, --datadir=DIR     Store all program data in DIR\n"
         "  -t, --textmode        Use the non-graphical interface\n"
         "  -r, --readonly        Don't modify any files\n"
+        "      --validate        Check user files for invalid data and exit\n"
         "      --help            Display this help text and exit\n"
         "      --version         Display program version and exit\n"
         "      --license         Display program license and exit\n"
@@ -300,6 +326,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
         { "datadir", required_argument, NULL, 'D' },
         { "textmode", no_argument, NULL, 't' },
         { "readonly", no_argument, NULL, 'r' },
+        { "validate", no_argument, NULL, 'v' },
         { "help", no_argument, NULL, 'H' },
         { "version", no_argument, NULL, 'V' },
         { "license", no_argument, NULL, 'L' },
@@ -309,6 +336,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
 
     char *cfgdir = NULL;
     char *datadir = NULL;
+    int validateonly = FALSE;
     char *p;
     long id;
     int ch;
@@ -319,6 +347,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
           case 'D':     datadir = optarg;                       break;
           case 't':     settings->forcetextmode = TRUE;         break;
           case 'r':     settings->readonly = TRUE;              break;
+          case 'v':     validateonly = TRUE;                    break;
           case 'H':     yowzitch();
           case 'V':     printflowedtext(versiontext);
           case 'L':     printflowedtext(licensetext);
@@ -347,9 +376,11 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
         settings->configid = (int)id;
     }
 
-    if (settings->readonly == TRUE)
-        setreadonly(settings->readonly);
+    if (settings->readonly == TRUE || validateonly)
+        setreadonly(TRUE);
     setfiledirectories(cfgdir, datadir, argv[0]);
+    if (validateonly)
+        validatefiles();
     return TRUE;
 }
 
