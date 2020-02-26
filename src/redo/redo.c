@@ -653,9 +653,16 @@ void redo_setbetterfields(redo_session const *session)
     }
 }
 
-/* Reset the change flag and return the prior value.
+/* Return the change flag's current value.
  */
-int redo_hassessionchanged(redo_session *session)
+int redo_hassessionchanged(redo_session const *session)
+{
+    return session->changeflag;
+}
+
+/* Reset the change flag and return its prior value.
+ */
+int redo_clearsessionchanged(redo_session *session)
 {
     int flag = session->changeflag;
     session->changeflag = 0;

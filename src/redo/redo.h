@@ -156,14 +156,14 @@ extern int redo_duplicatepath(redo_session *session,
 extern void redo_setbetterfields(redo_session const *session);
 
 /* Return true if positions have been added to or removed from the
- * session since the last time this function was called.
+ * session since it was initialized, or since
+ * redo_clearsessionchanged() was last called.
  */
-extern int redo_hassessionchanged(redo_session *session);
+extern int redo_hassessionchanged(redo_session const *session);
 
-/* Reset the change flag. Calling redo_hassessionchanged() necessarily
- * has this as a side effect, so a separate function is unnecessary.
+/* Reset the session change flag. The flag's prior value is returned.
  */
-#define redo_clearsessionchanged(s) ((void)redo_hassessionchanged(s))
+extern int redo_clearsessionchanged(redo_session *session);
 
 /* Delete the sesssion and free all associated memory.
  */
