@@ -236,6 +236,34 @@ static redo_position *eraseundonepositions(redo_session *session,
     return redo_dropposition(session, position);
 }
 
+/* Recursively update the saved state of a subtree. This function is
+ * called after a graft has occurred. The state of the grafted
+ * positions must necessarily match for the state array, but can have
+ * different values for the inplay array. This function therefore
+ * recalculates the state for every position in the subtree and
+ * updates the state with the correct inplay array contents.
+ */
+static void updategrafted(gameplayinfo *gameplay,
+                          redo_session *session, redo_position *position)
+{
+    redo_branch *branch;
+
+    for (branch = position->next ; branch ; branch = branch->cdr) {
+        applymove(gameplay, moveidtocmd(gameplay, branch->move));
+        if (memcmp(redo_getsavedstate(branch->p), &gameplay->state,
+                   SIZE_REDO_STATE)) {
+            if (memcmp(redo_getsavedstate(branch->p), &gameplay->state,
+                       CMPSIZE_REDO_STATE)) {
+                warn("ERROR: applying move at count %d"
+                     " produced different state!", branch->p->movecount);
+            }
+            redo_updatesavedstate(session, branch->p, &gameplay->state);
+        }
+        updategrafted(gameplay, session, branch->p);
+        restoresavedstate(gameplay, position);
+    }
+}
+
 /* Finish the process of a moving a card, as started by handlemove().
  * Game state is updated, and the move is added to the redo session.
  * If the move created a new and shorter solution, it is saved to
@@ -273,6 +301,8 @@ static void handlemove_callback(void *data)
     currentposition = redo_addposition(session, currentposition, moveid,
                                        &gameplay->state, gameplay->endpoint,
                                        redo_check);
+    if (currentposition->next)
+        updategrafted(gameplay, session, currentposition);
 
     pos = redo_getfirstposition(session);
     if (pos->solutionsize != gameplay->bestsolution) {
