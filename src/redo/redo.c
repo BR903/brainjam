@@ -61,6 +61,17 @@ static void savestate(redo_session const *session, redo_position *position,
     memcpy((void*)redo_getsavedstate(position), state, session->statesize);
 }
 
+/* Copy the extra state to a position, leaving the main state data
+ * unmodified.
+ */
+static void saveextrastate(redo_session const *session,
+                           redo_position *position, void const *state)
+{
+    memcpy((char*)(void*)redo_getsavedstate(position) + session->cmpsize,
+           (char const*)state + session->cmpsize,
+           session->statesize - session->cmpsize);
+}
+
 /* Test if the given state is identical to the one saved at a
  * position.
  */
@@ -439,6 +450,14 @@ redo_position *redo_getfirstposition(redo_session const *session)
 void const *redo_getsavedstate(redo_position const *position)
 {
     return position + 1;
+}
+
+/* Update the state data without error checking.
+ */
+void redo_updatesavedstate(redo_session *session,
+                           redo_position *position, void const *state)
+{
+    saveextrastate(session, position, state);
 }
 
 /* Return the redo_branch for the branch originating at this position
