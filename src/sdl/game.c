@@ -467,7 +467,8 @@ static void makekeyguides(void)
 
     lettersize = 0;
     for (i = 0 ; i < MOVEABLE_PLACE_COUNT ; ++i) {
-        letters[i] = TTF_RenderGlyph_Shaded(_graph.largefont, 'A' + i,
+        letters[i] = TTF_RenderGlyph_Shaded(_graph.largefont,
+                                            placetomovecmd2(i),
                                             keytextcolor, keycolor);
         if (lettersize < letters[i]->h)
             lettersize = letters[i]->h;
@@ -557,9 +558,9 @@ static void rendernavinfo(gameplayinfo const *gameplay,
     firstpos = NULL;
     secondpos = NULL;
     for (branch = position->next ; branch ; branch = branch->cdr) {
-        if (branch->move == moveindex1(place))
+        if (branch->move == cardtomoveid1(gameplay->inplay[place]))
             firstpos = branch->p;
-        else if (branch->move == moveindex2(place))
+        else if (branch->move == cardtomoveid2(gameplay->inplay[place]))
             secondpos = branch->p;
     }
 
@@ -653,38 +654,12 @@ static void renderkeyguides(void)
     }
 }
 
-/* Generate the contents of an array that represent the cards of the
- * tableau. (Using the array to render the cards simplifies the
- * process of ensuring that they overlap each other properly.)
- */
-static int gettableauarray(gameplayinfo const *gameplay,
-                        card_t tableau[TABLEAU_PLACE_COUNT][MAX_TABLEAU_DEPTH])
-{
-    int maxdepth, i, x, y;
-    position_t pos;
-
-    memset(tableau, 0,
-           TABLEAU_PLACE_COUNT * MAX_TABLEAU_DEPTH * sizeof(card_t));
-    maxdepth = -1;
-    for (i = 0 ; i < NCARDS ; ++i) {
-        pos = gameplay->state[i];
-        if (istableaupos(pos)) {
-            x = tableauposindex(pos);
-            y = tableauposdepth(pos);
-            if (maxdepth < y)
-                maxdepth = y;
-            tableau[x][y] = indextocard(i);
-        }
-    }
-    return maxdepth;
-}
-
 /* Render all the components of the game display.
  */
 static void render(void)
 {
-    card_t tableau[TABLEAU_PLACE_COUNT][MAX_TABLEAU_DEPTH];
-    int showmoveable, i, j;
+    card_t stack[42], card;
+    int showmoveable, i, n;
 
     SDL_SetRenderDrawColor(_graph.renderer, colors4(tablecolor));
     SDL_RenderClear(_graph.renderer);
@@ -697,21 +672,31 @@ static void render(void)
         rendercard(gameplay->inplay[i], placeloc[i].x, placeloc[i].y);
 
     for (i = RESERVE_PLACE_1ST ; i < RESERVE_PLACE_END ; ++i) {
+        if (!gameplay->depth[i]) {
+            rendercard(EMPTY_PLACE, placeloc[i].x, placeloc[i].y);
+            continue;
+        }
         rendercard(gameplay->inplay[i], placeloc[i].x, placeloc[i].y);
         rendernavinfo(gameplay, position, i, 0, showmoveable);
     }
 
-    gettableauarray(gameplay, tableau);
-    for (i = 0 ; i < TABLEAU_PLACE_COUNT ; ++i) {
-        if (gameplay->depth[i] == 0) {
+    for (i = TABLEAU_PLACE_1ST ; i < TABLEAU_PLACE_END ; ++i) {
+        if (!gameplay->depth[i]) {
             rendercard(EMPTY_PLACE, placeloc[i].x, placeloc[i].y);
             continue;
         }
-        for (j = 0 ; j < gameplay->depth[i] ; ++j)
-            rendercard(tableau[i][j],
-                       placeloc[i].x, placeloc[i].y + j * _graph.dropheight);
+        card = gameplay->inplay[i];
+        n = gameplay->depth[i];
+        while (n--) {
+            stack[n] = card;
+            card = gameplay->state[cardtoindex(card)];
+        }
+        for (n = 0 ; n < gameplay->depth[i] ; ++n)
+            rendercard(stack[n],
+                       placeloc[i].x, placeloc[i].y + n * _graph.dropheight);
         rendernavinfo(gameplay, position, i,
-                      (j - 1) * _graph.dropheight, showmoveable);
+                      (gameplay->depth[i] - 1) * _graph.dropheight,
+                      showmoveable);
     }
 
     if (keyschkbox.state & BSTATE_SELECT)

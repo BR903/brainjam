@@ -7,7 +7,7 @@
 #include "internal.h"
 
 /*
- * Internal functions.
+ * Internal function.
  */
 
 /* Expand a movecmd, which defines the starting place of a move, into
@@ -68,4 +68,22 @@ moveinfo findmoveinfo(gameplayinfo const *gameplay, movecmd_t movecmd)
   invalid:
     move.cmd = 0;
     return move;
+}
+
+/*
+ * External function.
+ */
+
+/* Translate a move ID into a move command using the current game
+ * state. Zero is returned if the move ID is not currently valid.
+ */
+movecmd_t moveidtocmd(gameplayinfo const *gameplay, int moveid)
+{
+    place_t p;
+
+    for (p = MOVEABLE_PLACE_1ST ; p < MOVEABLE_PLACE_END ; ++p)
+        if (gameplay->inplay[p] == moveidtocard(moveid))
+            return ismoveid1(moveid) ? placetomovecmd1(p)
+                                     : placetomovecmd2(p);
+    return 0;
 }

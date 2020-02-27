@@ -61,6 +61,17 @@ static void savestate(redo_session const *session, redo_position *position,
     memcpy((void*)redo_getsavedstate(position), state, session->statesize);
 }
 
+/* Copy the extra state to a position, leaving the main state data
+ * unmodified.
+ */
+static void saveextrastate(redo_session const *session,
+                           redo_position *position, void const *state)
+{
+    memcpy((char*)(void*)redo_getsavedstate(position) + session->cmpsize,
+           (char const*)state + session->cmpsize,
+           session->statesize - session->cmpsize);
+}
+
 /* Test if the given state is identical to the one saved at a
  * position.
  */
@@ -441,6 +452,14 @@ void const *redo_getsavedstate(redo_position const *position)
     return position + 1;
 }
 
+/* Update the state data without error checking.
+ */
+void redo_updatesavedstate(redo_session *session,
+                           redo_position *position, void const *state)
+{
+    saveextrastate(session, position, state);
+}
+
 /* Return the redo_branch for the branch originating at this position
  * and labelled with this move. NULL is returned if there is no such
  * branch in the session. If the branch is found, it is automatically
@@ -653,9 +672,16 @@ void redo_setbetterfields(redo_session const *session)
     }
 }
 
-/* Reset the change flag and return the prior value.
+/* Return the change flag's current value.
  */
-int redo_hassessionchanged(redo_session *session)
+int redo_hassessionchanged(redo_session const *session)
+{
+    return session->changeflag;
+}
+
+/* Reset the change flag and return its prior value.
+ */
+int redo_clearsessionchanged(redo_session *session)
 {
     int flag = session->changeflag;
     session->changeflag = 0;

@@ -14,10 +14,20 @@
 #include "./decls.h"
 #include "redo/types.h"
 
+/* The redo state data consists of one byte per card, plus one byte
+ * for each place. When comparing two states for equality, however,
+ * only the card data should be used. The place data is for preserving
+ * consistency in layout display.
+ */
+#define SIZE_REDO_STATE (NCARDS + NPLACES)
+#define CMPSIZE_REDO_STATE (NCARDS)
+
 /* All the information used to run the game. It includes the data
  * involved in managing changes to the game state, as well as several
  * fields that provide quick access to information that is complexly
- * embedded in the game state.
+ * embedded in the game state. (Note that it is required that the
+ * state and inplay fields immediately follow one another, as together
+ * they comprise the redo state data.)
  */
 struct gameplayinfo {
     int configid;               /* the current configuration's ID number */
@@ -25,9 +35,9 @@ struct gameplayinfo {
     int moveable;               /* bitmask of places with legal moves */
     int locked;                 /* bitmask of places with a move in progress */
     int endpoint;               /* true if the user has reached an endpoint */
+    position_t state[NCARDS];   /* the current location of each card */
     card_t inplay[NPLACES];     /* the (top) card at each place */
     signed char depth[NPLACES]; /* the number of cards at each place */
-    position_t state[NCARDS];   /* the current location of each card */
 };
 
 /* Enable or disable the auto-play feature. When the feature is
@@ -62,6 +72,12 @@ extern int applymove(gameplayinfo *gameplay, movecmd_t movechar);
  */
 extern void restoresavedstate(gameplayinfo *gameplay,
                               redo_position const *position);
+
+/* Translate a move ID into a move command by examining the current
+ * game state. The return value is zero if the move ID refers to a
+ * card that cannot be moved.
+ */
+movecmd_t moveidtocmd(gameplayinfo const *gameplay, int moveid);
 
 /* Run the user interface for the current setup, using the given game
  * state and redo session to store progress. When invoked, the game

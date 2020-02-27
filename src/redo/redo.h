@@ -146,6 +146,14 @@ extern int redo_suppresscycle(redo_session *session, redo_position **pposition,
 extern int redo_duplicatepath(redo_session *session,
                               redo_position *dest, redo_position const *src);
 
+/* Update the "extra" state data for an existing position, after the
+ * compared state data. If redo_beginsession() was called without
+ * creating extra state data (i.e. with a non-zero cmpsize argument),
+ * then this function will silently do nothing.
+ */
+extern void redo_updatesavedstate(redo_session *session,
+                                  redo_position *position, void const *state);
+
 /* Examine every position in the session, looking for ones that have
  * the setbetter field set to true. The ones that do will then have
  * their better fields re-initialized. (The purpose of this function
@@ -156,14 +164,14 @@ extern int redo_duplicatepath(redo_session *session,
 extern void redo_setbetterfields(redo_session const *session);
 
 /* Return true if positions have been added to or removed from the
- * session since the last time this function was called.
+ * session since it was initialized, or since
+ * redo_clearsessionchanged() was last called.
  */
-extern int redo_hassessionchanged(redo_session *session);
+extern int redo_hassessionchanged(redo_session const *session);
 
-/* Reset the change flag. Calling redo_hassessionchanged() necessarily
- * has this as a side effect, so a separate function is unnecessary.
+/* Reset the session change flag. The flag's prior value is returned.
  */
-#define redo_clearsessionchanged(s) ((void)redo_hassessionchanged(s))
+extern int redo_clearsessionchanged(redo_session *session);
 
 /* Delete the sesssion and free all associated memory.
  */

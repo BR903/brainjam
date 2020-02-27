@@ -73,10 +73,10 @@ extern int findnextunsolved(int startpos, int incr);
  */
 extern int replaysolution(gameplayinfo *gameplay, redo_session *session);
 
-/* Extract the solution from the given redo session, and write it to
- * the solution file. False is returned if the solution cannot be
- * reconstructed, or if the file cannot be written.
+/* Record the given string as a configuration's solution and write it
+ * to the solution file. False is returned if the file cannot be
+ * updated.
  */
-extern int savesolution(int configid, redo_session const *session);
+extern int savesolution(int configid, char const *text);
 
 #endif

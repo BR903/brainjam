@@ -4,17 +4,6 @@ Before 0.9:
 
 Before 1.0:
 
-* Improve the calculation of solution equivalence, so that two states
-  that differ only in (say) the ordering of reserve cards are seen as
-  equivalent. This will require the game state encoding to change, so
-  that individual reserves and tableau piles do not keep their
-  identities, but are simply listed in some fixed ordering. (It is not
-  clear if this will in turn require extra state data to be appended.)
-  Moves will also need to be stored differently internally, recording
-  the card being moved instead of the place it came from. This will
-  require a change to the encoding of the session files, which is why
-  this should be done before 1.0.
-
 * Add unit tests for the game logic code. This will probably also
   require new Makefile rules.
 

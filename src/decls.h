@@ -46,6 +46,8 @@
 /* Special values representing jokers and non-cards.
  */
 #define EMPTY_PLACE  mkcard(-1, 1)
+#define EMPTY_TABLEAU  mkcard(-1, 2)
+#define EMPTY_RESERVE  mkcard(-1, 3)
 #define EMPTY_FOUNDATION(s)  mkcard(0, s)
 #define isemptycard(c) ((c) < mkcard(1, 0))
 #define JOKER mkcard(14, 0)
@@ -145,62 +147,49 @@
 #define NOWHERE (POS_FOUNDATION_OFFSET + 5)
 
 /*
- * The three move types.
- *
- * The move index: A move index indicates which place to move from,
- * but doubled so as to indicate whether the destination should be the
- * first available place or the second. Move indexes are only used in
- * the redo session, and thus do not have their own typedef.
- *
- * The movecmd_t type: A move command maps a move index value to
- * letters, either a lowercase letter 'a' through 'l', or a capital
- * letter in the case of a second-choice desination.
- *
- * The moveid_t type: Unlike the other types, a moveid specifies both
- * the source and the destination place, by packing the two place
- * values into a single byte.
+ * The movecmd_t type. A "move command" is an ASCII letter that
+ * indicates the place a card is moved from, either a lowercase or
+ * capital letter 'A' through 'L'. A lowercase letter indicates that
+ * the move should be to the first available destination, while a
+ * capital letter selects the second available destination.
  */
-
-/* The number of possible moves.
- */
-#define MOVE_SOURCE_COUNT MOVEABLE_PLACE_COUNT
-#define MOVE_TOTAL_COUNT (2 * MOVE_SOURCE_COUNT)
-
-/* A first-choice move index is therefore identical to a place value. A
- * second-choice move index is a place with a constant added.
- */
-#define moveindex1(place) (place)
-#define moveindex2(place) ((place) + MOVE_SOURCE_COUNT)
-#define ismoveindex2(n) ((n) >= MOVE_SOURCE_COUNT)
-#define moveindextoplace(n) ((n) % MOVE_SOURCE_COUNT)
 
 /* Testing for a valid move command.
  */
-#define ismovecmd1(ch) ((ch) >= 'a' && (ch) < 'a' + MOVE_SOURCE_COUNT)
-#define ismovecmd2(ch) ((ch) >= 'A' && (ch) < 'A' + MOVE_SOURCE_COUNT)
+#define ismovecmd1(ch) ((ch) >= 'a' && (ch) < 'a' + MOVEABLE_PLACE_COUNT)
+#define ismovecmd2(ch) ((ch) >= 'A' && (ch) < 'A' + MOVEABLE_PLACE_COUNT)
 #define ismovecmd(ch) (ismovecmd1(ch) || ismovecmd2(ch))
-
-/* Macros to translate between a move index and a move command.
- */
-#define indextomovecmd(n) \
-    (ismoveindex2(n) ? 'A' + (n) - MOVE_SOURCE_COUNT : 'a' + (n))
-#define movecmdtoindex(m) \
-    (ismovecmd1(m) ? moveindex1((m) - 'a') : moveindex2((m) - 'A'))
 
 /* Macros for translating between a move command and a place.
  */
-#define movecmdtoplace(m) (moveindextoplace(movecmdtoindex(m)))
-#define placetomovecmd1(p) (indextomovecmd(moveindex1(placetoindex(p))))
-#define placetomovecmd2(p) (indextomovecmd(moveindex2(placetoindex(p))))
+#define movecmdtoplace(m) (((m) - 'A') & ~('a' - 'A'))
+#define placetomovecmd1(p) ('a' + placetoindex(p))
+#define placetomovecmd2(p) ('A' + placetoindex(p))
 
-/* Macros for using a moveid.
+/*
+ * A "move ID" identifies the card being moved, rather than the place
+ * it is moved from. An extra bit is used to indicate whether the
+ * first-choice or second-choice destination is selected. (Move IDs
+ * are used to identify moves in the redo session, which is why they
+ * don't have their own typedef.)
  */
-#define mkmoveid(from, to) ((placetoindex(from) << 4) | placetoindex(to))
-#define moveid_from(moveid) (indextoplace((moveid) >> 4))
-#define moveid_to(moveid) (indextoplace((moveid) & 15))
 
-/* A special value indicating an invalid move, regardless of type.
+/* Testing for a valid move ID.
  */
-#define BADMOVE mkmoveid(FOUNDATION_PLACE_1ST, FOUNDATION_PLACE_1ST)
+#define MOVEID_CARD_MASK 0x3F
+#define MOVEID_ALT_FLAG 0x40
+#define ismoveid1(moveid) (((moveid) & MOVEID_ALT_FLAG) == 0)
+#define ismoveid2(moveid) (((moveid) & MOVEID_ALT_FLAG) != 0)
+
+/* Macros for translating between a move ID and a card.
+ */
+#define moveidtocard(moveid) ((moveid) & MOVEID_CARD_MASK)
+#define moveidtocardindex(moveid) cardtoindex(moveidtocard(moveid))
+#define cardtomoveid1(card) (card)
+#define cardtomoveid2(card) ((card) | MOVEID_ALT_FLAG)
+
+/* Macro to generate a move ID.
+ */
+#define mkmoveid(card, alt) ((alt) ? cardtomoveid2(card) : cardtomoveid1(card))
 
 #endif

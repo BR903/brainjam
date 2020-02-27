@@ -16,14 +16,17 @@ static void clearstate(gameplayinfo *gameplay)
 {
     int i;
 
-    memset(gameplay->state, 0, sizeof gameplay->state);
-    memset(gameplay->depth, 0, sizeof gameplay->depth);
-    memset(gameplay->inplay, EMPTY_PLACE, sizeof gameplay->inplay);
-    for (i = 0 ; i < FOUNDATION_PLACE_COUNT ; ++i)
-        gameplay->inplay[foundationplace(i)] = EMPTY_FOUNDATION(i);
     gameplay->moveable = 0;
     gameplay->locked = 0;
     gameplay->endpoint = FALSE;
+    memset(gameplay->state, 0, sizeof gameplay->state);
+    memset(gameplay->depth, 0, sizeof gameplay->depth);
+    for (i = 0 ; i < TABLEAU_PLACE_COUNT ; ++i)
+        gameplay->inplay[tableauplace(i)] = EMPTY_TABLEAU;
+    for (i = 0 ; i < RESERVE_PLACE_COUNT ; ++i)
+        gameplay->inplay[reserveplace(i)] = EMPTY_RESERVE;
+    for (i = 0 ; i < FOUNDATION_PLACE_COUNT ; ++i)
+        gameplay->inplay[foundationplace(i)] = EMPTY_FOUNDATION(i);
 }
 
 /* Set up the initial layout for the current configuration. Cards are
@@ -32,6 +35,7 @@ static void clearstate(gameplayinfo *gameplay)
 static void dealcards(gameplayinfo *gameplay, int configid)
 {
     card_t deck[NCARDS], card;
+    place_t place;
     int i, x, y;
 
     getdeckforconfiguration(deck, configid);
@@ -39,9 +43,10 @@ static void dealcards(gameplayinfo *gameplay, int configid)
         card = deck[i];
         x = i % TABLEAU_PLACE_COUNT;
         y = i / TABLEAU_PLACE_COUNT;
-        gameplay->state[cardtoindex(card)] = tableaupos(x, y);
-        gameplay->inplay[tableauplace(x)] = card;
-        gameplay->depth[tableauplace(x)] = y + 1;
+        place = tableauplace(x);
+        gameplay->state[cardtoindex(card)] = gameplay->inplay[place];
+        gameplay->inplay[place] = card;
+        gameplay->depth[place] = y + 1;
     }
 }
 
@@ -93,21 +98,13 @@ static void recalcmoveable(gameplayinfo *gameplay)
  */
 void beginmove(gameplayinfo *gameplay, moveinfo move)
 {
-    position_t pos;
-    int c;
+    int n;
 
+    n = cardtoindex(move.card);
     gameplay->locked |= (1 << move.from) | (1 << move.to);
-    pos = gameplay->state[cardtoindex(move.card)];
-    if (isfoundationplace(move.from)) {
-        gameplay->inplay[move.from] -= RANK_INCR;
-    } else if (istableaupos(pos) && tableauposdepth(pos) > 0) {
-        for (c = 0 ; c < NCARDS && gameplay->state[c] != pos - 1 ; ++c) ;
-        gameplay->inplay[move.from] = indextocard(c);
-    } else {
-        gameplay->inplay[move.from] = EMPTY_PLACE;
-    }
+    gameplay->inplay[move.from] = gameplay->state[n];
     --gameplay->depth[move.from];
-    gameplay->state[cardtoindex(move.card)] = NOWHERE;
+    gameplay->state[n] = EMPTY_PLACE;
 }
 
 /* Complete the specified move that was begun by the beginmove()
@@ -116,14 +113,9 @@ void beginmove(gameplayinfo *gameplay, moveinfo move)
  */
 void finishmove(gameplayinfo *gameplay, moveinfo move)
 {
-    position_t pos;
-
-    pos = placetopos(move.to);
-    if (istableauplace(move.to))
-        pos += gameplay->depth[move.to];
-    gameplay->state[cardtoindex(move.card)] = pos;
-    ++gameplay->depth[move.to];
+    gameplay->state[cardtoindex(move.card)] = gameplay->inplay[move.to];
     gameplay->inplay[move.to] = move.card;
+    ++gameplay->depth[move.to];
     gameplay->locked &= ~((1 << move.from) | (1 << move.to));
     recalcmoveable(gameplay);
     gameplay->endpoint = isgamewon(gameplay);
@@ -160,39 +152,25 @@ int applymove(gameplayinfo *gameplay, movecmd_t movecmd)
 }
 
 /* Copy a saved game state back into the active game. The game state
- * is formatted as an array, one entry per card and each entry
- * containing the card's position. When restoring the state, as each
- * card is put in its proper location, the inplay and depth fields
- * need to be updated appropriately.
+ * is formatted as a byte array, one entry per card with each entry
+ * identifying the card it covers. The in-memory state data also
+ * contains the inplay array, so it is restored automatically as well
+ * by the memcpy(). The depth field is not stored with the state,
+ * however, so it needs need to be updated manually.
  */
 void restoresavedstate(gameplayinfo *gameplay, redo_position const *position)
 {
-    position_t pos;
     card_t card;
-    place_t place;
-    int i, n;
+    int i;
 
     clearstate(gameplay);
-    memcpy(gameplay->state, redo_getsavedstate(position),
-           sizeof gameplay->state);
-    for (i = 0 ; i < NCARDS ; ++i) {
-        card = indextocard(i);
-        pos = gameplay->state[i];
-        place = postoplace(pos);
-        if (istableauplace(place)) {
-            n = tableauposdepth(pos);
-            if (n >= gameplay->depth[place]) {
-                gameplay->inplay[place] = card;
-                gameplay->depth[place] = n + 1;
-            }
-        } else if (isfoundationplace(place)) {
-            if (gameplay->inplay[place] < card) {
-                gameplay->inplay[place] = card;
-                ++gameplay->depth[place];
-            }
-        } else {
-            gameplay->inplay[place] = card;
-            gameplay->depth[place] = 1;
+    memcpy(gameplay->state, redo_getsavedstate(position), SIZE_REDO_STATE);
+    for (i = 0 ; i < NPLACES ; ++i) {
+        gameplay->depth[i] = 0;
+        card = gameplay->inplay[i];
+        while (!isemptycard(card)) {
+            ++gameplay->depth[i];
+            card = gameplay->state[cardtoindex(card)];
         }
     }
     recalcmoveable(gameplay);
