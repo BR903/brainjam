@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "./gen.h"
+#include "./decls.h"
 #include "redo/redo.h"
 #include "game/game.h"
 #include "files/files.h"
