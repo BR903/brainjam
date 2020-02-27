@@ -75,9 +75,9 @@ static int isstackempty(void)
     return positionstack == NULL;
 }
 
-/* Bookmark the current position.
+/* Bookmark a position.
  */
-static void pushposition(redo_position *position)
+static void stackpush(redo_position *position)
 {
     stackentry *entry;
 
@@ -89,7 +89,7 @@ static void pushposition(redo_position *position)
 
 /* Return the most recently bookmarked position.
  */
-static redo_position *popposition(void)
+static redo_position *stackpop(void)
 {
     redo_position *pos;
     stackentry *entry;
@@ -101,6 +101,33 @@ static redo_position *popposition(void)
     positionstack = entry->next;
     deallocate(entry);
     return pos;
+}
+
+/* Walk the stack and delete any bookmark for a position.
+ */
+static void stackdelete(redo_position const *position)
+{
+    stackentry *entry, *prev;
+
+    entry = positionstack;
+    prev = NULL;
+    while (entry) {
+        if (entry->position == position) {
+            if (prev) {
+                prev->next = entry->next;
+                deallocate(entry);
+                entry = prev->next;
+            } else {
+                positionstack = entry->next;
+                deallocate(entry);
+                entry = positionstack;
+            }
+        }
+        if (!entry)
+            break;
+        prev = entry;
+        entry = entry->next;
+    }
 }
 
 /*
@@ -195,6 +222,7 @@ static redo_position *eraseundonepositions(redo_session *session,
 {
     if (position->next)
         eraseundonepositions(session, position->next->p);
+    stackdelete(position);
     return redo_dropposition(session, position);
 }
 
@@ -359,6 +387,7 @@ static int handlenavkey(gameplayinfo *gameplay, redo_session *session, int cmd)
       case cmd_erase:
         pos = redo_dropposition(session, currentposition);
         if (pos != currentposition) {
+            stackdelete(currentposition);
             currentposition = NULL;
             moveposition(gameplay, pos);
         } else {
@@ -434,16 +463,16 @@ static int handlenavkey(gameplayinfo *gameplay, redo_session *session, int cmd)
         moveposition(gameplay, backone);
         break;
       case cmd_pushbookmark:
-        pushposition(currentposition);
+        stackpush(currentposition);
         break;
       case cmd_popbookmark:
         if (!isstackempty())
-            moveposition(gameplay, popposition());
+            moveposition(gameplay, stackpop());
         break;
       case cmd_swapbookmark:
         if (!isstackempty()) {
-            pos = popposition();
-            pushposition(currentposition);
+            pos = stackpop();
+            stackpush(currentposition);
             moveposition(gameplay, pos);
         }
         break;
@@ -451,7 +480,7 @@ static int handlenavkey(gameplayinfo *gameplay, redo_session *session, int cmd)
         if (isstackempty())
             ding();
         else
-            popposition();
+            stackpop();
         break;
       case cmd_setminimalpath:
         setminimalpath(currentposition);
@@ -461,7 +490,7 @@ static int handlenavkey(gameplayinfo *gameplay, redo_session *session, int cmd)
             applysettings(TRUE);
         break;
       case cmd_quit:
-        while (popposition()) ;
+        while (stackpop()) ;
         return FALSE;
     }
     return TRUE;
