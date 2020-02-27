@@ -1,8 +1,9 @@
-Before 0.9:
-
-* Come up with a more attractive layout for the opening screen.
-
 Before 1.0:
+
+* Work on the layout for the opening screen. Seems like it could be
+  improved.
+
+* The game needs its own icon, instead of using the old windows icon.
 
 * Add unit tests for the game logic code. This will probably also
   require new Makefile rules.

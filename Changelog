@@ -1,3 +1,27 @@
+* 2020 Feb 26: version 0.9.0
+
+	The encoding of the game state has been rewritten, in such a way
+	that equivalent game states can be seen as identical if they only
+	differ in the ordering of cards in the reserve, or likewise in the
+	positioning of the tableau stacks. This change, along with a
+	change to how moves are recorded internally, allows the redo
+	library to do a much better job in recognizing when solutions can
+	be merged. (This is a change that's been on the to-do list for
+	years, so it's good to finally have it marked off.) Unfortunately,
+	the change to the state encoding is reflected in the session data
+	files, so saved session data files from before 0.9 are not usable.
+	This could perhaps be addressed, but I strongly suspect currently
+	that there is basically one regular user of this program at this
+	time, and he's already manually translated his data files.
+
+	The --validate option has been added, which can be used to check
+	data files for errors.
+
+	Added an option to display the move keys next to each place in the
+	layout, to help with using the key commands.
+
+	Various bug fixes and tweaks.
+
 * 2020 Feb 16: version 0.8.3
 
 	Revamped the initial display a little bit, adding buttons for
