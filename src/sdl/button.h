@@ -53,6 +53,6 @@ extern void makecheckbox(button *chkbox, char const *text);
  * object to be visually attached to its left-hand side when the
  * button is selected.
  */
-extern void makepopupbutton(button *popup, SDL_Surface *graphic);
+extern void makepopupbutton(button *popup, int iconid);
 
 #endif

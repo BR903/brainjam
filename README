@@ -23,23 +23,22 @@ Brain Jam depends on the following libraries:
 * ncursesw
 * SDL2
 * SDL2_ttf
+* libpng
 * fontconfig
-* zlib
 
 In order to compile Brain Jam, you will need to have installed these
 libraries along with their include files. For most Linux users, this
 means that you will need to have installed the development packages.
 For example, on a Debian-based system, you would run something like:
 
-  sudo apt install libsdl2-dev libsdl2-ttf-dev zlib1g-dev
+  sudo apt install libsdl2-dev libsdl2-ttf-dev libpng12-dev
                    libncursesw5-dev libfontconfig1-dev
 
 Brain Jam can be configured to remove its dependency on some but not
 all of the above libraries, at the expense of removing program
 functionality. See the "Configuration" section below for details.
 
-In addition, the build process makes use of Python and the python
-image library PIL, pkg-config, gzip, and sed.
+The build process also makes use of Python, pkg-config, and sed.
 
 
  * Configuration
@@ -58,7 +57,7 @@ interface. (The default is "--with-ncurses".)
   --without-sdl
 
 This flag will remove the program's dependency on the SDL2 library (as
-well as SDL2_ttf and zlib), at the expense of leaving out the graphic
+well as SDL2_ttf and libpng), at the expense of leaving out the graphic
 user interface. Only the text-based interface will be avaiable. (The
 default is "--with-sdl".)
 

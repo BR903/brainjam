@@ -9,21 +9,21 @@
 #include "./types.h"
 #include "./incbin.h"
 #include "internal.h"
-#include "zrwops.h"
+#include "getpng.h"
 #include "images.h"
 
 /* The first two images are used to create the title graphic for the
  * list display.
  */
-INCBIN("sdl/banner.bmp.gz", gzbanner, gzbanner_end);
-INCBIN("sdl/headline.bmp.gz", gzheadline, gzheadline_end);
+INCBIN("sdl/banner.png", pngbanner, pngbanner_end);
+INCBIN("sdl/headline.png", pngheadline, pngheadline_end);
 
 /* The third image is a collection of smaller images, stored in the
  * fashion of a sprite sheet. The individual images are identified
  * using values defined in sdl/imageids.h, and are located via the
  * imagerects array defined below.
  */
-INCBIN("sdl/images.bmp.gz", gzimages, gzimages_end);
+INCBIN("sdl/images.png", pngimages, pngimages_end);
 
 /* The final image provides the complete set of playing cards.
  *
@@ -47,7 +47,7 @@ INCBIN("sdl/images.bmp.gz", gzimages, gzimages_end);
  * (The final column contains two jokers and two card backs, neither
  * of which are used by this program.)
  */
-INCBIN("sdl/cardset.bmp.gz", gzcardset, gzcardset_end);
+INCBIN("sdl/cardset.png", pngcardset, pngcardset_end);
 
 /* The texture containing the cards.
  */
@@ -136,6 +136,8 @@ static int finddropheight(SDL_Surface *image, SDL_Point size)
         }
     }
 
+    if (SDL_MUSTLOCK(image))
+        SDL_UnlockSurface(image);
     return height + 1;
 }
 
@@ -147,7 +149,7 @@ static void initdeck(void)
     SDL_Surface *image;
     int i;
 
-    image = SDL_LoadBMP_RW(getzresource(gzcardset), TRUE);
+    image = pngtosurface(pngcardset);
     decktexture = SDL_CreateTextureFromSurface(_graph.renderer, image);
     SDL_QueryTexture(decktexture, NULL, NULL,
                      &_graph.cardsize.x, &_graph.cardsize.y);
@@ -155,6 +157,7 @@ static void initdeck(void)
     _graph.cardsize.y /= 4;
     _graph.dropheight = finddropheight(image, _graph.cardsize);
     SDL_FreeSurface(image);
+
     for (i = 0 ; i < 64 ; ++i) {
         cardrects[i].x = (i / 4) * _graph.cardsize.x;
         cardrects[i].y = (i % 4) * _graph.cardsize.y;
@@ -186,7 +189,7 @@ int getimageheight(int id)
 void initializeimages(void)
 {
     initdeck();
-    imagesurface = SDL_LoadBMP_RW(getzresource(gzimages), TRUE);
+    imagesurface = pngtosurface(pngimages);
     imagetexture = NULL;
 }
 
@@ -222,7 +225,7 @@ SDL_Texture *loadsplashgraphic(void)
     SDL_Surface *image;
     SDL_Texture *texture;
 
-    image = SDL_LoadBMP_RW(getzresource(gzbanner), TRUE);
+    image = pngtosurface(pngbanner);
     texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
     SDL_FreeSurface(image);
     return texture;
@@ -235,7 +238,7 @@ SDL_Texture *loadsplashheadline(void)
     SDL_Surface *image;
     SDL_Texture *texture;
 
-    image = SDL_LoadBMP_RW(getzresource(gzheadline), TRUE);
+    image = pngtosurface(pngheadline);
     texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
     SDL_FreeSurface(image);
     return texture;

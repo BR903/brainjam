@@ -102,7 +102,7 @@ static SDL_Surface *makeshadedsurface(int w, int h, int shadowdepth)
  * for all of the different states of the button are rendered onto a
  * single texture.
  */
-void makegraphicbutton(button *pushbutton, SDL_Surface *graphic)
+static void makegraphicbutton(button *pushbutton, SDL_Surface *graphic)
 {
     int const mods[] = { 160, 192, 160, 255 };
     SDL_Surface *image, *bkgnd;
@@ -277,14 +277,15 @@ void makecheckbox(button *chkbox, char const *str)
  * draw the popup itself, but simply leaves an opening on the left
  * edge of the button for the popup to merge with.
  */
-void makepopupbutton(button *popup, SDL_Surface *graphic)
+void makepopupbutton(button *popup, int iconid)
 {
     int const mods[] = { 160, 192, 160, 255 };
-    SDL_Surface *image, *bkgnd;
+    SDL_Surface *graphic, *image, *bkgnd;
     SDL_Rect rect;
     Uint32 bkgndval, textval;
     int i;
 
+    graphic = getimagesurface(iconid);
     popup->pos.x = 0;
     popup->pos.y = 0;
     popup->pos.w = graphic->w + _graph.margin;
@@ -325,6 +326,7 @@ void makepopupbutton(button *popup, SDL_Surface *graphic)
         SDL_BlitSurface(graphic, NULL, image, &rect);
         rect.y += popup->pos.h;
     }
+    SDL_FreeSurface(graphic);
 
     popup->texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
     SDL_FreeSurface(image);

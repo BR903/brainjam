@@ -930,9 +930,7 @@ displaymap initgamedisplay(void)
     backbutton.cmd = cmd_quit;
     addbutton(&backbutton);
 
-    image = getimagesurface(IMAGE_OPTIONS);
-    makepopupbutton(&optionsbutton, image);
-    SDL_FreeSurface(image);
+    makepopupbutton(&optionsbutton, IMAGE_OPTIONS);
     optionsbutton.display = DISPLAY_GAME;
     optionsbutton.cmd = cmd_changesettings;
     addbutton(&optionsbutton);
