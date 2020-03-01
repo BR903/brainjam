@@ -8,7 +8,7 @@
 #include "./gen.h"
 #include "./types.h"
 #include "./commands.h"
-#include "configs/configs.h"
+#include "./decks.h"
 #include "solutions/solutions.h"
 #include "internal.h"
 #include "images.h"
@@ -32,12 +32,12 @@ static scrollbar scroll;
  */
 static SDL_Rect bannerrect;             /* location of the banner graphic */
 static SDL_Rect headlinerect;           /* location of the headline text */
-static SDL_Rect listrect;               /* location of the config list */
+static SDL_Rect listrect;               /* location of the game list */
 static SDL_Rect iconrect;               /* location of the game icon */
 static SDL_Rect scorearea;              /* location of the score display */
 static SDL_Point scorelabel;            /* position of score display text */
 static SDL_Point scorenumber;           /* position of score */
-static SDL_Point markersize;            /* size of config list markers */
+static SDL_Point markersize;            /* size of game list markers */
 static int rowheight;                   /* height of one list entry */
 static int markeroffset;                /* vertical offset of list markers */
 
@@ -147,7 +147,7 @@ static int scrolllist(int position)
 }
 
 /* Change the current selection, forcing it into the range of valid
- * configurations. The scrolling list is updated so that the selection
+ * games. The scrolling list is updated so that the selection
  * is visible. Returns cmd_redraw, or cmd_none if the display is
  * unchanged.
  */
@@ -155,7 +155,7 @@ static command_t setselection(int id)
 {
     int count;
 
-    count = getconfigurationcount();
+    count = getdeckcount();
     if (id < 0)
         id = 0;
     else if (id >= count)
@@ -255,7 +255,7 @@ static SDL_Point setlayout(SDL_Point display)
     scroll.pos.h = listrect.h;
     scroll.pagesize = listrect.h;
     scroll.linesize = rowheight;
-    scroll.range = getconfigurationcount() * rowheight - listrect.h + 1;
+    scroll.range = getdeckcount() * rowheight - listrect.h + 1;
     scroll.value = clampscrollpos(scroll.value);
     normalizeselection();
 
@@ -289,10 +289,10 @@ static SDL_Point setlayout(SDL_Point display)
  */
 
 /* Render the components of the score area. If the currently selected
- * configuration has a stored solution, then the score area is updated
- * to show the number of moves in the solution, and the smallest
- * possible solution. Otherwise, this space is used to display a bit
- * of instructional text.
+ * game has a stored solution, then the score area is updated to show
+ * the number of moves in the solution, and the smallest possible
+ * solution. Otherwise, this space is used to display a bit of
+ * instructional text.
  */
 static void renderscorearea(int id)
 {
@@ -338,9 +338,9 @@ static void drawrecthighlight(int x, int y, int w, int h)
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
 }
 
-/* Render the configuration list
+/* Render the list of games.
  */
-static void renderconfiglist(void)
+static void rendergamelist(void)
 {
     solutioninfo const *solution;
     char buf[16];
@@ -389,7 +389,7 @@ static void render(void)
     SDL_RenderClear(_graph.renderer);
     SDL_RenderCopy(_graph.renderer, bannertexture, NULL, &bannerrect);
     SDL_RenderCopy(_graph.renderer, headlinetexture, NULL, &headlinerect);
-    renderconfiglist();
+    rendergamelist();
     renderscorearea(selection);
     renderimage(IMAGE_OLDICON, iconrect.x, iconrect.y);
 }
@@ -405,7 +405,7 @@ static command_t moveselection(int delta)
     return setselection(selection + delta);
 }
 
-/* Move the current selection to the previous unsolved configuration.
+/* Move the current selection to the previous unsolved game.
  */
 static void selectbackward(int selected)
 {
@@ -413,7 +413,7 @@ static void selectbackward(int selected)
     setselection(findnextunsolved(selection, -1));
 }
 
-/* Move the current selection to the next unsolved configuration.
+/* Move the current selection to the next unsolved game.
  */
 static void selectforward(int selected)
 {
@@ -421,7 +421,7 @@ static void selectforward(int selected)
     setselection(findnextunsolved(selection, +1));
 }
 
-/* Move the current selection to a random unsolved configuration.
+/* Move the current selection to a random unsolved game.
  */
 static void selectrandom(int selected)
 {
@@ -450,7 +450,7 @@ static command_t handlekeyevent(SDL_Keysym key)
       case SDLK_PAGEUP:   return moveselection(-scroll.pagesize / rowheight);
       case SDLK_PAGEDOWN: return moveselection(+scroll.pagesize / rowheight);
       case SDLK_HOME:     return setselection(0);
-      case SDLK_END:      return setselection(getconfigurationcount());
+      case SDLK_END:      return setselection(getdeckcount());
       case SDLK_RETURN:   return cmd_select;
       case SDLK_KP_ENTER: return cmd_select;
       case SDLK_TAB:
@@ -464,10 +464,10 @@ static command_t handlekeyevent(SDL_Keysym key)
 }
 
 /* The list display mainly listens for events that interact with the
- * scrolling list of configurations. The return value is the command
- * to return to the calling code, or zero if the command was not
- * handled by this code. A return value of cmd_select indicates
- * that the currently selected configuration should be entered.
+ * scrolling list of games. The return value is the command to return
+ * to the calling code, or zero if the command was not handled by this
+ * code. A return value of cmd_select indicates that the currently
+ * selected game should be entered.
  */
 static command_t eventhandler(SDL_Event *event)
 {
@@ -506,14 +506,14 @@ static command_t eventhandler(SDL_Event *event)
  * Internal functions.
  */
 
-/* Return the currently selected configuration id.
+/* Return the currently selected game ID.
  */
 int getselection(void)
 {
     return selection;
 }
 
-/* Change the list selection to the given configuration id.
+/* Change the list selection to the given game ID.
  */
 void initlistselection(int id)
 {

@@ -31,14 +31,12 @@ libraries along with their include files. For most Linux users, this
 means that you will need to have installed the development packages.
 For example, on a Debian-based system, you would run something like:
 
-  sudo apt install libsdl2-dev libsdl2-ttf-dev libpng12-dev
-                   libncursesw5-dev libfontconfig1-dev
+  sudo apt install libsdl2-dev libsdl2-ttf-dev libpng-dev
+                   libncursesw5-dev libfontconfig-dev
 
 Brain Jam can be configured to remove its dependency on some but not
 all of the above libraries, at the expense of removing program
 functionality. See the "Configuration" section below for details.
-
-The build process also makes use of Python, pkg-config, and sed.
 
 
  * Configuration

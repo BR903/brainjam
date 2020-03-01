@@ -13,7 +13,7 @@
  * only used the first time the program runs, before the user's
  * initialization file has been created.
  */
-#define DEFAULT_CONFIGID 0
+#define DEFAULT_GAMEID 0
 #define DEFAULT_SHOWKEYS 0
 #define DEFAULT_ANIMATION 1
 #define DEFAULT_AUTOPLAY 1
@@ -34,7 +34,7 @@ static settingsinfo *settings = NULL;
 void initializesettings(void)
 {
     settings = reallocate(settings, sizeof *settings);
-    settings->configid = -1;
+    settings->gameid = -1;
     settings->showkeys = -1;
     settings->animation = -1;
     settings->autoplay = -1;
@@ -47,8 +47,8 @@ void initializesettings(void)
  */
 void setdefaultsettings(void)
 {
-    if (settings->configid < 0)
-        settings->configid = DEFAULT_CONFIGID;
+    if (settings->gameid < 0)
+        settings->gameid = DEFAULT_GAMEID;
     if (settings->showkeys < 0)
         settings->showkeys = DEFAULT_SHOWKEYS;
     if (settings->animation < 0)

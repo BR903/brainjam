@@ -17,16 +17,6 @@ AC_CHECK_FUNC(getopt, [],
 dnl * Verify that our other build tools are present.
 dnl *
 
-AC_CHECK_PROG(check_prog, [sed], [yes], [no])
-if test "$check_prog" != "yes" ; then
-  AC_MSG_ERROR([could not find sed on the path.])
-fi
-
-AC_CHECK_PROG(check_prog, [python], [yes], [no])
-if test "$check_prog" != "yes" ; then
-  AC_MSG_ERROR([could not find the python interpreter.])
-fi
-
 AC_CHECK_PROG(check_prog, [pkg-config], [yes], [no])
 if test "$check_prog" != "yes" ; then
   AC_MSG_ERROR([could not find the pkg-config utility.])

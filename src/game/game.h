@@ -30,7 +30,7 @@
  * they comprise the redo state data.)
  */
 struct gameplayinfo {
-    int configid;               /* the current configuration's ID number */
+    int gameid;                 /* the current game's ID number */
     int bestsolution;           /* the size of the user's best solution */
     int moveable;               /* bitmask of places with legal moves */
     int locked;                 /* bitmask of places with a move in progress */
@@ -58,7 +58,7 @@ extern void setanimation(int enabled);
 extern void setbranching(int enabled);
 
 /* Initialize the game state to the beginning of a game. The
- * gameplay's configid field is used to choose the deck to use.
+ * gameplay's gameid field is used to choose the deck to use.
  */
 extern void initializegame(gameplayinfo *gameplay);
 
@@ -81,13 +81,13 @@ movecmd_t moveidtocmd(gameplayinfo const *gameplay, int moveid);
 
 /* Run the user interface for the current setup, using the given game
  * state and redo session to store progress. When invoked, the game
- * state must be initialized to the configuration's starting point.
- * The redo session can be empty, or it can contain redo history from
- * an earlier play session. The function returns when the user leaves
- * the game. If an improved solution is discovered during game play,
- * it will be automatically saved to the user's solution file. The
- * return value is true if the program should return the user to the
- * list of configurations, or false if the program should exit.
+ * state must be initialized to the game's starting point. The redo
+ * session can be empty, or it can contain redo history from an
+ * earlier play session. The function returns when the user leaves the
+ * game. If an improved solution is discovered during game play, it
+ * will be automatically saved to the user's solution file. The return
+ * value is true if the program should return the user to the list of
+ * games, or false if the program should exit.
  */
 extern int gameplayloop(gameplayinfo *gameplay, redo_session *session);
 

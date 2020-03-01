@@ -5,7 +5,7 @@
 #include "./gen.h"
 #include "./types.h"
 #include "./decls.h"
-#include "configs/configs.h"
+#include "./decks.h"
 #include "redo/redo.h"
 #include "game/game.h"
 #include "internal.h"
@@ -29,16 +29,16 @@ static void clearstate(gameplayinfo *gameplay)
         gameplay->inplay[foundationplace(i)] = EMPTY_FOUNDATION(i);
 }
 
-/* Set up the initial layout for the current configuration. Cards are
- * dealt from the deck to the tableau (left to right, top to bottom).
+/* Set up the initial layout for the current game. Cards are dealt
+ * from the deck to the tableau (left to right, top to bottom).
  */
-static void dealcards(gameplayinfo *gameplay, int configid)
+static void dealcards(gameplayinfo *gameplay, int gameid)
 {
     card_t deck[NCARDS], card;
     place_t place;
     int i, x, y;
 
-    getdeckforconfiguration(deck, configid);
+    getgamedeck(deck, gameid);
     for (i = 0 ; i < NCARDS ; ++i) {
         card = deck[i];
         x = i % TABLEAU_PLACE_COUNT;
@@ -132,7 +132,7 @@ void finishmove(gameplayinfo *gameplay, moveinfo move)
 void initializegame(gameplayinfo *gameplay)
 {
     clearstate(gameplay);
-    dealcards(gameplay, gameplay->configid);
+    dealcards(gameplay, gameplay->gameid);
     recalcmoveable(gameplay);
 }
 

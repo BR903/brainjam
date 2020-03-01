@@ -337,7 +337,7 @@ static void handlemove_callback(void *data)
         if (!gameplay->bestsolution ||
                         gameplay->bestsolution > pos->solutionsize) {
             buf = createsolutionstring(gameplay, session);
-            savesolution(gameplay->configid, buf);
+            savesolution(gameplay->gameid, buf);
             deallocate(buf);
             gameplay->bestsolution = pos->solutionsize;
             showsolutionwrite();

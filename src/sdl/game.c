@@ -8,8 +8,8 @@
 #include "./types.h"
 #include "./decls.h"
 #include "./commands.h"
+#include "./decks.h"
 #include "./settings.h"
-#include "configs/configs.h"
 #include "game/game.h"
 #include "redo/redo.h"
 #include "internal.h"
@@ -97,10 +97,10 @@ static gameplayinfo const *gameplay;    /* current game state */
 static redo_position const *position;   /* current redo position */
 static int bookmarkflag;                /* true if a bookmark exists */
 
-/* Size of the user's most recent best solution for the current
- * configuration. A negative value indicates that this variable has
- * not yet been initialized. A zero value indicates that the user has
- * yet to create a solution.
+/* Size of the user's most recent best solution for the current game.
+ * A negative value indicates that this variable has not yet been
+ * initialized. A zero value indicates that the user has yet to create
+ * a solution.
  */
 static int prevbestsolutionsize = -1;
 
@@ -707,7 +707,7 @@ static void render(void)
 
     if (gameplay->bestsolution) {
         drawlargenumber(gameplay->bestsolution, bestcount.x, bestcount.y, +1);
-        drawlargenumber(bestknownsolutionsize(gameplay->configid),
+        drawlargenumber(bestknownsolutionsize(gameplay->gameid),
                         bestknowncount.x, bestknowncount.y, +1);
     }
 

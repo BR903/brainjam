@@ -364,7 +364,7 @@ uimap curses_initializeui(void)
     ui.showsolutionwrite = curses_showsolutionwrite;
     ui.movecard = curses_movecard;
     ui.changesettings = curses_changesettings;
-    ui.selectconfig = curses_selectconfig;
+    ui.selectgame = curses_selectgame;
     ui.addhelpsection = curses_addhelpsection;
     return ui;
 }

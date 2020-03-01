@@ -88,13 +88,13 @@ typedef struct uimap {
      */
     int (*changesettings)(settingsinfo *settings);
 
-    /* Display all of the available configurations as a list and let
-     * the user select one. The argument specifies the most recently
-     * visited configuration. The return value is the ID of the
-     * configuration that the user selected, or -1 if the user asked
-     * to exit the program instead.
+    /* Display all of the available games as a list and let the user
+     * select one. The argument specifies the ID of the most recently
+     * visited game. The return value is the ID of the game that the
+     * user selected, or -1 if the user asked to exit the program
+     * instead.
      */
-    int (*selectconfig)(int currentconfig);
+    int (*selectgame)(int currentgameid);
 
     /* Add information to the online help. title is the topic that the
      * contents of text explains. If placefirst is true, this topic is
@@ -121,7 +121,7 @@ extern uimap _ui;
 #define showsolutionwrite()          (_ui.showsolutionwrite())
 #define movecard(cd, fr, to, cb, dt) (_ui.movecard(cd, fr, to, cb, dt))
 #define changesettings(si)           (_ui.changesettings(si))
-#define selectconfig(gp)             (_ui.selectconfig(gp))
+#define selectgame(id)               (_ui.selectgame(id))
 #define addhelpsection(tl, tx, pf)   (_ui.addhelpsection(tl, tx, pf))
 
 #endif

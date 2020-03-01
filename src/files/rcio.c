@@ -7,8 +7,8 @@
 #include <errno.h>
 #include "./gen.h"
 #include "./types.h"
+#include "./decks.h"
 #include "./settings.h"
-#include "configs/configs.h"
 #include "files/files.h"
 #include "internal.h"
 
@@ -140,9 +140,9 @@ int loadrcfile(settingsinfo *settings)
         *val++ = '\0';
         if (!strcmp(buf, "lastgame")) {
             if (sscanf(val, "%d", &id) == 1 &&
-                        id >= 0 && id < getconfigurationcount()) {
-                if (settings->configid < 0)
-                    settings->configid = id;
+                        id >= 0 && id < getdeckcount()) {
+                if (settings->gameid < 0)
+                    settings->gameid = id;
             } else {
                 warn("brainjam.ini:%d: invalid lastgame value", lineno);
                 continue;
@@ -187,8 +187,8 @@ int savercfile(settingsinfo const *settings)
     }
     deallocate(filename);
     fprintf(fp, "\n[General]\n");
-    if (settings->configid >= 0)
-        fprintf(fp, "lastgame=%04d\n", settings->configid);
+    if (settings->gameid >= 0)
+        fprintf(fp, "lastgame=%04d\n", settings->gameid);
     if (settings->showkeys >= 0)
         fprintf(fp, "showkeys=%c\n", settings->showkeys ? '1' : '0');
     if (settings->animation >= 0)

@@ -7,7 +7,7 @@
 #include <errno.h>
 #include "./gen.h"
 #include "./types.h"
-#include "configs/configs.h"
+#include "./decks.h"
 #include "solutions/solutions.h"
 #include "files/files.h"
 #include "internal.h"
@@ -49,7 +49,7 @@ int loadsolutionfile(solutioninfo **psolutions)
         fprintf(stderr, "brainjam.sol: invalid solution file\n");
         return -1;
     }
-    maxcount = getconfigurationcount();
+    maxcount = getdeckcount();
     solutions = allocate(maxcount * sizeof *solutions);
     n = 0;
     for (lineno = 1 ; fgets(buf, sizeof buf, fp) ; ++lineno) {

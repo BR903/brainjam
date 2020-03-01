@@ -6,8 +6,8 @@
 #include <ncurses.h>
 #include "./types.h"
 #include "./commands.h"
+#include "./decks.h"
 #include "./ui.h"
-#include "configs/configs.h"
 #include "redo/redo.h"
 #include "game/game.h"
 #include "internal.h"
@@ -293,10 +293,10 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
         mvprintw(bottomareay + 1, rightcolumnx + 3, "%4d",
                  gameplay->bestsolution);
         mvprintw(bottomareay + 2, rightcolumnx + 3, "%4d",
-                 bestknownsolutionsize(gameplay->configid));
+                 bestknownsolutionsize(gameplay->gameid));
     }
     mvprintw(bottomareay + 4, rightcolumnx - 2,
-             "Game %04d ", gameplay->configid);
+             "Game %04d ", gameplay->gameid);
 
     refresh();
 }

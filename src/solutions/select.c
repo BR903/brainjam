@@ -1,11 +1,11 @@
-/* solutions/select.c: functions for selecting unsolved configurations.
+/* solutions/select.c: functions for selecting unsolved games.
  */
 
 #include <stdlib.h>
 #include <time.h>
 #include "./gen.h"
 #include "./types.h"
-#include "configs/configs.h"
+#include "./decks.h"
 #include "solutions/solutions.h"
 
 /* Macro to declare a loop over all solutions.
@@ -17,10 +17,9 @@
  * External functions.
  */
 
-/* Return the index of a randomly selected unsolved configuration. If
- * all configurations are solved, select a configuration with a
- * non-minimal solution. If all configurations have minimal solutions,
- * select any configuration.
+/* Return the ID of a randomly selected unsolved game. If all games
+ * are solved, select a game with a non-minimal solution. If all games
+ * have minimal solutions, select any game.
  */
 int pickrandomunsolved(void)
 {
@@ -28,7 +27,7 @@ int pickrandomunsolved(void)
     int *array;
     int total, size, n;
 
-    total = getconfigurationcount();
+    total = getdeckcount();
     array = allocate(total * sizeof *array);
     size = 0;
     if (getsolutioncount() == total) {
@@ -53,16 +52,16 @@ int pickrandomunsolved(void)
 }
 
 /* Starting at startpos and moving either forward or backward,
- * depending on incr, find the next unsolved configuration. If the
- * user already a solution for every configuration, then the next
- * configuration with a non-minimal solution is returned instead.
+ * depending on incr, find the next unsolved game. If the user already
+ * a solution for every game, then the next game with a non-minimal
+ * solution is returned instead.
  */
 int findnextunsolved(int startpos, int incr)
 {
     solutioninfo const *solution;
     int total, i;
 
-    total = getconfigurationcount();
+    total = getdeckcount();
     if (getsolutioncount() < total) {
         i = startpos;
         for (;;) {

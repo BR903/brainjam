@@ -22,8 +22,8 @@ static int solutioninfocmp(void const *a, void const *b)
     return ((solutioninfo const*)a)->id - ((solutioninfo const*)b)->id;
 }
 
-/* Look up a solution. NULL is returned if the given configuration
- * does not have a solution recorded.
+/* Look up a solution. NULL is returned if the given game does not
+ * have a solution recorded.
  */
 static solutioninfo *getsolution(int id)
 {
@@ -36,7 +36,7 @@ static solutioninfo *getsolution(int id)
 
 /* Introduce a new solution to the list of solutions. This function
  * assumes that the caller has already verified that no solution
- * already exists for this configuration.
+ * already exists for this game.
  */
 static solutioninfo *addsolution(int id)
 {
@@ -93,7 +93,7 @@ int getsolutioncount(void)
     return solutioncount;
 }
 
-/* Return the solution for a given configuration, or NULL if no
+/* Return the solution for a given game, or NULL if no
  * solution has been recorded.
  */
 solutioninfo const *getsolutionfor(int id)
@@ -101,11 +101,10 @@ solutioninfo const *getsolutionfor(int id)
     return getsolution(id);
 }
 
-/* Return the solution for a given configuration. If no solution
- * exists for that configuration, return the solution immediately
- * preceding it numerically (or the closest possible solution if there
- * are none that come before it). Return NULL only if no solutions
- * currently exist.
+/* Return the solution for a given game. If no solution exists for
+ * that game, return the solution immediately preceding it numerically
+ * (or the closest possible solution if there are none that come
+ * before it). Return NULL only if no solutions currently exist.
  */
 solutioninfo const *getnearestsolution(int id)
 {
@@ -116,7 +115,7 @@ solutioninfo const *getnearestsolution(int id)
 }
 
 /* Given a solution, return the first solution with a higher
- * configuration ID. Return NULL if this solution is the highest.
+ * game ID. Return NULL if this solution is the highest.
  */
 solutioninfo const *getnextsolution(solutioninfo const *solution)
 {
@@ -129,17 +128,17 @@ solutioninfo const *getnextsolution(solutioninfo const *solution)
 }
 
 /* Add a solution to the list and update the solution file. If a
- * solution already exists for this configuration, it is replaced.
+ * solution already exists for this game, it is replaced.
  */
-int savesolution(int configid, char const *text)
+int savesolution(int gameid, char const *text)
 {
     solutioninfo *solution;
     int size;
 
     size = strlen(text);
-    solution = getsolution(configid);
+    solution = getsolution(gameid);
     if (!solution)
-        solution = addsolution(configid);
+        solution = addsolution(gameid);
     if (solution->size > 0 && solution->size < size)
         warn("warning: replacing solution of size %d with one of size %d!",
              solution->size, size);
@@ -160,7 +159,7 @@ int replaysolution(gameplayinfo *gameplay, redo_session *session)
     redo_position *position;
     int moveid, i, r;
 
-    solution = getsolution(gameplay->configid);
+    solution = getsolution(gameplay->gameid);
     if (!solution)
         return FALSE;
 
@@ -168,14 +167,14 @@ int replaysolution(gameplayinfo *gameplay, redo_session *session)
     for (i = 0 ; i < solution->size ; ++i) {
         if (!ismovecmd(solution->text[i])) {
             warn("game %d: move %d: illegal character \"%c\" in solution",
-                 gameplay->configid, i, solution->text[i]);
+                 gameplay->gameid, i, solution->text[i]);
             break;
         }
         moveid = mkmoveid(gameplay->inplay[movecmdtoplace(solution->text[i])],
                           ismovecmd2(solution->text[i]));
         if (!applymove(gameplay, solution->text[i])) {
             warn("game %d: move %d: unable to apply move \"%c\" in solution",
-                 gameplay->configid, i, solution->text[i]);
+                 gameplay->gameid, i, solution->text[i]);
             break;
         }
         position = redo_addposition(session, position, moveid,
@@ -185,7 +184,7 @@ int replaysolution(gameplayinfo *gameplay, redo_session *session)
 
     r = gameplay->endpoint;
     if (!r)
-        warn("game %04d: saved solution is incomplete", gameplay->configid);
+        warn("game %04d: saved solution is incomplete", gameplay->gameid);
     restoresavedstate(gameplay, redo_getfirstposition(session));
     return r;
 }

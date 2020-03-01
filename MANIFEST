@@ -14,6 +14,8 @@ src/Makefile
 src/module.mk
 src/brainjam.c
 src/commands.h
+src/decks.c
+src/decks.h
 src/decls.h
 src/gen.c
 src/gen.h
@@ -24,11 +26,6 @@ src/types.h
 src/ui.c
 src/ui.h
 src/depend.sh
-src/configs/module.mk
-src/configs/configs.c
-src/configs/configs.h
-src/configs/configs.txt
-src/configs/mkconfigs.py
 src/curses/module.mk
 src/curses/curses.c
 src/curses/curses.h
@@ -50,6 +47,9 @@ src/game/game.h
 src/game/internal.h
 src/game/play.c
 src/game/state.c
+src/gamedata/Makefile
+src/gamedata/gamedata.txt
+src/gamedata/mkgames.c
 src/redo/module.mk
 src/redo/redo.c
 src/redo/redo.h

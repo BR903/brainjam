@@ -14,7 +14,7 @@
  * currently unset.
  */
 struct settingsinfo {
-    int configid;               /* the ID of the last visited configuration */
+    int gameid;                 /* the ID of the game most recently played */
     int autoplay;               /* setting for autoplaying on foundations */
     int animation;              /* setting for animating card movements */
     int showkeys;               /* setting for displaying move key guides */
@@ -40,7 +40,7 @@ extern settingsinfo *getcurrentsettings(void);
 
 /* Apply the current settings to the running program. If write is
  * true, the current settings are also written to the initialization
- * file. Note that this function does not apply the configid and
+ * file. Note that this function does not apply the gameid and
  * forcetextmode fields, which unlike the other settings can only be
  * applied at specific times.
  */

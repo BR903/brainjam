@@ -10,8 +10,8 @@
 #include "./version.h"
 #include "./types.h"
 #include "./settings.h"
+#include "./decks.h"
 #include "./ui.h"
-#include "configs/configs.h"
 #include "solutions/solutions.h"
 #include "files/files.h"
 #include "redo/redo.h"
@@ -27,9 +27,9 @@ static char const *versiontext =
     " <http://gnu.org/licenses/gpl.html>.\n"
     "\n"
     "This program is written by Brian Raiter. It is based on the original"
-    " Windows program written by Peter Liepa. The configurations were created"
-    " by Peter Liepa, with assistance from Bert van Oortmarssen, and are used"
-    " here with their permission.\n"
+    " Windows program written by Peter Liepa. The game configurations were"
+    " created by Peter Liepa, with assistance from Bert van Oortmarssen, and"
+    " are used here with their permission.\n"
     "\n"
     "The rules of Brainjam are based on \"Baker's Game\", as described by"
     " Martin Gardner in the June 1968 issue of Scientific American.";
@@ -152,17 +152,16 @@ static char const *branchingredotext =
  * The top-level game loop.
  */
 
-/* Set up a configuration. Initialize the game data, load the
- * previously saved session data and solution (if any). If a solution
- * exists separately from the session, then the solution is "replayed"
- * into the session data.
+/* Set up a redo session. Load the previously saved session data and
+ * solution (if any). If a solution exists separately from the
+ * session, then the solution is "replayed" into the session data.
  */
 static redo_session *setupsession(gameplayinfo *gameplay)
 {
     redo_session *session;
     char buf[16];
 
-    sprintf(buf, "session-%04d", gameplay->configid);
+    sprintf(buf, "session-%04d", gameplay->gameid);
     setsessionfilename(buf);
     session = redo_beginsession(&gameplay->state,
                                 SIZE_REDO_STATE, CMPSIZE_REDO_STATE);
@@ -186,16 +185,16 @@ static void closesession(redo_session *session)
 
 /* Create the game state and the redo session, and hand them off to
  * the game engine. The return value is true if the program should
- * return to the configuration selection interface, or false if the
- * user is done with the program for now.
+ * return to the game selection interface, or false if the user is
+ * done with the program for now.
  */
-static int playgame(int configid)
+static int playgame(int gameid)
 {
     gameplayinfo thegame;
     redo_session *session;
     int f;
 
-    thegame.configid = configid;
+    thegame.gameid = gameid;
     initializegame(&thegame);
     session = setupsession(&thegame);
     f = gameplayloop(&thegame, session);
@@ -203,9 +202,8 @@ static int playgame(int configid)
     return f;
 }
 
-/* The program's top-level loop. Allow the user to select a
- * configuration, and then interact with it. Continue until the user
- * asks to leave.
+/* The program's top-level loop. Allow the user to select a game, and
+ * then interact with it. Continue until the user asks to leave.
  */
 static void gameselectionloop(void)
 {
@@ -215,10 +213,10 @@ static void gameselectionloop(void)
     initializesolutions();
     for (;;) {
         settings = getcurrentsettings();
-        id = selectconfig(settings->configid);
+        id = selectgame(settings->gameid);
         if (id < 0)
             break;
-        settings->configid = id;
+        settings->gameid = id;
         f = playgame(id);
         if (!f)
             break;
@@ -252,8 +250,8 @@ static void validatefiles(void)
 
     loadrcfile(getcurrentsettings());
     loadsolutionfile(&solutions);
-    for (id = 0 ; id < getconfigurationcount() ; ++id) {
-        thegame.configid = id;
+    for (id = 0 ; id < getdeckcount() ; ++id) {
+        thegame.gameid = id;
         initializegame(&thegame);
         session = setupsession(&thegame);
         closesession(session);
@@ -288,7 +286,7 @@ static void yowzitch(void)
         "Usage: brainjam [OPTIONS] [ID]\n"
         "Play Brain Jam.\n"
         "\n"
-        "  -C, --cfgdir=DIR      Store config data in DIR\n"
+        "  -C, --cfgdir=DIR      Store user settings in DIR\n"
         "  -D, --datadir=DIR     Store all program data in DIR\n"
         "  -t, --textmode        Use the non-graphical interface\n"
         "  -r, --readonly        Don't modify any files\n"
@@ -299,8 +297,8 @@ static void yowzitch(void)
         "      --rules           Display the rules of the game and exit\n"
         "\n";
     char const *detailstext =
-        "If a configuration ID is not specified, the most recently used"
-        " configuration will be resumed.\n"
+        "If a game ID is not specified, the most recently played game will"
+        " be resumed.\n"
         "\n"
         "While the program is running, use ? or F1 to display information"
         " on how to play the game.";
@@ -368,13 +366,13 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
     }
     if (optind < argc) {
         id = strtol(argv[optind], &p, 10);
-        if (*p || id < 0 || id >= getconfigurationcount()) {
-            warn("%s: invalid configuration ID: \"%s\"",
+        if (*p || id < 0 || id >= getdeckcount()) {
+            warn("%s: invalid game ID: \"%s\"",
                  argv[0], argv[optind]);
-            warn("(valid range is 0000-%04d)", getconfigurationcount() - 1);
+            warn("(valid range is 0000-%04d)", getdeckcount() - 1);
             return FALSE;
         }
-        settings->configid = (int)id;
+        settings->gameid = (int)id;
     }
 
     if (settings->readonly == TRUE || validateonly)

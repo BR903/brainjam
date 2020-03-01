@@ -63,7 +63,7 @@ extern void curses_showsolutionwrite(void);
 
 /* Defined in list.c.
  */
-extern int curses_selectconfig(int currentconfig);
+extern int curses_selectgame(int currentgameid);
 
 /* Defined in help.c.
  */

@@ -4,8 +4,8 @@
  * file access is done through the functions in this module. The
  * initialization file stores the user's settings. The solutions file
  * stores all the user's solutions. Finally, there are the session
- * files, one for each game configuration that the user has played.
- * These store the history of the user's moves in that game.
+ * files, one for each game that the user has played. These store the
+ * history of the user's moves in that game.
  *
  * All files are kept in a single data directory, which is chosen (and
  * created if it doesn't already exist) during program initialization.

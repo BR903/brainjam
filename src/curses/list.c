@@ -5,18 +5,18 @@
 #include <time.h>
 #include <ncurses.h>
 #include "./gen.h"
-#include "configs/configs.h"
+#include "./decks.h"
 #include "solutions/solutions.h"
 #include "game/game.h"
 #include "internal.h"
 
-/* The help text for the configuration selection display. Unlike the
- * other help sections, this text is only made available when the user
- * enters help from this display.
+/* The help text for the game selection display. Unlike the other help
+ * sections, this text is only made available when the user enters
+ * help from this display.
  */
 static char const *listhelptitle = "Selection Key Commands";
 static char const *listhelptext =
-    "Select a configuration     Ret or Spc\n"
+    "Select a game              Ret or Spc\n"
     "Scroll selection           \342\206\221 \342\206\223\n"
     "Scroll one screen's worth  PgUp PgDn\n"
     "Scroll to top              Home\n"
@@ -31,8 +31,8 @@ static char const *listhelptext =
  */
 static int const titlelinex = 11;       /* x-coordinate of the screen title */
 static int const titleliney = 0;        /* y-coordinate of the screen title */
-static int const configlistx = 8;       /* coordinates of the configuration */
-static int const configlisty = 2;       /*    list's top-left corner */
+static int const gamelistx = 8;         /* coordinates of the game list's */
+static int const gamelisty = 2;         /*    top-left corner */
 static int const directionsx = 48;      /* coordinates of the temporary help */
 static int const directionsy = 10;      /*    box's top-left corner */
 static int const pageheight = 21;       /* lines in the list, sans header */
@@ -41,19 +41,19 @@ static int const pageheight = 21;       /* lines in the list, sans header */
  * Rendering the selection list.
  */
 
-/* Render a subset of configuration IDs as a list, starting at first
- * and showing count entries, with selected indicating the ID to
- * highlight. For configurations that have a solution recorded, the
- * size of the solution is shown, along with the shortest solution
- * size possible. (If the user's solution size is already the
- * shortest, then it is rendered in dim text.)
+/* Render a subset of game IDs as a list, starting at first and
+ * showing count entries, with selected indicating the ID to
+ * highlight. For games that have a solution recorded, the size of the
+ * solution is shown, along with the shortest solution size possible.
+ * (If the user's solution size is already the shortest, then it is
+ * rendered in dim text.)
  */
-static void drawconfiglist(int first, int count, int selected)
+static void drawgamelist(int first, int count, int selected)
 {
     solutioninfo const *solution;
     int id, best, i;
 
-    move(configlisty, configlistx);
+    move(gamelisty, gamelistx);
     textmode(MODEID_MARKED);
     if (getsolutioncount() > 0)
         addstr("Game    Moves    Best");
@@ -64,7 +64,7 @@ static void drawconfiglist(int first, int count, int selected)
     solution = getnearestsolution(first);
     for (i = 0 ; i < count ; ++i) {
         id = first + i;
-        move(configlisty + 1 + i, configlistx);
+        move(gamelisty + 1 + i, gamelistx);
         if (id == selected)
             textmode(MODEID_SELECTED);
         if (solution) {
@@ -96,11 +96,10 @@ static void drawlisttext(void)
     textmode(MODEID_NORMAL);
     if (getsolutioncount() == 0) {
         mvaddstr(directionsy + 0, directionsx, "Welcome to Brain Jam.");
-        mvaddstr(directionsy + 1, directionsx, "Select one of the");
-        mvaddstr(directionsy + 2, directionsx, "configurations from the");
-        mvaddstr(directionsy + 3, directionsx, "list and press Ret");
-        mvaddstr(directionsy + 4, directionsx, "to begin playing.");
-        mvaddstr(directionsy + 6, directionsx, "Press ? or F1 to view help.");
+        mvaddstr(directionsy + 1, directionsx, "Select one of the games");
+        mvaddstr(directionsy + 2, directionsx, "from the list and press Ret");
+        mvaddstr(directionsy + 3, directionsx, "to begin playing.");
+        mvaddstr(directionsy + 5, directionsx, "Press ? or F1 to view help.");
     } else if (getsolutioncount() < 3) {
         mvaddstr(directionsy + 0, directionsx, "The middle column shows");
         mvaddstr(directionsy + 1, directionsx, "the number of moves in");
@@ -115,9 +114,9 @@ static void drawlisttext(void)
  * Running the list display.
  */
 
-/* Return the entry in the (visible) configuration list that was
- * clicked on, or -1 if the most recent mouse event did not represent
- * a selection of a list entry.
+/* Return the entry in the (visible) game list that was clicked on, or
+ * -1 if the most recent mouse event did not represent a selection of
+ * a list entry.
  */
 static int findmouseselection(void)
 {
@@ -127,23 +126,23 @@ static int findmouseselection(void)
         return -1;
     if (!(event.bstate & BUTTON1_CLICKED))
         return -1;
-    if (event.y <= configlisty || event.y >= configlisty + pageheight)
+    if (event.y <= gamelisty || event.y >= gamelisty + pageheight)
         return -1;
-    if (event.x < configlistx || event.x >= directionsx)
+    if (event.x < gamelistx || event.x >= directionsx)
         return -1;
-    return event.y - configlisty - 1;
+    return event.y - gamelisty - 1;
 }
 
-/* Output a scrollable list of configurations, initially centered on a
- * chosen configuration, and manage the I/O for moving around and
- * selecting an entry. The return value is the configuration selected
- * by the user, or -1 if the user opted to exit the program instead.
+/* Output a scrollable list of games, initially centered on a chosen
+ * game, and manage the I/O for moving around and selecting an entry.
+ * The return value is the game ID selected by the user, or -1 if the
+ * user opted to exit the program instead.
  */
 static int runselectionloop(int selected)
 {
     int total, top, n;
 
-    total = getconfigurationcount();
+    total = getdeckcount();
     for (;;) {
         if (selected < 0)
             selected = 0;
@@ -156,7 +155,7 @@ static int runselectionloop(int selected)
             top = total - pageheight;
         if (validatesize()) {
             erase();
-            drawconfiglist(top, pageheight, selected);
+            drawgamelist(top, pageheight, selected);
             drawlisttext();
             move(23, 78);
             refresh();
@@ -196,10 +195,10 @@ static int runselectionloop(int selected)
 /* A wrapper around runselectionloop() that adds and then removes the
  * relevant help topic.
  */
-int curses_selectconfig(int configid)
+int curses_selectgame(int gameid)
 {
     curses_addhelpsection(listhelptitle, listhelptext, TRUE);
-    configid = runselectionloop(configid);
+    gameid = runselectionloop(gameid);
     curses_addhelpsection(listhelptitle, NULL, TRUE);
-    return configid;
+    return gameid;
 }

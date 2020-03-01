@@ -200,12 +200,12 @@ extern void stopanimation(animinfo *anim, int finish);
  */
 extern displaymap initlistdisplay(void);
 
-/* Set the list display to show the given configuration ID as the
- * current selection when it is next active.
+/* Set the list display to show the given game ID as the current
+ * selection when it is next active.
  */
-extern void initlistselection(int configid);
+extern void initlistselection(int gameid);
 
-/* Return the configuration ID that is currently selected.
+/* Return the game ID that is currently selected.
  */
 extern int getselection(void);
 

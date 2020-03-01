@@ -18,7 +18,7 @@ uimap curses_initializeui(void)
     ui.showsolutionwrite = NULL;
     ui.movecard = NULL;
     ui.changesettings = NULL;
-    ui.selectconfig = NULL;
+    ui.selectgame = NULL;
     ui.addhelpsection = NULL;
     return ui;
 }

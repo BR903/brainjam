@@ -14,7 +14,7 @@
 .PHONY: all install clean cclean
 
 # Define the configuration symbols.
-include ./cfg.mk
+-include ./cfg.mk
 
 # The name of the game.
 PROG := $(NAME)
@@ -48,7 +48,7 @@ endif
 
 # Each directory (including the top-level directory) is a module that
 # makes up the complete program.
-MODULES := . configs solutions files game redo curses sdl
+MODULES := . solutions files game redo curses sdl
 
 # Source files in all modules are built from this directory.
 override CPPFLAGS += -I.
@@ -106,7 +106,9 @@ install: $(PROG)
 # and generated resources.
 clean:
 	rm -f $(PROG) $(OBJ) $(OBJ:.o=.d) $(GENRES) ./version.h
+	$(MAKE) -C gamedata $@
 
 # Alternately, the cclean rule only removes the program and object files.
 cclean:
 	rm -f $(PROG) $(OBJ)
+	$(MAKE) -C gamedata $@

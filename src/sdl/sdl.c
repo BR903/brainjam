@@ -875,13 +875,12 @@ static int runoptionsdisplay(settingsinfo *settings)
 }
 
 /* Switch to the list display, and run the event loop until the user
- * either selects a configuration or exits the program. The return
- * value is number of the selected configuration, or -1 if the user
- * opted to exit.
+ * either selects a game or exits the program. The return value is the
+ * ID number of the selected game, or -1 if the user opted to exit.
  */
-static int runlistdisplay(int configid)
+static int runlistdisplay(int gameid)
 {
-    initlistselection(configid);
+    initlistselection(gameid);
     displayed = DISPLAY_LIST;
     updatedisplay = TRUE;
     for (;;) {
@@ -1127,23 +1126,23 @@ static int sdl_changesettings(settingsinfo *settings)
     return runoptionsdisplay(settings);
 }
 
-/* Run the configuration list UI and return the user's selection.
+/* Run the game selection UI and return the user's selection.
  * Within this function, the help section on the list display is
  * present.
  */
-static int sdl_selectconfig(int configid)
+static int sdl_selectgame(int gameid)
 {
     char buf[32];
 
     SDL_SetWindowTitle(window, "Brain Jam");
     sdl_addhelpsection(listcommandshelptitle, listcommandshelptext, TRUE);
-    configid = runlistdisplay(configid);
+    gameid = runlistdisplay(gameid);
     sdl_addhelpsection(listcommandshelptitle, NULL, TRUE);
-    if (configid >= 0) {
-        sprintf(buf, "Brain Jam - game %04d", configid);
+    if (gameid >= 0) {
+        sprintf(buf, "Brain Jam - game %04d", gameid);
         SDL_SetWindowTitle(window, buf);
     }
-    return configid;
+    return gameid;
 }
 
 /*
@@ -1175,7 +1174,7 @@ uimap sdl_initializeui(void)
     ui.showsolutionwrite = sdl_showsolutionwrite;
     ui.movecard = sdl_movecard;
     ui.changesettings = sdl_changesettings;
-    ui.selectconfig = sdl_selectconfig;
+    ui.selectgame = sdl_selectgame;
     ui.addhelpsection = sdl_addhelpsection;
     return ui;
 }
