@@ -16,6 +16,9 @@ echo
 echo "* Building the Windows binary distribution ..."
 echo
 
+# The list of DLLs that the windows binary depends on.
+export DLLS='libfreetype-6.dll SDL2_ttf.dll SDL2.dll libpng16-16.dll zlib1.dll'
+
 # Always rebuild from scratch.
 make clean
 ./src/windows/cross-build.sh configure --enable-windows
@@ -25,8 +28,7 @@ make clean
 mkdir $DIR
 cp -a src/brainjam $DIR/brainjam.exe
 cat ./README | sed 's/$/\r/' > $DIR/README.txt
-cp -a $(./src/windows/cross-build.sh exec /bin/bash -c \
-           'type -fp libfreetype-6.dll SDL2_ttf.dll SDL2.dll zlib1.dll') $DIR/.
+cp -a $(./src/windows/cross-build.sh exec /bin/bash -c "type -fp $DLLS") $DIR/.
 rm -f $ZIPFILE
 zip -r $ZIPFILE $DIR
 rm -r $DIR

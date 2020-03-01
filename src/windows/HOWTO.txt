@@ -14,14 +14,14 @@ executable on a Linux machine:
    orient those processes to your mingw32 tools.
 
 2. Install Windows versions of the dependent libraries. The Windows
-   binary depends on SDL2, SDL2_ttf, and zlib. (The fontconfig library
-   is not applicable, as the Windows API has its own method for font
-   management. ncurses is only available on Windows, since it doesn't
-   have any equivalent to termcap/terminfo.) The project home pages
-   for SDL2 and SDL2_ttf both provide zipfiles of development packages
-   for mingw32, with simple instructions for installation. For zlib,
-   the only pre-built packages I could find were for very old versions
-   of the library, so I had to grab the source tree and build and
+   binary depends on SDL2, SDL2_ttf, and libpng. (The fontconfig
+   library is not applicable, as the Windows API has its own method
+   for font management. ncurses is unavailable on Windows, since it
+   doesn't have any equivalent to termcap/terminfo.) The project home
+   pages for SDL2 and SDL2_ttf both provide zipfiles of development
+   packages for mingw32, with simple instructions for installation.
+   For libpng, the only pre-built packages I could find were for
+   32-bit versions, so I had to grab the source tree and build and
    install it myself.
 
 3. The Windows build script also uses a program called icotool. On a
@@ -58,7 +58,7 @@ executable on a Linux machine:
 
 6. Assuming the build succeeds, the resulting executable will be
    located at "src/brainjam". No, I couldn't be bothered to have it
-   correctly named. Just manually rename it to "src/brainjam.exe".
+   correctly named. Just manually rename it to "brainjam.exe".
 
 Congratulations! You now have a Windows binary. In order to use it,
 you need to copy it to your Windows machine, along with the DLLs that
