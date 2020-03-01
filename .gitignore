@@ -8,6 +8,7 @@ config.status
 autom4te.cache/*
 src/cfg.mk
 src/version.h
-src/configs/configs.bin
+src/gamedata/gamedata.bin
+src/gamedata/mkgames
 src/windows/*.ico
 src/brainjam
