@@ -1,3 +1,17 @@
+* 2020 Feb 29: version 0.9.1
+
+	This version has no real change to the program behavior -- just to
+	how it works internally. The biggest one is that images are now
+	stored as PNGs, not just in the source tree but also in the
+	binary. The program now has a dependency on libpng, but this has
+	turned out to be easier to deal with than having the build process
+	have a dependency on libpng.
+
+	The python scripts are no long a mandatory part of the build
+	process. One has been replaced with a short C program, and the
+	other has been made optional. Taking python out of the build
+	dependencies should simplify the process of making packages.
+
 * 2020 Feb 26: version 0.9.0
 
 	The encoding of the game state has been rewritten, in such a way

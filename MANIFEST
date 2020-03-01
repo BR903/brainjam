@@ -60,10 +60,14 @@ src/sdl/button.h
 src/sdl/font.c
 src/sdl/font.h
 src/sdl/game.c
+src/sdl/getpng.c
+src/sdl/getpng.h
 src/sdl/help.c
+src/sdl/imageids.h
 src/sdl/images.c
 src/sdl/images.h
 src/sdl/internal.h
+src/sdl/layout.h
 src/sdl/list.c
 src/sdl/scroll.c
 src/sdl/scroll.h
