@@ -22,11 +22,6 @@ if test "$check_prog" != "yes" ; then
   AC_MSG_ERROR([could not find sed on the path.])
 fi
 
-AC_CHECK_PROG(check_prog, [gzip], [yes], [no])
-if test "$check_prog" != "yes" ; then
-  AC_MSG_ERROR([could not find the gzip utility.])
-fi
-
 AC_CHECK_PROG(check_prog, [python], [yes], [no])
 if test "$check_prog" != "yes" ; then
   AC_MSG_ERROR([could not find the python interpreter.])
@@ -146,7 +141,7 @@ fi
 if test "$with_sdl" = "yes" ; then
   pkg-config sdl2 || AC_MSG_ERROR([the SDL2 library could not be found.])
   pkg-config SDL2_ttf || AC_MSG_ERROR([the SDL2_ttf library was not found.])
-  pkg-config zlib || AC_MSG_ERROR([zlib could not be found.])
+  pkg-config libpng || AC_MSG_ERROR([libpng could not be found.])
 fi
 
 if test "$with_fontconfig" = "yes" ; then

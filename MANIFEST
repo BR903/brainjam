@@ -75,7 +75,7 @@ src/sdl/zrwops.h
 src/sdl/banner.png
 src/sdl/cardset.png
 src/sdl/headline.png
-src/sdl/abmp.py
+src/sdl/images.png
 src/sdl/sprites/module.mk
 src/sdl/sprites/back.png
 src/sdl/sprites/bookmark.png

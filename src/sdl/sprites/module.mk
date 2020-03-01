@@ -14,8 +14,14 @@ SPRITELAYOUT := sdl/sprites/layout.txt
 SPRITELIST := \
     $(shell sed -n 's,^\([a-z][^ ]*\).*,sdl/sprites/\1.png,p' $(SPRITELAYOUT))
 
-GENRES += $(SPRITEOUTPUTS)
-SRCRES += $(SPRITELIST) sdl/sprites/mkimage.py
+# The outputs of these build rules are not included in the list of
+# generated resources, and they will not be removed by "make clean".
+# This is done to avoid having the build process require the python
+# image library to be installed. But if you do wish to have them
+# treated the same as other generated resources, uncomment the
+# following lines.
+#GENRES += $(SPRITEOUTPUTS)
+#SRCRES += $(SPRITELIST) sdl/sprites/mkimage.py
 
 # Compile the individual images into a single sprite sheet.
 $(SPRITEOUTPUTS): $(SPRITELAYOUT) $(SPRITELIST) sdl/sprites/mkimage.py
