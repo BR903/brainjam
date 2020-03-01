@@ -88,7 +88,7 @@ if test "$prefix" != "" && test -z "$TARGET" ; then
 fi
 
 # A 64-bit target requires a 64-bit host.
-if test "$proc" = "x86_64" && test "$(uname -m)" = "x86_64" ; then
+if test "$proc" = "x86_64" && test "$(uname -m)" != "x86_64" ; then
   fail "cannot build a 64-bit target"
 fi
 
