@@ -5,7 +5,7 @@
 set -e
 
 # Extract the current version number.
-VERSION=$(sed -n "s/^PACKAGE_VERSION='\(.*\)'$/\1/p" ./configure)
+VERSION=$(sed -n "s/^PACKAGE_VERSION='\(.*\)'$/\1/p" ./configure)a
 
 # Use the version number in the names of all the things.
 DIR=brainjam-${VERSION}
@@ -48,7 +48,14 @@ tar -czvf $TARFILE $DIR
 rm -r $DIR
 
 echo
+echo "* Creating the homebrew formula ..."
+echo
+
+TARSHA=$(sha256sum $TARFILE | sed 's/ .*//')
+sed "s/TARFILE/$TARFILE/;s/TARSHA/$TARSHA/" brainjam.rb.in >brainjam.rb
+
+echo
 echo "* Done."
 echo
-ls -lh $TARFILE $ZIPFILE
+ls -lh $TARFILE $ZIPFILE brainjam.rb
 echo

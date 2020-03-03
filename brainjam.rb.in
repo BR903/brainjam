@@ -1,0 +1,23 @@
+class Brainjam < Formula
+  desc "Solitaire card game with a full face-up layout"
+  homepage "https://www.muppetlabs.com/~breadbox/software/brainjam.html"
+  url "https://www.muppetlabs.com/~breadbox/pub/software/TARFILE"
+  sha256 "TARSHA"
+
+  depends_on "pkg-config" => :build
+  depends_on "fontconfig"
+  depends_on "libpng"
+  depends_on "sdl2"
+  depends_on "sdl2_ttf"
+
+  def install
+    system "./configure", "--prefix=#{prefix}",
+                          "--without-ncurses"
+    system "make", "install"
+  end
+
+  test do
+    assert shell_output("#{bin}/brainjam --version").include? version.to_s
+    system "#{bin}/brainjam", "--validate"
+  end
+end

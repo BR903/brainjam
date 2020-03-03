@@ -11,8 +11,6 @@ Before 1.0:
 * Create a debian package, to simplify installation for various Linux
   distro users.
 
-* Create a homebrew formula (?) to simplify Mac installation.
-
 * Is there an equivalent for Windows, without going the full
   wininstall route? Is it enough to just create a self-extracting zip?
 

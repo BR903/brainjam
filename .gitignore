@@ -6,6 +6,7 @@
 config.log
 config.status
 autom4te.cache/*
+brainjam.rb
 src/cfg.mk
 src/version.h
 src/gamedata/gamedata.bin
