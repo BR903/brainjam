@@ -318,8 +318,6 @@ static void shutdown(void)
  */
 static int startup(void)
 {
-    SDL_Surface *image;
-
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))
         return err("SDL_Init");
     atexit(SDL_Quit);
@@ -342,10 +340,12 @@ static int startup(void)
     SDL_StartTextInput();
 
     initializeimages();
+#if 0
+    SDL_Surface *image;
     image = getimagesurface(IMAGE_OLDICON);
     SDL_SetWindowIcon(window, image);
     SDL_FreeSurface(image);
-
+#endif
     return TRUE;
 }
 

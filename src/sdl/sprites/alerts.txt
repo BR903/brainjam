@@ -1,4 +1,4 @@
-# sdl/sprites/layout.txt: locations of parts of the sprite sheet
+# sdl/sprites/alerts.txt: locations of parts of the sprite sheet
 #
 # This data file lists the various small images that the program uses.
 # and provides a layout for placing them into a single image file. The
@@ -13,18 +13,7 @@
 # IMAGE      X   Y   W   H
 stuck        0   0  48  48
 done        48   0  48  48
-prev        96   0  16  16
-random      96  16  16  16
-next        96  32  16  16
-oldicon      0  48  32  32
-bookmark    32  48  48  32
-check       88  48  16  16
-star        88  64  16  16
-write        0  80  24  24
-back        24  80  24  24
-help        48  80  24  24
-quit        72  80  24  24
-clip         0 104  24  24
-shuffle     24 104  24  24
-options     48 104  24  24
-play        72 104  40  24
+bookmark     0  48  48  32
+write       48  48  24  24
+check       72  48  16  16
+star        72  64  16  16

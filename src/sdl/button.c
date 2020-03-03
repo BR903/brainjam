@@ -171,7 +171,7 @@ void makeimagebutton(button *pushbutton, int iconid)
 {
     SDL_Surface *image;
 
-    image = getimagesurface(iconid);
+    image = getbuttonicon(iconid);
     makegraphicbutton(pushbutton, image);
     SDL_FreeSurface(image);
 }
@@ -285,7 +285,7 @@ void makepopupbutton(button *popup, int iconid)
     Uint32 bkgndval, textval;
     int i;
 
-    graphic = getimagesurface(iconid);
+    graphic = getbuttonicon(iconid);
     popup->pos.x = 0;
     popup->pos.y = 0;
     popup->pos.w = graphic->w + _graph.margin;

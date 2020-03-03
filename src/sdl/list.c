@@ -33,7 +33,6 @@ static scrollbar scroll;
 static SDL_Rect bannerrect;             /* location of the banner graphic */
 static SDL_Rect headlinerect;           /* location of the headline text */
 static SDL_Rect listrect;               /* location of the game list */
-static SDL_Rect iconrect;               /* location of the game icon */
 static SDL_Rect scorearea;              /* location of the score display */
 static SDL_Point scorelabel;            /* position of score display text */
 static SDL_Point scorenumber;           /* position of score */
@@ -209,11 +208,6 @@ static SDL_Point setlayout(SDL_Point display)
     headlinerect.x = display.x < bannerrect.w ? display.x : bannerrect.w;
     headlinerect.x -= headlinerect.w;
     headlinerect.y = bannerrect.y + bannerrect.h - headlinerect.h;
-
-    iconrect.w = getimagewidth(IMAGE_OLDICON);
-    iconrect.h = getimageheight(IMAGE_OLDICON);
-    iconrect.x = display.x - iconrect.w - _graph.margin;
-    iconrect.y = bannerrect.y + bannerrect.h + _graph.margin;
 
     area.x = quitbutton.pos.w + 2 * _graph.margin;
     area.w = (display.x / 2) - area.x;
@@ -391,7 +385,6 @@ static void render(void)
     SDL_RenderCopy(_graph.renderer, headlinetexture, NULL, &headlinerect);
     rendergamelist();
     renderscorearea(selection);
-    renderimage(IMAGE_OLDICON, iconrect.x, iconrect.y);
 }
 
 /*
@@ -565,8 +558,7 @@ displaymap initlistdisplay(void)
     markersize.x = getimagewidth(IMAGE_STAR);
     markersize.y = getimageheight(IMAGE_STAR);
 
-    bannertexture = loadsplashgraphic();
-    headlinetexture = loadsplashheadline();
+    loadsplashgraphics(&bannertexture, &headlinetexture);
     SDL_QueryTexture(bannertexture, NULL, NULL, &bannerrect.w, &bannerrect.h);
     SDL_QueryTexture(headlinetexture, NULL, NULL,
                      &headlinerect.w, &headlinerect.h);

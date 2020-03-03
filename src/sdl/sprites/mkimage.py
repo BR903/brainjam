@@ -89,7 +89,6 @@ def writeidlist(images, out):
     for i in range(len(images)):
         out.write('#define IMAGE_%-*s %d\n' %
                   (spacing, images[i]['name'].upper(), i + 1))
-    out.write('#define IMAGE_%-*s %d\n' % (spacing, 'COUNT', len(images) + 1))
 
 # Output the initialization body of a C array definition containing
 # the coordinates of each image's position and size, in the order that
