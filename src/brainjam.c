@@ -152,19 +152,19 @@ static char const *branchingredotext =
  * The top-level game loop.
  */
 
-/* Set up a redo session. Load the previously saved session data and
- * solution (if any). If a solution exists separately from the
- * session, then the solution is "replayed" into the session data.
+/* Set up a game and a redo session. Lay out the cards for the given
+ * game, and load the previously saved session data and solution (if
+ * any). If a solution exists separately from the session, then the
+ * solution is "replayed" into the session data.
  */
-static redo_session *setupsession(gameplayinfo *gameplay)
+static redo_session *setupgame(gameplayinfo *gameplay)
 {
     redo_session *session;
     char buf[16];
 
     sprintf(buf, "session-%04d", gameplay->gameid);
     setsessionfilename(buf);
-    session = redo_beginsession(&gameplay->state,
-                                SIZE_REDO_STATE, CMPSIZE_REDO_STATE);
+    session = initializegame(gameplay);
     redo_setgraftbehavior(session, redo_graftandcopy);
     loadsession(session, gameplay);
 
@@ -195,8 +195,7 @@ static int playgame(int gameid)
     int f;
 
     thegame.gameid = gameid;
-    initializegame(&thegame);
-    session = setupsession(&thegame);
+    session = setupgame(&thegame);
     f = gameplayloop(&thegame, session);
     closesession(session);
     return f;
@@ -243,19 +242,13 @@ static void savesettings(void)
  */
 static void validatefiles(void)
 {
-    gameplayinfo thegame;
-    redo_session *session;
     solutioninfo *solutions;
-    int id;
+    gameplayinfo g;
 
     loadrcfile(getcurrentsettings());
     loadsolutionfile(&solutions);
-    for (id = 0 ; id < getdeckcount() ; ++id) {
-        thegame.gameid = id;
-        initializegame(&thegame);
-        session = setupsession(&thegame);
-        closesession(session);
-    }
+    for (g.gameid = 0 ; g.gameid < getdeckcount() ; ++g.gameid)
+        closesession(setupgame(&g));
     exit(EXIT_SUCCESS);
 }
 

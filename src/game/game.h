@@ -14,19 +14,11 @@
 #include "./decls.h"
 #include "redo/types.h"
 
-/* The redo state data consists of one byte per card, plus one byte
- * for each place. When comparing two states for equality, however,
- * only the card data should be used. The place data is for preserving
- * consistency in layout display.
- */
-#define SIZE_REDO_STATE (NCARDS + NPLACES)
-#define CMPSIZE_REDO_STATE (NCARDS)
-
 /* All the information used to run the game. It includes the data
  * involved in managing changes to the game state, as well as several
  * fields that provide quick access to information that is complexly
  * embedded in the game state. (Note that it is required that the
- * state and inplay fields immediately follow one another, as together
+ * covers and cardat fields immediately follow one another, as together
  * they comprise the redo state data.)
  */
 struct gameplayinfo {
@@ -35,9 +27,9 @@ struct gameplayinfo {
     int moveable;               /* bitmask of places with legal moves */
     int locked;                 /* bitmask of places with a move in progress */
     int endpoint;               /* true if the user has reached an endpoint */
-    position_t state[NCARDS];   /* the current location of each card */
-    card_t inplay[NPLACES];     /* the (top) card at each place */
     signed char depth[NPLACES]; /* the number of cards at each place */
+    card_t covers[NCARDS];      /* the card that each card is on top of */
+    card_t cardat[NPLACES];       /* the card in play at each place */
 };
 
 /* Enable or disable the auto-play feature. When the feature is
@@ -58,14 +50,25 @@ extern void setanimation(int enabled);
 extern void setbranching(int enabled);
 
 /* Initialize the game state to the beginning of a game. The
- * gameplay's gameid field is used to choose the deck to use.
+ * gameplay's gameid field is used to choose the deck to use. The
+ * return value is a new redo_session for this game.
  */
-extern void initializegame(gameplayinfo *gameplay);
+extern redo_session *initializegame(gameplayinfo *gameplay);
 
 /* Change the game state by making the given move. The return value is
  * false if the move is invalid.
  */
 extern int applymove(gameplayinfo *gameplay, movecmd_t movechar);
+
+/* Add the latest game state to the redo session. The new position is
+ * returned. This function is basically just a thin wrapper around
+ * redo_addposition() that avoids having to expose the details of
+ * recording the game state.
+ */
+extern redo_position *recordgamestate(gameplayinfo const *gameplay,
+                                      redo_session *session,
+                                      redo_position *fromposition,
+                                      int moveid, int checkequiv);
 
 /* Return the game state to the one associated with the given redo
  * position.

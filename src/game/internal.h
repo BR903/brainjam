@@ -36,4 +36,11 @@ extern void beginmove(gameplayinfo *gameplay, moveinfo move);
  */
 extern void finishmove(gameplayinfo *gameplay, moveinfo move);
 
+/* Update the saved state of a subtree. This function must be called
+ * after a graft has occurred, to avoid invalid values for the cardat
+ * portion of the saved state.
+ */
+extern void updategrafted(gameplayinfo *gameplay, redo_session *session,
+                          redo_position *position);
+
 #endif

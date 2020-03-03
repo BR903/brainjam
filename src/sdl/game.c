@@ -558,9 +558,9 @@ static void rendernavinfo(gameplayinfo const *gameplay,
     firstpos = NULL;
     secondpos = NULL;
     for (branch = position->next ; branch ; branch = branch->cdr) {
-        if (branch->move == cardtomoveid1(gameplay->inplay[place]))
+        if (branch->move == cardtomoveid1(gameplay->cardat[place]))
             firstpos = branch->p;
-        else if (branch->move == cardtomoveid2(gameplay->inplay[place]))
+        else if (branch->move == cardtomoveid2(gameplay->cardat[place]))
             secondpos = branch->p;
     }
 
@@ -669,14 +669,14 @@ static void render(void)
     showmoveable = shouldmarkmoveable(gameplay);
 
     for (i = FOUNDATION_PLACE_1ST ; i < FOUNDATION_PLACE_END ; ++i)
-        rendercard(gameplay->inplay[i], placeloc[i].x, placeloc[i].y);
+        rendercard(gameplay->cardat[i], placeloc[i].x, placeloc[i].y);
 
     for (i = RESERVE_PLACE_1ST ; i < RESERVE_PLACE_END ; ++i) {
         if (!gameplay->depth[i]) {
             rendercard(EMPTY_PLACE, placeloc[i].x, placeloc[i].y);
             continue;
         }
-        rendercard(gameplay->inplay[i], placeloc[i].x, placeloc[i].y);
+        rendercard(gameplay->cardat[i], placeloc[i].x, placeloc[i].y);
         rendernavinfo(gameplay, position, i, 0, showmoveable);
     }
 
@@ -685,11 +685,11 @@ static void render(void)
             rendercard(EMPTY_PLACE, placeloc[i].x, placeloc[i].y);
             continue;
         }
-        card = gameplay->inplay[i];
+        card = gameplay->cardat[i];
         n = gameplay->depth[i];
         while (n--) {
             stack[n] = card;
-            card = gameplay->state[cardtoindex(card)];
+            card = gameplay->covers[cardtoindex(card)];
         }
         for (n = 0 ; n < gameplay->depth[i] ; ++n)
             rendercard(stack[n],

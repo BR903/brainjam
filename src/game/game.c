@@ -36,7 +36,7 @@ moveinfo findmoveinfo(gameplayinfo const *gameplay, movecmd_t movecmd)
 
     move.cmd = movecmd;
     move.from = movecmdtoplace(movecmd);
-    move.card = gameplay->inplay[move.from];
+    move.card = gameplay->cardat[move.from];
     if (gameplay->depth[move.from] == 0)
         goto invalid;
 
@@ -48,12 +48,12 @@ moveinfo findmoveinfo(gameplayinfo const *gameplay, movecmd_t movecmd)
         goto invalid;
 
     move.to = foundationplace(card_suit(move.card));
-    if (gameplay->inplay[move.to] + RANK_INCR == move.card)
+    if (gameplay->cardat[move.to] + RANK_INCR == move.card)
         if (usefirst++)
             return move;
     for (move.to = TABLEAU_PLACE_1ST ; move.to < TABLEAU_PLACE_END ; ++move.to)
         if (move.from != move.to)
-            if (move.card + RANK_INCR == gameplay->inplay[move.to])
+            if (move.card + RANK_INCR == gameplay->cardat[move.to])
                 if (usefirst++)
                     return move;
     for (move.to = TABLEAU_PLACE_1ST ; move.to < TABLEAU_PLACE_END ; ++move.to)
@@ -82,7 +82,7 @@ movecmd_t moveidtocmd(gameplayinfo const *gameplay, int moveid)
     place_t p;
 
     for (p = MOVEABLE_PLACE_1ST ; p < MOVEABLE_PLACE_END ; ++p)
-        if (gameplay->inplay[p] == moveidtocard(moveid))
+        if (gameplay->cardat[p] == moveidtocard(moveid))
             return ismoveid1(moveid) ? placetomovecmd1(p)
                                      : placetomovecmd2(p);
     return 0;

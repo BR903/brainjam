@@ -170,9 +170,9 @@ static void drawnavinfo(gameplayinfo const *gameplay,
     unshiftpos = NULL;
     shiftpos = NULL;
     for (branch = position->next ; branch ; branch = branch->cdr) {
-        if (branch->move == cardtomoveid1(gameplay->inplay[place]))
+        if (branch->move == cardtomoveid1(gameplay->cardat[place]))
             unshiftpos = branch->p;
-        else if (branch->move == cardtomoveid2(gameplay->inplay[place]))
+        else if (branch->move == cardtomoveid2(gameplay->cardat[place]))
             shiftpos = branch->p;
     }
 
@@ -245,11 +245,11 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
     erase();
     for (i = 0 ; i < FOUNDATION_PLACE_COUNT ; ++i) {
         move(toprowy, foundationx + i * cardspacingx);
-        drawcard(gameplay->inplay[foundationplace(i)], MODEID_FOUNDATION);
+        drawcard(gameplay->cardat[foundationplace(i)], MODEID_FOUNDATION);
     }
     for (i = 0 ; i < RESERVE_PLACE_COUNT ; ++i) {
         move(toprowy, reservex + i * cardspacingx);
-        drawcard(gameplay->inplay[reserveplace(i)], MODEID_RESERVE);
+        drawcard(gameplay->cardat[reserveplace(i)], MODEID_RESERVE);
         move(toprowy + 1, reservex - 1 + i * cardspacingx);
         drawnavinfo(gameplay, position, reserveplace(i), showmoveable);
         if (showkeyguides)
@@ -260,11 +260,11 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
         y = gameplay->depth[tableauplace(i)];
         move(tableauy + y, tableaux + i * cardspacingx - 1);
         drawnavinfo(gameplay, position, tableauplace(i), showmoveable);
-        card = gameplay->inplay[tableauplace(i)];
+        card = gameplay->cardat[tableauplace(i)];
         while (y--) {
             move(tableauy + y, tableaux + i * cardspacingx);
             drawcard(card, MODEID_NORMAL);
-            card = gameplay->state[cardtoindex(card)];
+            card = gameplay->covers[cardtoindex(card)];
         }
         if (showkeyguides)
             mvaddch(tableauy - 1, tableaux + i * cardspacingx + 2,

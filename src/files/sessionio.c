@@ -69,9 +69,9 @@ static int loadsession_recurse(redo_position *position)
                  sessionfilename, ftell(fp));
             continue;
         }
-        position = redo_addposition(session, position, moveid,
-                        &gameplay->state, gameplay->endpoint,
-                        byte & BETTER_FLAG ? redo_checklater : redo_nocheck);
+        position = recordgamestate(gameplay, session, position, moveid,
+                                   byte & BETTER_FLAG ? redo_checklater
+                                                      : redo_nocheck);
     }
 }
 

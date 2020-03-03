@@ -170,16 +170,15 @@ int replaysolution(gameplayinfo *gameplay, redo_session *session)
                  gameplay->gameid, i, solution->text[i]);
             break;
         }
-        moveid = mkmoveid(gameplay->inplay[movecmdtoplace(solution->text[i])],
+        moveid = mkmoveid(gameplay->cardat[movecmdtoplace(solution->text[i])],
                           ismovecmd2(solution->text[i]));
         if (!applymove(gameplay, solution->text[i])) {
             warn("game %d: move %d: unable to apply move \"%c\" in solution",
                  gameplay->gameid, i, solution->text[i]);
             break;
         }
-        position = redo_addposition(session, position, moveid,
-                                    &gameplay->state, gameplay->endpoint,
-                                    redo_nocheck);
+        position = recordgamestate(gameplay, session, position,
+                                   moveid, redo_nocheck);
     }
 
     r = gameplay->endpoint;

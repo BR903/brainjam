@@ -1,6 +1,7 @@
 /* game/state.c: modifying game state in accordance with the rules.
  */
 
+#include <stddef.h>
 #include <string.h>
 #include "./gen.h"
 #include "./types.h"
@@ -9,6 +10,15 @@
 #include "redo/redo.h"
 #include "game/game.h"
 #include "internal.h"
+
+/* The redo state data consists of the combined covers and cardat
+ * arrays. When comparing two states for equality, however, only the
+ * covers array should be used. The cardat array is needed only for
+ * consistency in layout display.
+ */
+#define SIZE_REDO_STATE (sizeof(gameplayinfo) - offsetof(gameplayinfo, covers))
+#define CMPSIZE_REDO_STATE \
+    (offsetof(gameplayinfo, cardat) - offsetof(gameplayinfo, covers))
 
 /* Return all gameplay state to empty.
  */
@@ -19,14 +29,14 @@ static void clearstate(gameplayinfo *gameplay)
     gameplay->moveable = 0;
     gameplay->locked = 0;
     gameplay->endpoint = FALSE;
-    memset(gameplay->state, 0, sizeof gameplay->state);
+    memset(gameplay->covers, 0, sizeof gameplay->covers);
     memset(gameplay->depth, 0, sizeof gameplay->depth);
     for (i = 0 ; i < TABLEAU_PLACE_COUNT ; ++i)
-        gameplay->inplay[tableauplace(i)] = EMPTY_TABLEAU;
+        gameplay->cardat[tableauplace(i)] = EMPTY_TABLEAU;
     for (i = 0 ; i < RESERVE_PLACE_COUNT ; ++i)
-        gameplay->inplay[reserveplace(i)] = EMPTY_RESERVE;
+        gameplay->cardat[reserveplace(i)] = EMPTY_RESERVE;
     for (i = 0 ; i < FOUNDATION_PLACE_COUNT ; ++i)
-        gameplay->inplay[foundationplace(i)] = EMPTY_FOUNDATION(i);
+        gameplay->cardat[foundationplace(i)] = EMPTY_FOUNDATION(i);
 }
 
 /* Set up the initial layout for the current game. Cards are dealt
@@ -44,8 +54,8 @@ static void dealcards(gameplayinfo *gameplay, int gameid)
         x = i % TABLEAU_PLACE_COUNT;
         y = i / TABLEAU_PLACE_COUNT;
         place = tableauplace(x);
-        gameplay->state[cardtoindex(card)] = gameplay->inplay[place];
-        gameplay->inplay[place] = card;
+        gameplay->covers[cardtoindex(card)] = gameplay->cardat[place];
+        gameplay->cardat[place] = card;
         gameplay->depth[place] = y + 1;
     }
 }
@@ -102,9 +112,9 @@ void beginmove(gameplayinfo *gameplay, moveinfo move)
 
     n = cardtoindex(move.card);
     gameplay->locked |= (1 << move.from) | (1 << move.to);
-    gameplay->inplay[move.from] = gameplay->state[n];
+    gameplay->cardat[move.from] = gameplay->covers[n];
     --gameplay->depth[move.from];
-    gameplay->state[n] = EMPTY_PLACE;
+    gameplay->covers[n] = EMPTY_PLACE;
 }
 
 /* Complete the specified move that was begun by the beginmove()
@@ -113,12 +123,40 @@ void beginmove(gameplayinfo *gameplay, moveinfo move)
  */
 void finishmove(gameplayinfo *gameplay, moveinfo move)
 {
-    gameplay->state[cardtoindex(move.card)] = gameplay->inplay[move.to];
-    gameplay->inplay[move.to] = move.card;
+    gameplay->covers[cardtoindex(move.card)] = gameplay->cardat[move.to];
+    gameplay->cardat[move.to] = move.card;
     ++gameplay->depth[move.to];
     gameplay->locked &= ~((1 << move.from) | (1 << move.to));
     recalcmoveable(gameplay);
     gameplay->endpoint = isgamewon(gameplay);
+}
+
+/* Recursively update the saved state of a subtree. This function is
+ * called after a graft has occurred. The state of the grafted
+ * positions must necessarily match for the covers array, but can have
+ * different values for the cardat array. This function therefore
+ * recalculates the game state for every position in the subtree and
+ * updates the saved state with the correct cardat array contents.
+ */
+void updategrafted(gameplayinfo *gameplay, redo_session *session,
+                   redo_position *position)
+{
+    redo_branch *branch;
+
+    for (branch = position->next ; branch ; branch = branch->cdr) {
+        applymove(gameplay, moveidtocmd(gameplay, branch->move));
+        if (memcmp(redo_getsavedstate(branch->p), &gameplay->covers,
+                   SIZE_REDO_STATE)) {
+            if (memcmp(redo_getsavedstate(branch->p), &gameplay->covers,
+                       CMPSIZE_REDO_STATE)) {
+                warn("ERROR: applying move at count %d"
+                     " produced different state!", branch->p->movecount);
+            }
+            redo_updatesavedstate(session, branch->p, &gameplay->covers);
+        }
+        updategrafted(gameplay, session, branch->p);
+        restoresavedstate(gameplay, position);
+    }
 }
 
 /*
@@ -127,13 +165,15 @@ void finishmove(gameplayinfo *gameplay, moveinfo move)
 
 /* Initialize the gameplay game state to the starting point of a game.
  * All cards are dealt to the tableau, and the foundation and reserves
- * are set to empty.
+ * are set to empty. Return a newly started redo session.
  */
-void initializegame(gameplayinfo *gameplay)
+redo_session *initializegame(gameplayinfo *gameplay)
 {
     clearstate(gameplay);
     dealcards(gameplay, gameplay->gameid);
     recalcmoveable(gameplay);
+    return redo_beginsession(&gameplay->covers,
+                             SIZE_REDO_STATE, CMPSIZE_REDO_STATE);
 }
 
 /* Apply a move command to the game state directly, without any UI
@@ -151,10 +191,21 @@ int applymove(gameplayinfo *gameplay, movecmd_t movecmd)
     return TRUE;
 }
 
+/* Call redo_addposition() for the given game state.
+ */
+redo_position *recordgamestate(gameplayinfo const *gameplay,
+                               redo_session *session,
+                               redo_position *fromposition,
+                               int moveid, int checkequiv)
+{
+    return redo_addposition(session, fromposition, moveid,
+                            &gameplay->covers, gameplay->endpoint, checkequiv);
+}
+
 /* Copy a saved game state back into the active game. The game state
  * is formatted as a byte array, one entry per card with each entry
  * identifying the card it covers. The in-memory state data also
- * contains the inplay array, so it is restored automatically as well
+ * contains the cardat array, so it is restored automatically as well
  * by the memcpy(). The depth field is not stored with the state,
  * however, so it needs need to be updated manually.
  */
@@ -164,13 +215,13 @@ void restoresavedstate(gameplayinfo *gameplay, redo_position const *position)
     int i;
 
     clearstate(gameplay);
-    memcpy(gameplay->state, redo_getsavedstate(position), SIZE_REDO_STATE);
+    memcpy(&gameplay->covers, redo_getsavedstate(position), SIZE_REDO_STATE);
     for (i = 0 ; i < NPLACES ; ++i) {
         gameplay->depth[i] = 0;
-        card = gameplay->inplay[i];
+        card = gameplay->cardat[i];
         while (!isemptycard(card)) {
             ++gameplay->depth[i];
-            card = gameplay->state[cardtoindex(card)];
+            card = gameplay->covers[cardtoindex(card)];
         }
     }
     recalcmoveable(gameplay);
