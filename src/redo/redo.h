@@ -151,7 +151,7 @@ extern int redo_duplicatepath(redo_session *session,
  * creating extra state data (i.e. with a non-zero cmpsize argument),
  * then this function will silently do nothing.
  */
-extern void redo_updatesavedstate(redo_session *session,
+extern void redo_updatesavedstate(redo_session const *session,
                                   redo_position *position, void const *state);
 
 /* Examine every position in the session, looking for ones that have

@@ -454,7 +454,7 @@ void const *redo_getsavedstate(redo_position const *position)
 
 /* Update the state data without error checking.
  */
-void redo_updatesavedstate(redo_session *session,
+void redo_updatesavedstate(redo_session const *session,
                            redo_position *position, void const *state)
 {
     saveextrastate(session, position, state);
