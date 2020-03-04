@@ -6,12 +6,13 @@
 #
 # The list of top-level targets:
 #
-# make [all]   = build the program binary
-# make install = install the program
-# make clean   = delete all files created by the build process
-# make cclean  = delete created object files but keep created data files
+# make [all]     = build the program binary
+# make check     = build and run the validation program
+# make install   = install the program
+# make clean     = delete all files created by the build process
+# make cclean    = delete created object files but keep created data files
 
-.PHONY: all install clean cclean
+.PHONY: all check install clean cclean
 
 # Define the configuration symbols.
 -include ./cfg.mk
@@ -95,6 +96,10 @@ endif
 # The program is built from the object files.
 $(PROG): $(OBJ)
 
+# The test program returns failure if it detects errors in the game logic.
+check: $(PROG)
+	$(MAKE) -C test $@
+
 # The install rule copies the program and the man page.
 install: $(PROG)
 	install -d $(bindir)
@@ -107,8 +112,10 @@ install: $(PROG)
 clean:
 	rm -f $(PROG) $(OBJ) $(OBJ:.o=.d) $(GENRES) ./version.h
 	$(MAKE) -C gamedata $@
+	$(MAKE) -C test $@
 
 # Alternately, the cclean rule only removes the program and object files.
 cclean:
 	rm -f $(PROG) $(OBJ)
 	$(MAKE) -C gamedata $@
+	$(MAKE) -C test $@

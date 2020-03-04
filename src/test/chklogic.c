@@ -1,12 +1,12 @@
-/* game/validate.c: validation testing of game logic.
+/* test/chklogic.c: validation testing of game logic.
  */
 
 #include <stdio.h>
 #include <string.h>
 #include "./gen.h"
 #include "./decls.h"
+#include "redo/redo.h"
 #include "game/game.h"
-#include "internal.h"
 
 /* Return a string representing a card suit.
  */
@@ -279,13 +279,9 @@ static int validatemoveable(gameplayinfo const *gameplay)
     return errors;
 }
 
-/*
- * External function.
+/* Report any inconsistencies in the game state to the user.
  */
-
-/* Report inconsistencies in the game state to the user.
- */
-int validategamestate(gameplayinfo const *gameplay)
+static int validategamestate(gameplayinfo const *gameplay)
 {
     if (gameplay->locked) {
         warn("error: validategamestate called while game state is locked!");
@@ -293,4 +289,74 @@ int validategamestate(gameplayinfo const *gameplay)
     }
     return validatelayout(gameplay) + validateendpoint(gameplay) +
            validatemoveable(gameplay);
+}
+
+/*
+ * Test cases.
+ */
+
+/* Initialize a sample game and run through all the moves in a
+ * solution, verifying that the game state never enters an
+ * inconsistent state. Then repeat the same checks when running
+ * backwards through the saved solutions. Errors and inconsistencies
+ * are reported on stderr to the user. The return value is the number
+ * of errors seen throughout the entire test.
+ */
+int main(void)
+{
+    char const *prefix = "sample game solution test";
+    int const gameid = 223;
+    char const *solution =
+        "hcgggggckgfhhgjaaaaaeeeeelkifccccjggjkFFfkjccfkjgggkjFFfkjffaaaBBbbk"
+        "jbbbfffibBjhhjihhlkcccckjiDDDDdddbbbbbbddddeeeijklcdaagggfffhhhhhhh";
+    signed char depths[] = { 7, 7, 7, 7, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    gameplayinfo thegame;
+    redo_session *session;
+    redo_position *position;
+    int errors, i, f;
+
+    errors = 0;
+
+    thegame.gameid = gameid;
+    session = initializegame(&thegame);
+    if (memcmp(thegame.depth, depths, sizeof thegame.depth)) {
+        warn("%s: initializegame created invalid initial state", prefix);
+        ++errors;
+    }
+
+    position = redo_getfirstposition(session);
+    for (i = 0 ; solution[i] ; ++i) {
+        f = applymove(&thegame, solution[i]);
+        if (!f) {
+            warn("%s: move #%d (%c) could not be made in sample game",
+                 prefix, i, solution[i]);
+            ++errors;
+            break;
+        }
+        position = recordgamestate(&thegame, session, position,
+                                   solution[i], redo_nocheck);
+        errors += validategamestate(&thegame);
+    }
+
+    if (!thegame.endpoint) {
+        warn("%s: sample game solution finished without completing game",
+             prefix);
+        ++errors;
+    }
+
+    while (position->prev) {
+        position = position->prev;
+        restoresavedstate(&thegame, position);
+        errors += validategamestate(&thegame);
+    }
+    if (memcmp(thegame.depth, depths, sizeof thegame.depth)) {
+        warn("%s: restored game not in valid initial state", prefix);
+        ++errors;
+    }
+
+    redo_endsession(session);
+    if (errors)
+        warn("Total errors: %d", errors);
+    return errors;
 }

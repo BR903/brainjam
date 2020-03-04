@@ -7,14 +7,15 @@
 # The list of targets:
 #
 # make [all]     = build the program binary
+# make check     = build and run a validation program
 # make install   = install the program and man page
 # make clean     = delete all files created by the build process
 # make distclean = delete files created by the build and configure processes
 
-.PHONY: all install clean distclean
+.PHONY: all check install clean distclean
 
 # The usual targets are delegated to the src makefile.
-all install clean:
+all check install clean:
 	$(MAKE) -C src $@
 
 # "make distclean" also cleans up the detritus left behind by ./configure.

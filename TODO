@@ -5,9 +5,6 @@ Before 1.0:
 
 * The game needs its own icon, instead of using the old windows icon.
 
-* Add unit tests for the game logic code. This will probably also
-  require new Makefile rules.
-
 * Create a debian package, to simplify installation for various Linux
   distro users.
 

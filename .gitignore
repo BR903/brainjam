@@ -11,5 +11,6 @@ src/cfg.mk
 src/version.h
 src/gamedata/gamedata.bin
 src/gamedata/mkgames
+src/test/chklogic
 src/windows/*.ico
 src/brainjam
