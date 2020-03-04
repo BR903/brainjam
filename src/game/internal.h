@@ -43,4 +43,10 @@ extern void finishmove(gameplayinfo *gameplay, moveinfo move);
 extern void updategrafted(gameplayinfo *gameplay, redo_session *session,
                           redo_position *position);
 
+/* Examine the game state and report on any inconsistencies in the
+ * game state. The return value is the number of inconsistencies
+ * identified, or zero if the game state is valid.
+ */
+extern int validategamestate(gameplayinfo const *gameplay);
+
 #endif
