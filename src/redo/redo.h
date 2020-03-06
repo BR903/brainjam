@@ -163,9 +163,10 @@ extern void redo_updatesavedstate(redo_session const *session,
  * their better fields re-initialized. (The purpose of this function
  * is to allow a serializer to omit the value of the better fields,
  * merely noting which ones have a non-NULL value. This function can
- * then recreate the values on deserialization.)
+ * then recreate the values on deserialization.) The return value is
+ * the number of better pointers that were set.
  */
-extern void redo_setbetterfields(redo_session const *session);
+extern int redo_setbetterfields(redo_session const *session);
 
 /* Return true if positions have been added to or removed from the
  * session since it was initialized, or since

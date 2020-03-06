@@ -151,7 +151,7 @@ static int notintable(redo_session const *session, unsigned short value)
     if (!session->hashtable)
         return 0;
     n = value % hashtablebitsize;
-    return session->hashtable[n / 8] & (1 << n % 8);
+    return !(session->hashtable[n / 8] & (1 << n % 8));
 }
 
 /*
@@ -758,10 +758,12 @@ int redo_duplicatepath(redo_session *session,
 /* Find all positions with setbetter flagged and initialize their
  * better field.
  */
-void redo_setbetterfields(redo_session const *session)
+int redo_setbetterfields(redo_session const *session)
 {
     redo_position *position, *other;
+    int count;
 
+    count = 0;
     for (position = session->parray ; position ; position = position->prev) {
         for ( ; position->inarray ; position = incpos(session, position)) {
             if (!position->inuse)
@@ -769,6 +771,8 @@ void redo_setbetterfields(redo_session const *session)
             if (position->setbetter) {
                 other = checkforequiv(session, redo_getsavedstate(position));
                 position->better = other;
+                if (other)
+                    ++count;
                 if (other && other->movecount > position->movecount) {
                     position->better = NULL;
                     if (!other->better) {
@@ -780,6 +784,7 @@ void redo_setbetterfields(redo_session const *session)
             }
         }
     }
+    return count;
 }
 
 /* Return the change flag's current value.
