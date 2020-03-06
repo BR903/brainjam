@@ -75,6 +75,10 @@ extern int redo_setgraftbehavior(redo_session *session, int grafting);
  */
 extern redo_position *redo_getfirstposition(redo_session const *session);
 
+/* Return the number of positions stored in the session.
+ */
+extern int redo_getsessionsize(redo_session const *session);
+
 /* Return a read-only pointer to the copied state associated with a
  * position.
  */
