@@ -1,3 +1,14 @@
+* 2020 Mar 05: version 0.9.2
+
+	Code tests are now provided to validate the game logic code, and
+	can be run via the makefile using "make check".
+
+	Performance of the redo library was improved.
+
+	The images that are compiled into the program have been
+	reorganized, and there have been some minor changes to improve
+	the code organization.
+
 * 2020 Feb 29: version 0.9.1
 
 	This version has no real change to the program behavior -- just to

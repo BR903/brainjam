@@ -5,7 +5,7 @@
 set -e
 
 # Extract the current version number.
-VERSION=$(sed -n "s/^PACKAGE_VERSION='\(.*\)'$/\1/p" ./configure)a
+VERSION=$(sed -n "s/^PACKAGE_VERSION='\(.*\)'$/\1/p" ./configure)
 
 # Use the version number in the names of all the things.
 DIR=brainjam-${VERSION}

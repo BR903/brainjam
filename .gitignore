@@ -3,6 +3,7 @@
 *.a
 *.tar.gz
 *.zip
+gmon.out
 config.log
 config.status
 autom4te.cache/*
