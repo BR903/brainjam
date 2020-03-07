@@ -205,7 +205,7 @@ fontrefinfo *findnamedfont(char const *fontname)
     if (lookupfont(fontref))
         return fontref;
 
-    deallocate(fontref);
+    deallocatefontref(fontref);
     return NULL;
 }
 

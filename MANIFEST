@@ -104,5 +104,7 @@ src/solutions/module.mk
 src/solutions/select.c
 src/solutions/solutions.c
 src/solutions/solutions.h
+src/test/Makefile
+src/test/chklogic.c
 src/windows/windows.mk
 src/windows/cross-build.sh
