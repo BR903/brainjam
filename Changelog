@@ -1,3 +1,14 @@
+* 2020 Mar 07: version 0.9.3
+
+	This is a very minor update. But, there was a logic bug in the
+	redo library modification, and I believe that it could have broken
+	the better field in the saved session data. So, I didn't want to
+	leave that code out in the wild for longer than necessary.
+
+	This version is also the first to provide a debian package. This,
+	along with the homebrew formula, should make it easier for people
+	to install, and to uninstall.
+
 * 2020 Mar 05: version 0.9.2
 
 	Code tests are now provided to validate the game logic code, and

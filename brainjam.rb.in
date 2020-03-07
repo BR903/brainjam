@@ -1,7 +1,7 @@
 class Brainjam < Formula
   desc "Solitaire card game with a full face-up layout"
   homepage "https://www.muppetlabs.com/~breadbox/software/brainjam.html"
-  url "https://www.muppetlabs.com/~breadbox/pub/software/TARFILE"
+  url "https://www.muppetlabs.com/~breadbox/pub/software/brainjam/TARFILE"
   sha256 "TARSHA"
 
   depends_on "pkg-config" => :build

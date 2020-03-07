@@ -5,9 +5,6 @@ Before 1.0:
 
 * The game needs its own icon, instead of using the old windows icon.
 
-* Create a debian package, to simplify installation for various Linux
-  distro users.
-
 * Is there an equivalent for Windows, without going the full
   wininstall route? Is it enough to just create a self-extracting zip?
 
