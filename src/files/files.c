@@ -41,7 +41,7 @@ static int forcereadonly = FALSE;
  */
 static int createdir(char const *path, int mode)
 {
-#ifdef _WIN32
+#if _WIN32
     (void)mode;
     return mkdir(path);
 #else
@@ -59,7 +59,7 @@ static int dirsepindex(char const *path)
     char const *p;
     char const *pp;
 
-#ifdef _WIN32
+#if _WIN32
     pp = strrchr(path, '\\');
 #else
     pp = NULL;
@@ -157,7 +157,7 @@ static char *getdirfrompath(char const *path)
  */
 static int findroots(char **psettingsroot, char **pdataroot);
 
-#if defined __APPLE__
+#if __APPLE__
 
 /* The application directory is in a standard location under the
  * user's home directory.
@@ -174,7 +174,7 @@ static int findroots(char **psettingsroot, char **pdataroot)
     return TRUE;
 }
 
-#elif defined _WIN32
+#elif _WIN32
 
 /* The application directory should be identified by the APPDATA
  * environment variable.
