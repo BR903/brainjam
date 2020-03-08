@@ -25,13 +25,14 @@ navigate the user interface.
 .TP
 \fB\-C\fR, \fB\-\-cfgdir\fR=\fIDIR\fR
 Use \fIDIR\fR as the directory for storing the program's settings.
-The default directory is \fI~/.config/brainjam\fR.
+The default directory on a Unix platform is \fI~/.config/brainjam\fR.
 .TP
 \fB\-D\fR, \fB\-\-datadir\fR=\fIDIR\fR
 Use \fIDIR\fR as the user's data directory for storing session data.
-The default directory is \fI~/.local/share/brainjam\fR. Note that
-using this option automatically sets \fIDIR\fR as the directory for
-the program's settings as well, unless \fI\-\-cfgdir\fR is also used.
+The default directory on a Unix platform is
+\fI~/.local/share/brainjam\fR. Note that using this option
+automatically sets \fIDIR\fR as the directory for the program's
+settings as well, unless \fI\-\-cfgdir\fR is also used.
 .TP
 \fB\-t\fR, \fB\-\-textmode\fR
 Force the program to run in the terminal. The default behavior is to
@@ -43,8 +44,12 @@ Run in read-only mode. No data files will be changed, and no game
 progress will be preserved.
 .TP
 .B \-\-validate
-Validate data files and exit. Any invalid files in the user's data
-directory will generate warning messages.
+Examine the user's data files without starting the user interface.
+Any invalid files in the user's data directory will generate warning
+messages.
+.TP
+.B \-\-dirs
+Display the program's settings and data directories and exit.
 .TP
 .B \-\-help
 Display help and exit.

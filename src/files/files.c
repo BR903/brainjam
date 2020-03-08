@@ -1,6 +1,12 @@
 /* files/files.c: managing the program's directories.
+ *
+ * The bulk of the code in this file is platform-specific. It is easy
+ * to write platform-independent file I/O code. It is harder to write
+ * platform-independent directory I/O code. Setting up default
+ * directories is even harder.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -27,7 +33,7 @@ static int readonly = FALSE;
 static int forcereadonly = FALSE;
 
 /*
- * Platform-specific code.
+ * Platform-specific directory management.
  */
 
 /* Create a directory. This function hides the fact that the mkdir()
@@ -35,7 +41,7 @@ static int forcereadonly = FALSE;
  */
 static int createdir(char const *path, int mode)
 {
-#ifdef WIN32
+#ifdef _WIN32
     (void)mode;
     return mkdir(path);
 #else
@@ -53,7 +59,7 @@ static int dirsepindex(char const *path)
     char const *p;
     char const *pp;
 
-#ifdef WIN32
+#ifdef _WIN32
     pp = strrchr(path, '\\');
 #else
     pp = NULL;
@@ -134,24 +140,77 @@ static char *getdirfrompath(char const *path)
 }
 
 /*
- * Directory selection.
+ * Platform-specific paths.
+ *
+ * Each platform has a different default for where applications can
+ * set up per-user writeable directories. Each platform also has a
+ * different default for how to find the path to those directories. So
+ * the function getroots() is completely different for each target.
  */
 
-/* Select program directories, specifically settingsdir for storing
- * the user's settings, and datadir for storing the user's solutions
- * and sessions. These directories will be initialized by the standard
- * XDG_CONFIG_HOME and XDG_DATA_HOME values. The return value is false
- * if these environment variables are unset and their default values
- * cannot be determined. If their values are set but the directories
- * they point to do not exist (or are not accessible), then
- * settingsdir and/or datadir will still be NULL when this function
- * returns.
+/* Locate the root directories for applications to create directories
+ * for storing settings and user data. The return value is false if
+ * the root directories could not be located. Otherwise, the caller is
+ * responsible for freeing the returned strings. Note that the
+ * function does not verify that the directories exist, or that they
+ * are useable.
  */
-static int choosedirectories(void)
+static int findroots(char **psettingsroot, char **pdataroot);
+
+#if defined __APPLE__
+
+/* The application directory is in a standard location under the
+ * user's home directory.
+ */
+static int findroots(char **psettingsroot, char **pdataroot)
 {
-    char *settingsroot;
-    char *dataroot;
-    char *homedir = NULL;
+    char const *homedir;
+
+    homedir = getenv("HOME");
+    if (!homedir)
+        return FALSE;
+    *pdataroot = fmtallocate("%s/Library/Application Support", homedir);
+    *psettingsroot = strallocate(*pdataroot);
+    return TRUE;
+}
+
+#elif defined _WIN32
+
+/* The application directory should be identified by the APPDATA
+ * environment variable.
+ */
+static int findroots(char **psettingsroot, char **pdataroot)
+{
+    char const *dataroot;
+    char const *homedir;
+
+    dataroot = getenv("APPDATA");
+    if (dataroot) {
+        *pdataroot = strallocate(dataroot);
+    } else {
+        homedir = getenv("HOMEPATH");
+        if (!homedir) {
+            homedir = getenv("HOME");
+            if (!homedir)
+                return FALSE;
+        }
+        *pdataroot = fmtallocate("%s\\Application Data", homedir);
+    }
+    *psettingsroot = strallocate(*pdataroot);
+    return TRUE;
+}
+
+#else
+
+/* The XDG_CONFIG_HOME and XDG_DATA_HOME environment variables
+ * identify the root directories for configuration files and user data
+ * files, respectively.
+ */
+static int findroots(char **psettingsroot, char **pdataroot)
+{
+    char const *settingsroot;
+    char const *dataroot;
+    char const *homedir = NULL;
 
     settingsroot = getenv("XDG_CONFIG_HOME");
     dataroot = getenv("XDG_DATA_HOME");
@@ -161,32 +220,50 @@ static int choosedirectories(void)
             return FALSE;
     }
 
-    if (!settingsdir) {
-        if (settingsroot)
-            settingsroot = strallocate(settingsroot);
-        else
-            settingsroot = fmtallocate("%s/.config", homedir);
-        settingsdir = verifydirindir(settingsroot, "brainjam");
-        deallocate(settingsroot);
-    }
+    if (settingsroot)
+        *psettingsroot = strallocate(settingsroot);
+    else
+        *psettingsroot = fmtallocate("%s/.config", homedir);
+    if (dataroot)
+        *pdataroot = strallocate(dataroot);
+    else
+        *pdataroot = fmtallocate("%s/.local/share", homedir);
+    return TRUE;
+}
 
-    if (!datadir) {
-        if (dataroot)
-            dataroot = strallocate(dataroot);
-        else
-            dataroot = fmtallocate("%s/.local/share", homedir);
-        datadir = verifydirindir(dataroot, "brainjam");
-        deallocate(dataroot);
-    }
+#endif
 
+/*
+ * Directory selection.
+ */
+
+/* Determine values for the settingsdir and datadir variables, for
+ * storing the user's configuration data and session data,
+ * respectively. False is returned if no proper values for these
+ * directories could not be found. If this function returns a true
+ * value, however, it is still possible for settingsdir or datadir to
+ * still be set to NULL. This indicates that appropriate values were
+ * determined but the directories could not be accessed, and therefore
+ * instead of finding directories elsewhere, the program should forgo
+ * writing data.
+ */
+static int choosedirectories(void)
+{
+    char *settingsroot;
+    char *dataroot;
+
+    if (!findroots(&settingsroot, &dataroot))
+        return FALSE;
+    settingsdir = verifydirindir(settingsroot, "brainjam");
+    datadir = verifydirindir(dataroot, "brainjam");
+    deallocate(settingsroot);
+    deallocate(dataroot);
     return TRUE;
 }
 
 /* Select program directories when the user doesn't have a home
  * directory, by locating the directory of the executable and
- * attempting to create a save directory there. (This strategy is
- * aimed at Windows users, who are the only ones likely to not have a
- * HOME environment variable set.)
+ * attempting to create a save directory there.
  */
 static int choosehomelessdirectories(char const *executablepath)
 {
@@ -284,4 +361,12 @@ int setfiledirectories(char const *overridecfgdir, char const *overridedatadir,
     if (!settingsdir || !datadir)
         forcereadonly = TRUE;
     return TRUE;
+}
+
+/* Print the program's chosen directories on standard output.
+ */
+void printfiledirectories(void)
+{
+    printf("configuration data: %s\n", settingsdir ? settingsdir : "(unset)");
+    printf("saved session data: %s\n", datadir ? datadir : "(unset)");
 }

@@ -96,7 +96,7 @@ static int lookupfont(fontrefinfo *fontref)
     return result;
 }
 
-#elif WIN32  /* using the Windows API */
+#elif _WIN32  /* using the Windows API */
 
 #include <windows.h>
 

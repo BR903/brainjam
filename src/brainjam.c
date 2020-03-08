@@ -249,7 +249,6 @@ static void validatefiles(void)
     loadsolutionfile(&solutions);
     for (g.gameid = 0 ; g.gameid < getdeckcount() ; ++g.gameid)
         closesession(setupgame(&g));
-    exit(EXIT_SUCCESS);
 }
 
 /*
@@ -284,6 +283,7 @@ static void yowzitch(void)
         "  -t, --textmode        Use the non-graphical interface\n"
         "  -r, --readonly        Don't modify any files\n"
         "      --validate        Check user files for invalid data and exit\n"
+        "      --dirs            Display the output directories and exit\n"
         "      --help            Display this help text and exit\n"
         "      --version         Display program version and exit\n"
         "      --license         Display program license and exit\n"
@@ -319,6 +319,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
         { "textmode", no_argument, NULL, 't' },
         { "readonly", no_argument, NULL, 'r' },
         { "validate", no_argument, NULL, 'v' },
+        { "dirs", no_argument, NULL, 'd' },
         { "help", no_argument, NULL, 'H' },
         { "version", no_argument, NULL, 'V' },
         { "license", no_argument, NULL, 'L' },
@@ -329,6 +330,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
     char *cfgdir = NULL;
     char *datadir = NULL;
     int validateonly = FALSE;
+    int dirdisplayonly = FALSE;
     char *p;
     long id;
     int ch;
@@ -340,6 +342,7 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
           case 't':     settings->forcetextmode = TRUE;         break;
           case 'r':     settings->readonly = TRUE;              break;
           case 'v':     validateonly = TRUE;                    break;
+          case 'd':     dirdisplayonly = TRUE;                  break;
           case 'H':     yowzitch();
           case 'V':     printflowedtext(versiontext);
           case 'L':     printflowedtext(licensetext);
@@ -371,8 +374,15 @@ static int readcmdline(int argc, char *argv[], settingsinfo *settings)
     if (settings->readonly == TRUE || validateonly)
         setreadonly(TRUE);
     setfiledirectories(cfgdir, datadir, argv[0]);
-    if (validateonly)
+    if (validateonly) {
         validatefiles();
+        exit(EXIT_SUCCESS);
+    }
+    if (dirdisplayonly) {
+        printfiledirectories();
+        exit(EXIT_SUCCESS);
+    }
+
     return TRUE;
 }
 

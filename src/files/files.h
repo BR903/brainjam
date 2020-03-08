@@ -32,6 +32,11 @@
 extern int setfiledirectories(char const *cfgdir, char const *datadir,
                               char const *executable);
 
+/* Output the directories on standard output. (This functions is
+ * mainly provided to help the user with configuration issues.)
+ */
+extern void printfiledirectories(void);
+
 /* Set read-only mode on or off. When in read-only mode, all functions
  * that write to files will quietly fail.
  */
