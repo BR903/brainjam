@@ -6,6 +6,18 @@
  * the end of the data, so that its size can be easily computed.
  */
 
+#ifndef _incbin_h_
+#define _incbin_h_
+
+/* Some platforms prefix exported symbols with an underscore. Some
+ * platforms do not.
+ */
+#if __APPLE__ || (_WIN32 && !_WIN64)
+#define _ "_"
+#else
+#define _
+#endif
+
 /* The INCBIN macro takes three arguments. The first argument is the
  * filename that contains the data. The second argument is a symbol
  * that will be used as the name of the variable that points to the
@@ -15,20 +27,12 @@
  * never be dereferenced; it is only used for computing the size of
  * the data.
  */
-#ifdef __APPLE__
 #define INCBIN(filename, symbol, endsymbol)             \
     extern unsigned char const symbol[], endsymbol[];   \
-    __asm__(".globl _" #symbol "\n"                     \
-            ".globl _" #endsymbol "\n"                  \
-            "_" #symbol ":\n"                           \
+    __asm__(".globl " _ #symbol "\n"                    \
+            ".globl " _ #endsymbol "\n"                 \
+            _ #symbol ":\n"                             \
             ".incbin " #filename "\n"                   \
-            "_" #endsymbol ":\n")
-#else
-#define INCBIN(filename, symbol, endsymbol)             \
-    extern unsigned char const symbol[], endsymbol[];   \
-    __asm__(".globl " #symbol "\n"                      \
-            ".globl " #endsymbol "\n"                   \
-            #symbol ":\n"                               \
-            ".incbin " #filename "\n"                   \
-            #endsymbol ":\n")
+            _ #endsymbol ":\n")
+
 #endif

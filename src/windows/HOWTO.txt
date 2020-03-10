@@ -16,13 +16,14 @@ executable on a Linux machine:
 2. Install Windows versions of the dependent libraries. The Windows
    binary depends on SDL2, SDL2_ttf, and libpng. (The fontconfig
    library is not applicable, as the Windows API has its own method
-   for font management. ncurses is unavailable on Windows, since it
-   doesn't have any equivalent to termcap/terminfo.) The project home
-   pages for SDL2 and SDL2_ttf both provide zipfiles of development
-   packages for mingw32, with simple instructions for installation.
-   For libpng, the only pre-built packages I could find were for
-   32-bit versions, so I had to grab the source tree and build and
-   install it myself.
+   for font management, and ncurses is unavailable on Windows, since
+   Windows doesn't have any equivalent to termcap/terminfo.) The
+   project home pages for SDL2 and SDL2_ttf both provide zipfiles of
+   development packages for mingw32, with simple instructions for
+   installation. For libpng, the only pre-built packages I could find
+   were for 32-bit versions, so I had to grab the source tree and
+   build and install it myself. In addition, my libraries were built
+   with a dependency on zlib, so I had to build that also.
 
 3. The Windows build script also uses a program called icotool. On a
    Debian-based system, icotool is part of the "icoutils" package.
@@ -34,8 +35,7 @@ executable on a Linux machine:
 
 4. With all of that out of the way, you should be able to proceed
    directly to building Brain Jam. Run the configuration tool via
-   cross-build.sh and specifying the "--enable-windows" flag. Thus,
-   from Brain Jam's top-level directory, run:
+   cross-build.sh and specifying the "--enable-windows" flag:
 
        src/windows/cross-build.sh configure --enable-windows
 
@@ -68,13 +68,7 @@ a central Windows system directory) runs the risk of breaking other
 programs if they're dependent on an earlier version of the same
 library.
 
-By default, Brain Jam will create a subdirectory called "save"
-underneath the directory where brainjam.exe is stored, and it will use
-this to store the user session data and such. If the user has defined
-a value for the HOME environment variable, however, Brain Jam will
-instead create a subdirectory called ".brainjam" under that. That may
-not be the right behavior for Windows? I believe that Windows users
-generally don't have a HOME environment variable set, and if they do
-it's because they probably want something that acts like a Unix home
-directory. But I'm not sure if this is the best approach, so this
-behavior may change before 1.0.
+(A better alternative to DLL-wrangling might be to statically link
+with these libraries. Dynamic linking is less necessary on Windows
+than on Unix, and the fact that the program needs to be distributed
+with all of its dependent libraries somewhat obviates the advantages.)
