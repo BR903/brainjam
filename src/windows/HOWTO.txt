@@ -23,7 +23,7 @@ executable on a Linux machine:
    installation. For libpng, the only pre-built packages I could find
    were for 32-bit versions, so I had to grab the source tree and
    build and install it myself. In addition, my libraries were built
-   with a dependency on zlib, so I had to build that also.
+   with a dynamic dependency on zlib, so I had to build that also.
 
 3. The Windows build script also uses a program called icotool. On a
    Debian-based system, icotool is part of the "icoutils" package.
@@ -56,19 +56,11 @@ executable on a Linux machine:
    environment pointing to the wrong directory tree, or the wrong
    build tool being used.
 
-6. Assuming the build succeeds, the resulting executable will be
-   located at "src/brainjam". No, I couldn't be bothered to have it
-   correctly named. Just manually rename it to "brainjam.exe".
+Assuming that the build succeeds, the resulting executable will be
+located at "src/brainjam.exe". Congratulations! You now have a Windows
+binary. Copy it to your Windows machine, along with the DLLs that it
+depends on.
 
-Congratulations! You now have a Windows binary. In order to use it,
-you need to copy it to your Windows machine, along with the DLLs that
-it depends on. In the Windows world, it's pretty common to store DLLs
-in the same directory as your binary. The alternative (storing them in
-a central Windows system directory) runs the risk of breaking other
-programs if they're dependent on an earlier version of the same
-library.
-
-(A better alternative to DLL-wrangling might be to statically link
-with these libraries. Dynamic linking is less necessary on Windows
-than on Unix, and the fact that the program needs to be distributed
-with all of its dependent libraries somewhat obviates the advantages.)
+(An alternative approach that would avoid some of this DLL-wrangling
+would be to statically link all of the third-party libraries.
+Something to look into.)

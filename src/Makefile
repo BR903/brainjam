@@ -18,7 +18,7 @@
 -include ./cfg.mk
 
 # The name of the game.
-PROG := $(NAME)
+PROG := $(NAME)$(EXEEXT)
 
 # The default target builds the program.
 all: $(PROG)
@@ -95,6 +95,7 @@ endif
 
 # The program is built from the object files.
 $(PROG): $(OBJ)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # The test program returns failure if it detects errors in the game logic.
 check: $(PROG)

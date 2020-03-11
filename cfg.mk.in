@@ -26,6 +26,7 @@ VERSION := @PACKAGE_VERSION@
 # Change these symbols to control the build tools that are used.
 CC := @CC@
 WINDRES := @WINDRES@
+EXEEXT := @EXEEXT@
 
 # Change these symbols to control where files get installed.
 prefix := @prefix@
