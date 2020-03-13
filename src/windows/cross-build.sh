@@ -2,9 +2,13 @@
 #
 # Usage: cross-build.sh [OPTIONS] VERB [ARG ...]
 #
-# VERB can be "configure" to run an autotools-based ./configure script,
-# "make" to run a recipe from a makefile, or "check" to just print out
-# the values that the script will use for the target and prefix.
+# VERB can be "configure" to run an autotools-based ./configure
+# script, or "make" to run a recipe from a makefile. Other available
+# verbs: "check" will print out the values that the script will use
+# for the target and prefix, "exec" will run an arbitrary program, and
+# "sh" will run an arbitrary shell command. (Additionally, "sh" can be
+# replaced with the name of a shell in order to use a feature specific
+# to that shell.)
 #
 # This script makes a number of semi-educated guesses about where the
 # cross-compiling tools should be located on your filesystem. It is by
@@ -20,6 +24,7 @@ usage ()
   echo "Usage: cross-build.sh [OPTIONS] configure [CONFIGURE-PARAM ...]"
   echo "       cross-build.sh [OPTIONS] make [MAKE-PARAM ...]"
   echo "       cross-build.sh [OPTIONS] exec [CMD PARAM...]"
+  echo "       cross-build.sh [OPTIONS] sh [CMD PARAM...]"
   echo "       cross-build.sh [OPTIONS] check"
   echo "Prepare the environment for cross-compiling using mingw32 tools."
   echo ""
@@ -134,6 +139,12 @@ fi
 
 # Do the requested thing.
 case "$verb" in
+  check)
+    echo "Target: $TARGET"
+    echo "Build:  $BUILD"
+    echo "Prefix: $prefix"
+    exit 0
+    ;;
   configure | ./configure)
     cache="$TARGET-config.cache"
     ./configure --target="$TARGET" --host="$TARGET" --build="$BUILD" \
@@ -149,11 +160,12 @@ case "$verb" in
   exec)
     exec "$@"
     ;;
-  check)
-    echo "Target: $TARGET"
-    echo "Prefix: $prefix"
-    exit 0
+  sh | shell)
+    "$@"
     ;;
   *)
-    fail "unrecognized action: \"$verb\"."
+    shell=$(grep -m1 '\b'$verb'$' /etc/shells)
+    test $? = 0 || fail "unrecognized action: \"$verb\"."
+    exec "$shell" -c "$*"
+    ;;
 esac
