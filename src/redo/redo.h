@@ -10,11 +10,24 @@
 #ifndef _libredo_redo_h_
 #define _libredo_redo_h_
 
-#include "types.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* The library version: 0.7
+/* The library version: 0.8
  */
-#define REDO_LIBRARY_VERSION 0x0007
+#define REDO_LIBRARY_VERSION 0x0008
+
+/*
+ * Types.
+ */
+
+/* The list of objects used by the library. redo_session is opaque;
+ * the other two are defined here.
+ */
+typedef struct redo_session redo_session;
+typedef struct redo_position redo_position;
+typedef struct redo_branch redo_branch;
 
 /* The information associated with a visited state.
  */
@@ -40,14 +53,19 @@ struct redo_branch {
     int move;                   /* the move that this branch represents */
 };
 
+/*
+ * Functions.
+ */
+
 /* Create and return a new redo session. initialstate points to a
  * buffer that contains the representation of the state of the
  * starting position, from which all other positions will descend.
- * size is the size of the state representation in bytes. cmpsize is
- * number of bytes in the state representation to actually compare, or
- * zero to use the entire state representation. NULL is returned if
- * the size or cmpsize arguments are invalid, or if memory for the
- * session cannot be allocated.
+ * size is the size of the state representation in bytes. It cannot be
+ * larger than ~63k (and ideally should be as small as possible).
+ * cmpsize is number of bytes in the state representation to actually
+ * compare, or zero to use the entire state representation. NULL is
+ * returned if the arguments are invalid, or if memory for the session
+ * cannot be allocated.
  */
 extern redo_session *redo_beginsession(void const *initialstate,
                                        int size, int cmpsize);
@@ -169,8 +187,8 @@ extern void redo_updatesavedstate(redo_session const *session,
 extern int redo_setbetterfields(redo_session const *session);
 
 /* Return true if positions have been added to or removed from the
- * session since it was initialized, or since
- * redo_clearsessionchanged() was last called.
+ * session since it was initialized, or since the last call to
+ * redo_clearsessionchanged().
  */
 extern int redo_hassessionchanged(redo_session const *session);
 
@@ -181,5 +199,9 @@ extern int redo_clearsessionchanged(redo_session *session);
 /* Delete the sesssion and free all associated memory.
  */
 extern void redo_endsession(redo_session *session);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

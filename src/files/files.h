@@ -15,7 +15,7 @@
 #define _files_files_h_
 
 #include "./types.h"
-#include "redo/types.h"
+#include "redo/redo.h"
 
 /* Select the directories for storing the program's data files. cfgdir
  * specifies the directory for storing the game's settings, and

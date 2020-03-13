@@ -53,7 +53,6 @@ src/gamedata/mkgames.c
 src/redo/module.mk
 src/redo/redo.c
 src/redo/redo.h
-src/redo/types.h
 src/sdl/module.mk
 src/sdl/alertids.h
 src/sdl/alertpos.h

@@ -9,7 +9,7 @@
 #define _solutions_solutions_h_
 
 #include "./types.h"
-#include "redo/types.h"
+#include "redo/redo.h"
 
 /* This struct encodes the user's solution for a game. The actual
  * moves are stored as a string of commands.

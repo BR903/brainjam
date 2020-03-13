@@ -12,7 +12,7 @@
 
 #include "./types.h"
 #include "./decls.h"
-#include "redo/types.h"
+#include "redo/redo.h"
 
 /* All the information used to run the game. It includes the data
  * involved in managing changes to the game state, as well as several

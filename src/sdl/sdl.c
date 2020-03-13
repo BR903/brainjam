@@ -10,7 +10,7 @@
 #include "./commands.h"
 #include "./settings.h"
 #include "./ui.h"
-#include "redo/types.h"
+#include "redo/redo.h"
 #include "files/files.h"
 #include "game/game.h"
 #include "sdl/sdl.h"

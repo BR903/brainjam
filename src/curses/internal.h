@@ -5,7 +5,7 @@
 #define _curses_internal_h_
 
 #include "./types.h"
-#include "redo/types.h"
+#include "redo/redo.h"
 
 /* The list of text "modes" used by the program. Each mode corresponds
  * to a different set of text attributes, determined at startup.

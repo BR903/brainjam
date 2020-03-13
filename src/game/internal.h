@@ -5,6 +5,7 @@
 #define _game_internal_h_
 
 #include "./types.h"
+#include "redo/redo.h"
 
 /* A complete description of a move, capturing all of the different
  * aspects of a move that are needed by different functions.

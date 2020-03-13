@@ -7,7 +7,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include "./types.h"
-#include "redo/types.h"
+#include "redo/redo.h"
 
 /* SDL is not entirely consistent about using the SDL_Color struct;
  * very often its API calls for separate integer arguments. These

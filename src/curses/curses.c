@@ -6,7 +6,7 @@
 #include <ncurses.h>
 #include "./types.h"
 #include "./settings.h"
-#include "redo/types.h"
+#include "redo/redo.h"
 #include "curses/curses.h"
 #include "internal.h"
 

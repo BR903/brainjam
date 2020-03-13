@@ -11,7 +11,7 @@
 #define _ui_h_
 
 #include "./types.h"
-#include "redo/types.h"
+#include "redo/redo.h"
 
 /* The full list of potential user interfaces.
  */
