@@ -1,13 +1,17 @@
 Before 1.0:
 
+* BUG: If the user deletes (i.e. uses undo-and-forget) the last
+  position of a solution, the program doesn't detect that the minimum
+  solution size for the session may now be incorrect, or that the
+  session may not even have a solution. Fixing this requires
+  (potentially) a complete traversal of the tree. This should probably
+  be considered a bug in libredo, and fixed there. (Though another fix
+  would be to just forbid deleting endpoint positions.)
+
 * Work on the layout for the opening screen. Seems like it could be
   improved.
 
 * The game needs a real icon.
-
-* Improve the process for building all the various distributions.
-
-* Set up a decent installer for the windows distributions.
 
 * Make a full pass through the documentation, looking for errors and
   outdated information.

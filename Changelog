@@ -1,3 +1,16 @@
+* 2020 Mar 16: version 0.9.4
+
+	Improved the code portability, and added a process to build
+	installers for Windows (32-bit and 64-bit). Hopefully Windows
+	users find this a more familiar option than a plain zip file.
+
+	The determination of the data directories has been fixed, and uses
+	platform-specifc code to ensure that the defaults are appropriate.
+
+	(Note: There are no more major changes left on the TODO list. Bug
+	fixes and documentation updates are the only tasks planned before
+	version 1.0.)
+	
 * 2020 Mar 07: version 0.9.3
 
 	This is a very minor update. But, there was a logic bug in the
