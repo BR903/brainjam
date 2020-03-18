@@ -1,4 +1,10 @@
 /* mkgames.c: Build Brain Jam's binary game data from a text source.
+ *
+ * This program accepts a text file describing the game's decks, and
+ * outputs this information in a compressed binary format, which is
+ * then built into the Brain Jam executable. Since it is a simple
+ * one-shot utility, it shares no header files or other dependencies
+ * with the actual program.
  */
 
 #include <stdio.h>
@@ -19,14 +25,14 @@
 static char const *filename;
 
 /* Output a value as a part of a bitstream. The bitlen argument
- * indicates the number of bits from value to output. The bits are
- * stored going from most to least significant bit. Thus if the first
- * call to this function has value set to 6 and bitlen set to 3, the
- * first byte of output would be set to 110x xxxx, with the xs being
- * set by subsequent calls. A call with bitlen set to zero indicates
- * the end of the bitstream, at which point there shouldn't be any
- * leftover bits waiting to be output. The return value is false if
- * the write fails.
+ * indicates the number of bits to use from value. The bits are output
+ * going from most to least significant bit. Thus, if the first call
+ * to this function has value set to 6 and bitlen set to 3, the first
+ * byte of output would be set to 110x xxxx, with the xs representing
+ * bits to be set by subsequent calls. A call with bitlen set to zero
+ * indicates the end of the bitstream. (Any pending bits are flushed
+ * at this time, but this is not expected to happen.) The return value
+ * is false if the write to fp fails.
  */
 static int outputbits(FILE *fp, int value, int bitlen)
 {
@@ -163,7 +169,7 @@ static int translate(char const *infilename, char const *outfilename)
 int main(int argc, char *argv[])
 {
     if (argc != 3) {
-        fprintf(stderr, "Usage: mkcfgs CFGSIN.TXT CFGSOUT.BIN\n");
+        fprintf(stderr, "Usage: mkcfgs INPUT.TXT OUTPUT.BIN\n");
         return 0;
     }
     return translate(argv[1], argv[2]) ? 0 : EXIT_FAILURE;

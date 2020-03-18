@@ -1,13 +1,14 @@
-# configs/configs.txt: the master list of configurations.
+# gamedata/gamedata.txt: the master list of configurations.
 #
-# The following list of configurations were built into the Windows
-# Brain Jam program. Peter Liepa wrote the program and created the
+# The following list of configurations was built into the Windows
+# Brain Jam program (though not, of course, in this precise format).
+# Peter Liepa wrote the original program and created a set of
 # configurations. Bert van Oortmarssen later wrote a program to
-# identify which configurations were unsolvable, which Peter Liepa
-# then removed from later versions of his program, and to determine
-# the minimum move counts for the solvable configurations. They have
-# explicitly given their permission for the list of configurations to
-# be used here.
+# identify which configurations in the original set were unsolvable,
+# which Peter Liepa then removed from later versions of his program.
+# His program also determined the minimum move counts for the solvable
+# configurations. They have explicitly given their permission for the
+# list of configurations to be used here.
 #
 # Each line of this string corresponds to one configuration. The
 # configuration ID begins the line, followed by 52 letters giving the
@@ -16,9 +17,9 @@
 # end of each line is the size of the shortest possible solution for
 # that configuration.
 #
-# Each card in the deck is encoded by a single uppercase or lowercase
-# letter. The letters are assigned alphabetically, ranks going from
-# Ace to King, and suits in the order clubs, diamonds, hearts, spades.
+# Each card in the deck is encoded by a single letter. The letters are
+# assigned alphabetically, uppercase first, with ranks going from Ace
+# to King, and suits in the order clubs, diamonds, hearts, spades.
 # Thus A=Ac, B=Ad, C=Ah, D=As, E=2c, F=2d, and so on up to z=Ks.
 
 0000 WyIeokJZvYFqdXrlNQsSMwAEbGpUtBgxOTmLCKcPVfRjDzHiuhna 87
