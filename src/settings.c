@@ -10,8 +10,8 @@
 #include "game/game.h"
 
 /* The default values for the program's settings. Typically these are
- * only used the first time the program runs, before the user's
- * initialization file has been created.
+ * only used the first time the program runs, before an initialization
+ * file has been created.
  */
 #define DEFAULT_GAMEID 0
 #define DEFAULT_SHOWKEYS 0
@@ -78,6 +78,8 @@ settingsinfo *getcurrentsettings(void)
  */
 void applysettings(int write)
 {
+    if (!settings)
+        return;
     if (settings->showkeys >= 0)
         setshowkeyguidesflag(settings->showkeys);
     if (settings->animation >= 0)
@@ -88,7 +90,6 @@ void applysettings(int write)
         setbranching(settings->branching);
     if (settings->readonly >= 0)
         setreadonly(settings->readonly);
-
     if (write)
         savercfile(settings);
 }

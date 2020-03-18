@@ -1,59 +1,63 @@
 /* ./decls.h: macros for working with the special type values.
  *
- * This file defines numerous macros for examining and manipulating
- * all of the basic types, as well as some related constants. The
- * macros are all simple operations, involving little more than basic
- * arithmetic or bit-masking.
+ * This file defines basic constants associated with the types, and
+ * numerous macros for manipulating values and translating between
+ * types. All macros are composed of inexpensive operations on their
+ * inputs.
  */
 
 #ifndef _decls_h_
 #define _decls_h_
 
 /*
- * The card_t type. Each value represents a playing card.
+ * The card_t type. The representation of a playing card.
  */
 
 /* Number of cards in the deck.
  */
-#define NRANKS 13
-#define NSUITS 4
-#define NCARDS (NRANKS * NSUITS)
+#define NRANKS  13
+#define NSUITS  4
+#define NCARDS  (NRANKS * NSUITS)
 
 /* Some convenience names.
  */
-#define CLUBS 0
-#define HEARTS 1
-#define DIAMONDS 2
-#define SPADES 3
-#define ACE 1
-#define KING 13
+#define CLUBS  0
+#define HEARTS  1
+#define DIAMONDS  2
+#define SPADES  3
+#define ACE  1
+#define KING  13
 
 /* Macros for translating a playing card to and from its component
  * features. RANK_INCR is a constant that can be added or subtracted
  * to a card value to change its rank while preserving its suit.
  */
-#define card_rank(c) (((c) >> 2) - 1)
-#define card_suit(c) ((c) & 3)
-#define mkcard(r, s) ((((r) + 1) << 2) | ((s) & 3))
-#define RANK_INCR (1 << 2)
+#define card_rank(c)  (((c) >> 2) - 1)
+#define card_suit(c)  ((c) & 3)
+#define mkcard(r, s)  ((((r) + 1) << 2) | ((s) & 3))
+#define RANK_INCR  (1 << 2)
 
 /* Macros for translating between a (non-empty) card value and a
  * zero-based index value.
  */
-#define cardtoindex(c) ((c) - mkcard(ACE, 0))
-#define indextocard(n) ((n) + mkcard(ACE, 0))
+#define cardtoindex(c)  ((c) - mkcard(ACE, 0))
+#define indextocard(n)  ((n) + mkcard(ACE, 0))
 
-/* Special values representing jokers and non-cards.
+/* Special values representing things that aren't technically cards
+ * but are card_t values. EMPTY_PLACE is the graphic representation of
+ * a generic place with no card on it. Internally, however, the
+ * different parts of the layout use different values to represent an
+ * empty place.
  */
 #define EMPTY_PLACE  mkcard(-1, 1)
 #define EMPTY_TABLEAU  mkcard(-1, 2)
 #define EMPTY_RESERVE  mkcard(-1, 3)
 #define EMPTY_FOUNDATION(s)  mkcard(0, s)
-#define isemptycard(c) ((c) < mkcard(1, 0))
-#define JOKER mkcard(14, 0)
-#define JOKER2 mkcard(14, 1)
-#define CARDBACK1 mkcard(14, 2)
-#define CARDBACK2 mkcard(14, 3)
+#define isemptycard(c)  ((c) < mkcard(1, 0))
+#define JOKER  mkcard(14, 0)
+#define JOKER2  mkcard(14, 1)
+#define CARDBACK1  mkcard(14, 2)
+#define CARDBACK2  mkcard(14, 3)
 
 /*
  * The place_t type. A "place" is a destination that a given card can
@@ -64,32 +68,34 @@
 
 /* The places of the layout.
  */
-#define TABLEAU_PLACE_1ST 0
-#define TABLEAU_PLACE_END 8
-#define TABLEAU_PLACE_COUNT 8
-#define RESERVE_PLACE_1ST 8
-#define RESERVE_PLACE_END 12
-#define RESERVE_PLACE_COUNT 4
-#define FOUNDATION_PLACE_1ST 12
-#define FOUNDATION_PLACE_END 16
-#define FOUNDATION_PLACE_COUNT 4
-#define MOVEABLE_PLACE_1ST 0
-#define MOVEABLE_PLACE_END 12
-#define MOVEABLE_PLACE_COUNT 12
-#define NPLACES 16
+#define TABLEAU_PLACE_1ST  0
+#define TABLEAU_PLACE_END  8
+#define TABLEAU_PLACE_COUNT  8
+#define RESERVE_PLACE_1ST  8
+#define RESERVE_PLACE_END  12
+#define RESERVE_PLACE_COUNT  4
+#define FOUNDATION_PLACE_1ST  12
+#define FOUNDATION_PLACE_END  16
+#define FOUNDATION_PLACE_COUNT  4
+#define MOVEABLE_PLACE_1ST  0
+#define MOVEABLE_PLACE_END  12
+#define MOVEABLE_PLACE_COUNT  12
+#define NPLACES  16
 
 /* Macros for working with place values.
  */
-#define isplace(p) ((p) >= 0 && (p) < NPLACES)
-#define istableauplace(p) ((p) < TABLEAU_PLACE_END)
-#define isfoundationplace(p) ((p) >= FOUNDATION_PLACE_1ST)
-#define isreserveplace(p) ((p) >= RESERVE_PLACE_1ST && (p) < RESERVE_PLACE_END)
-#define tableauplace(n) (n)
-#define reserveplace(n) (RESERVE_PLACE_1ST + (n))
-#define foundationplace(n) (FOUNDATION_PLACE_1ST + (n))
-#define tableauplaceindex(p) (p)
-#define reserveplaceindex(p) ((p) - RESERVE_PLACE_1ST)
-#define foundationplaceindex(p) ((p) - FOUNDATION_PLACE_1ST)
+#define istableauplace(p)  \
+    ((p) >= TABLEAU_PLACE_1ST && (p) < TABLEAU_PLACE_END)
+#define isfoundationplace(p)  \
+    ((p) >= FOUNDATION_PLACE_1ST && (p) < FOUNDATION_PLACE_END)
+#define isreserveplace(p)  \
+    ((p) >= RESERVE_PLACE_1ST && (p) < RESERVE_PLACE_END)
+#define tableauplace(n)  (n)
+#define reserveplace(n)  (RESERVE_PLACE_1ST + (n))
+#define foundationplace(n)  (FOUNDATION_PLACE_1ST + (n))
+#define tableauplaceindex(p)  (p)
+#define reserveplaceindex(p)  ((p) - RESERVE_PLACE_1ST)
+#define foundationplaceindex(p)  ((p) - FOUNDATION_PLACE_1ST)
 
 /* Places are basically identical to indexes, but these macros are
  * defined for completeness.
@@ -142,10 +148,6 @@
      isreserveplace(place) ? reservepos(reserveplaceindex(place)) : \
                              foundationpos(foundationplaceindex(place)))
 
-/* An invalid value for both positions and places.
- */
-#define NOWHERE (POS_FOUNDATION_OFFSET + 5)
-
 /*
  * The movecmd_t type. A "move command" is an ASCII letter that
  * indicates the place a card is moved from, either a lowercase or
@@ -170,8 +172,8 @@
  * A "move ID" identifies the card being moved, rather than the place
  * it is moved from. An extra bit is used to indicate whether the
  * first-choice or second-choice destination is selected. (Move IDs
- * are used to identify moves in the redo session, which is why they
- * don't have their own typedef.)
+ * are only used to identify moves within the redo session, which is
+ * why they don't have their own typedef.)
  */
 
 /* Testing for a valid move ID.

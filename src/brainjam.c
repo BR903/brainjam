@@ -10,9 +10,9 @@
 #include "./version.h"
 #include "./types.h"
 #include "./settings.h"
+#include "./decks.h"
 #include "./ui.h"
 #include "./mainloop.h"
-#include "solutions/solutions.h"
 #include "files/files.h"
 #include "game/game.h"
 
@@ -21,14 +21,14 @@
 static char const *versiontitle = "Credits";
 static char const *versiontext =
     "Brain Jam: version " VERSION_ID "\n"
-    "Copyright \302\251 2017 by Brian Raiter <breadbox@muppetlabs.com>\n"
+    "Copyright \302\251 2017-2020 Brian Raiter <breadbox@muppetlabs.com>\n"
     "License: GNU GPL version 3 or later; see"
     " <http://gnu.org/licenses/gpl.html>.\n"
     "\n"
-    "This program is written by Brian Raiter. It is based on the original"
-    " Windows program written by Peter Liepa. The game configurations were"
-    " created by Peter Liepa, with assistance from Bert van Oortmarssen, and"
-    " are used here with their permission.\n"
+    "This program is written by Brian Raiter. It is a re-implementation of a"
+    " program written by Peter Liepa. The game configurations were created"
+    " by Peter Liepa, with assistance from Bert van Oortmarssen, and are used"
+    " here with their permission.\n"
     "\n"
     "The rules of Brainjam are based on \"Baker's Game\", as described by"
     " Martin Gardner in the June 1968 issue of Scientific American.";
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
     if (settings->forcetextmode || !initializeui(UI_SDL)) {
         if (!initializeui(UI_CURSES)) {
             fputs("error: unable to initialize the user interface\n", stderr);
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
     }
     applysettings(FALSE);
@@ -334,5 +334,5 @@ int main(int argc, char *argv[])
 
     gameselectionloop();
 
-    return EXIT_SUCCESS;
+    return 0;
 }

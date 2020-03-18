@@ -1,8 +1,8 @@
 /* ./decks.h: accessing the decks for each game.
  *
- * Each ID corresponds to a unique initial deck order, which is what
- * makes each game different. (Also stored with the deck order is the
- * size of the shortest possible solution for that game.)
+ * Each game ID corresponds to a unique initial deck order, which is
+ * what makes each game different. Stored with the deck order also is
+ * the size of the shortest possible solution for that game.
  */
 
 #ifndef _decks_h_

@@ -34,10 +34,11 @@ extern char *fmtallocate(char const *fmt, ...);
 /* Find an appropriate place to break a string so as to fit in a line
  * of the given length. Newlines and the space characters are
  * recognized; all other characters are assumed to be non-whitespace.
- * The return value is the number of characters to print, which is
- * guaranteed to be nonzero unless the string is already empty. The
- * given string pointer is modified upon return to skip past any
- * initial spaces.
+ * This function is not UTF-8-aware, and blithely assumes each byte
+ * represents one character cell width. The return value is the number
+ * of characters to print, which is guaranteed to be nonzero unless
+ * the string is already empty. The given string pointer is updated
+ * upon return to skip past any initial spaces in the next line.
  */
 extern int textbreak(char const **pstr, int width);
 

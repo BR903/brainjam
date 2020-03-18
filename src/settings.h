@@ -1,9 +1,9 @@
 /* ./settings.h: managing the settings for the program.
  *
- * The settings are a small set of values (mostly boolean values),
- * that affect program behavior and persist across invocations. The
- * user can modify them via the options menu, the initialization file,
- * and/or the command-line options. These functions manage access and
+ * The settings are a small set of values (mostly boolean), that
+ * affect program behavior and persist across invocations. The user
+ * can modify them via the options menu, the initialization file, and
+ * the command-line options. These functions manage the access and
  * modification of these values.
  */
 
@@ -23,7 +23,7 @@ struct settingsinfo {
     int readonly;               /* true to prevent files from being changed */
 };
 
-/* Initialize the program settings. All fields will be unset.
+/* Initialize the program settings by marking all fields as unset.
  */
 extern void initializesettings(void);
 
@@ -32,16 +32,16 @@ extern void initializesettings(void);
  */
 extern void setdefaultsettings(void);
 
-/* Get a pointer to the current settings. If the caller modifies any
- * of the settings through the returned pointer, applysettings() must
- * be called afterwards for the changes to take effect.
+/* Get a pointer to the current settings. This pointer is writeable.
+ * If the caller uses it to modify any settings, applysettings() must
+ * be called subsequently for the changes to properly take effect.
  */
 extern settingsinfo *getcurrentsettings(void);
 
 /* Apply the current settings to the running program. If write is
- * true, the current settings are also written to the initialization
+ * true, the current settings are also saved to the initialization
  * file. Note that this function does not apply the gameid and
- * forcetextmode fields, which unlike the other settings can only be
+ * forcetextmode settings, which unlike the other settings can only be
  * applied at specific times.
  */
 extern void applysettings(int write);

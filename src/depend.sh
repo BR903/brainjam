@@ -7,8 +7,8 @@
 # the INCBIN macro, and add any data files included into the source as
 # dependencies. (Since this latter task is being done with a regular
 # expression instead of by parsing the actual C, it is necessarily
-# imperfect and depends upon the code being written in a normal
-# fashion.)
+# imperfect and depends upon the code not having e.g. an occurrence of
+# "INCBIN" inside of a string constant.)
 
 src="$1"
 dir=$(dirname "$src")

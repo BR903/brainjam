@@ -13,7 +13,7 @@
  * values are used to indicate various non-card elements, such as the
  * empty foundation spaces.)
  */
-typedef signed char card_t;
+typedef unsigned char card_t;
 
 /* A place is a location in the layout that can contain a card that
  * can be moved or played upon. (There are sixteen total.)

@@ -11,8 +11,8 @@
 uimap _ui;
 
 /* Select the user interface to connect and have it initialize. If the
- * initialization program fails to provide a render function, then the
- * UI is unavailable.
+ * returned struct has no rendergame function, then the interface
+ * could not be created.
  */
 int initializeui(int uimode)
 {

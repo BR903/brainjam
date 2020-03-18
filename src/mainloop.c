@@ -12,7 +12,7 @@
 #include "files/files.h"
 
 /*
- * The top-level game loop.
+ * Entering the program's inner loop: playing a game.
  */
 
 /* Set up a game and a redo session. Lay out the cards for the given

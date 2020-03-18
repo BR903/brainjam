@@ -34,7 +34,7 @@ int getdeckcount(void)
 }
 
 /* The best known solution size is stored in the first seven bits of
- * the game data, offset by the number of cards in a deck.
+ * the game data, biased by the number of cards in a deck.
  */
 int bestknownsolutionsize(int id)
 {
@@ -42,9 +42,10 @@ int bestknownsolutionsize(int id)
 }
 
 /* Extract the deck order for a game and store it in the given array.
- * The setup data is a bit stream of numerical values. The values
- * start at six bits in size, large enough to hold a value from 0-51,
- * and gradually diminish as the range of possible values diminishes.
+ * The setup data is a bit stream of numerical values. After the first
+ * seven bits, each value identifies a card. The values start at six
+ * bits in size, large enough to hold a value from 0-51, and gradually
+ * diminish as the range of possible values diminishes.
  */
 void getgamedeck(card_t cards[NCARDS], int id)
 {

@@ -13,12 +13,11 @@
 #include "./types.h"
 #include "redo/redo.h"
 
-/* The full list of potential user interfaces.
+/* The list of potential user interfaces.
  */
-#define UI_NONE   0
-#define UI_SDL    1
-#define UI_CURSES 2
-#define UI_ANSI   3
+#define UI_NONE  0
+#define UI_SDL  1
+#define UI_CURSES  2
 
 /* Select the user interface and initialize the interactive part of
  * the program. uimode indicates which interface to use. False is
@@ -54,18 +53,20 @@ typedef struct uimap {
      */
     void (*ungetinput)(command_t cmd, int msec);
 
-    /* Enable or disable the display of move key guides. When the feature
-     * is enabled, the letter corresponding to each place is displayed
-     * above the place. The new setting is returned.
+    /* Enable or disable the display of move key guides. When the
+     * feature is enabled, the letter corresponding to each place is
+     * displayed above it. The new setting is returned.
      */
     int (*setshowkeyguidesflag)(int flag);
 
     /* Enable or disable card animations. The new setting is returned.
+     * If the interface does not support animation, the return value
+     * will always be false.
      */
     int (*setcardanimationflag)(int flag);
 
-    /* Alert the user by ringing the terminal bell, flashing the
-     * window, or some equivalent.
+    /* Notify the user of rejected input (typically done by ringing
+     * the terminal bell, flashing the title bar, or similar).
      */
     void (*ding)(void);
 
@@ -106,11 +107,11 @@ typedef struct uimap {
 
 } uimap;
 
-/* The active user interface global.
+/* There can only be one active user interface, and it is here.
  */
 extern uimap _ui;
 
-/* Macros to simplify access to the functions of the user interface.
+/* Macros to de-clutter use of the user interface functions.
  */
 #define rendergame(rp)               (_ui.rendergame(rp))
 #define getinput()                   (_ui.getinput())

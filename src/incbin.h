@@ -19,13 +19,14 @@
 #endif
 
 /* The INCBIN macro takes three arguments. The first argument is the
- * filename that contains the data. The second argument is a symbol
- * that will be used as the name of the variable that points to the
- * included data. This variable will be declared as an array of const
- * bytes. The final argument is a symbol that will point to the end of
- * the data. It will also be declared as a byte array, but it should
- * never be dereferenced; it is only used for computing the size of
- * the data.
+ * filename that contains the data. (As with #include, it must be a
+ * literal string constant). The second argument is a symbol that will
+ * be used as the name of the variable that points to the included
+ * data. This variable will be declared as an array of const bytes.
+ * The final argument is a symbol that will point to the end of the
+ * data. It will also be declared as a byte array, but it should never
+ * be dereferenced; it is only useful for computing the size of the
+ * data.
  */
 #define INCBIN(filename, symbol, endsymbol)             \
     extern unsigned char const symbol[], endsymbol[];   \
