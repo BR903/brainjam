@@ -16,7 +16,9 @@ override CFLAGS += $(shell pkg-config --cflags fontconfig)
 override LDLIBS += $(shell pkg-config --libs fontconfig)
 endif
 
-# sdl/sprites contains the images that are built into sdl/images.png
+# sdl/sprites contains the images that are built into sdl/images.png.
+# It is not actually a separate module; it's just too messy to have its
+# contents in the same directory.
 include sdl/sprites/module.mk
 
 else

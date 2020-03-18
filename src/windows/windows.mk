@@ -1,7 +1,9 @@
 # windows/windows.mk: Windows-specific build rules.
 #
-# The windows build requires an extra object file. This object file
-# supplies the application's icon.
+# The windows build includes an extra object file, which supplies the
+# application's icon (assuming that the windres utility is available).
+
+ifdef WINDRES
 
 OBJ += windows/appres.o
 GENRES += windows/app.ico
@@ -16,3 +18,5 @@ windows/app.ico: $(wildcard windows/icon*.png)
 # Dummy dependency file, created to avoid generating warnings.
 windows/appres.d:
 	touch $@
+
+endif

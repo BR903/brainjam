@@ -1,8 +1,8 @@
 # Project makefile for Brain Jam.
 #
-# This makefile is mostly provided as a convenience, to allow "make"
-# and "make install" work when run from the project root directory.
-# The real makefile is under the src directory.
+# This makefile is mostly provided as a convenience, to allow "make
+# install" (et al) to work when run from the project root directory.
+# The real makefile for the project is in the src directory.
 #
 # The list of targets:
 #

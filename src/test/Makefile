@@ -4,9 +4,14 @@
 # games. When run it will play through the solution, verifying that
 # the game state never enters an inconsistent state.
 #
-# Since this makefile is not part of the rest of the build system, it
-# depends on the external object files having already been built
-# before it is invoked.
+# The test program takes advantage of the fact that the code it is
+# testing has a limited set of dependencies on the rest of the code,
+# and so it can link the test code with just those dependencies (and
+# the code actually being tested, of course).
+#
+# Since this makefile is not really part of the rest of the build
+# system, it depends on the external object files having already been
+# built before it is invoked.
 
 CC := gcc
 CFLAGS := -Wall -Wextra -I..
