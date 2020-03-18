@@ -1,14 +1,7 @@
-# sdl/sprites/layout.txt: locations of parts of the sprite sheet
+# sdl/sprites/bicons.txt: layout of the button icons sheet
 #
-# This data file lists the various small images that the program uses.
-# and provides a layout for placing them into a single image file. The
-# mkimages.py script uses this data to build the individual images
-# into a single sprite sheet. The script also uses this data file to
-# generate two C files, which are included into the source code to
-# provide access to the original small images.
-#
-# This file must be updated if changes are made to the images that
-# affect their size, or if images are added or removed.
+# This data file lists the various small images that appear on
+# pushbuttons, and defines their placement in a larger single image.
 
 # IMAGE      X   Y   W   H
 quit         0   0  24  24
