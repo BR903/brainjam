@@ -11,7 +11,7 @@ dnl *
 AC_PROG_CC
 AC_HEADER_STDC
 AC_CHECK_FUNC(getopt, [],
-              [AC_MSG_ERROR([could not find the getopt() library function.])])
+              [AC_MSG_ERROR([the POSIX getopt() function was not found.])])
 
 
 dnl * Verify that our other build tools are present.
@@ -19,7 +19,7 @@ dnl *
 
 AC_CHECK_PROG(check_prog, [pkg-config], [yes], [no])
 if test "$check_prog" != "yes" ; then
-  AC_MSG_ERROR([could not find the pkg-config utility.])
+  AC_MSG_ERROR([could not find the pkg-config utility on your path.])
 fi
 
 
@@ -44,7 +44,7 @@ else
 fi
 
 
-dnl * The option --enable-windows creates a Windows cross-build.
+dnl * The option --enable-windows sets up a Windows build.
 dnl *
 
 AC_ARG_ENABLE(windows,
@@ -64,7 +64,8 @@ else
   : ${WINDRES=windres}
   AC_CHECK_PROG(check_prog, [$WINDRES], [yes], [no])
   if test "$check_prog" != "yes" ; then
-    AC_MSG_ERROR([could not find the $WINDRES utility.])
+    AC_MSG_WARN([could not find the $WINDRES utility.])
+    WINDRES=:
   fi
 fi
 
@@ -129,9 +130,9 @@ if test "$with_ncurses" = "yes" ; then
 fi
 
 if test "$with_sdl" = "yes" ; then
-  pkg-config sdl2 || AC_MSG_ERROR([the SDL2 library could not be found.])
+  pkg-config sdl2 || AC_MSG_ERROR([the SDL2 library was not found.])
   pkg-config SDL2_ttf || AC_MSG_ERROR([the SDL2_ttf library was not found.])
-  pkg-config libpng || AC_MSG_ERROR([libpng could not be found.])
+  pkg-config libpng || AC_MSG_ERROR([libpng was not found.])
 fi
 
 if test "$with_fontconfig" = "yes" ; then

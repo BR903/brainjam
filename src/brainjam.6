@@ -12,14 +12,14 @@ issue of Scientific American.
 \fBBrain Jam\fR begins by presenting a list of available games. Each
 game uses the same rules but a differently shuffled deck. Each game
 has a known best solution, so after solving a particular game you can
-also return to in order to improve your solution.
+return to in order to improve your solution.
 .PP
 If an \fIID\fR is supplied on the command line, the program will begin
 with that game selected. Otherwise, it defaults to selecting your most
 recently played game.
 .PP
-Press \fB?\fR or \fBF1\fR to view help within the game. The in-game
-help includes information on the rules of \fBBrain Jam\fR and how to
+Use \fB?\fR or \fBF1\fR to view help within the game. The in-game help
+includes information on the rules of \fBBrain Jam\fR and how to
 navigate the user interface.
 .SH OPTIONS
 .TP
@@ -28,11 +28,10 @@ Use \fIDIR\fR as the directory for storing the program's settings.
 The default directory on a Unix platform is \fI~/.config/brainjam\fR.
 .TP
 \fB\-D\fR, \fB\-\-datadir\fR=\fIDIR\fR
-Use \fIDIR\fR as the user's data directory for storing session data.
-The default directory on a Unix platform is
-\fI~/.local/share/brainjam\fR. Note that using this option
-automatically sets \fIDIR\fR as the directory for the program's
-settings as well, unless \fI\-\-cfgdir\fR is also used.
+Use \fIDIR\fR as the directory for storing program data. The
+default directory on a Unix platform is \fI~/.local/share/brainjam\fR.
+Note that this option sets \fIDIR\fR as the directory for both program
+settings and data, unless \fI\-\-cfgdir\fR is used as well.
 .TP
 \fB\-t\fR, \fB\-\-textmode\fR
 Force the program to run in the terminal. The default behavior is to
@@ -40,8 +39,9 @@ open a graphical window, and to use a text-based interface only if the
 graphics system is unavailable.
 .TP
 \fB\-r\fR, \fB\-\-readonly\fR
-Run in read-only mode. No data files will be changed, and no game
-progress will be preserved.
+Run in read-only mode. No files will be written to during this run;
+all settings and game progress will be forgotten when the program
+exits.
 .TP
 .B \-\-validate
 Examine the user's data files without starting the user interface.
@@ -49,7 +49,8 @@ Any invalid files in the user's data directory will generate warning
 messages.
 .TP
 .B \-\-dirs
-Display the program's settings and data directories and exit.
+Display the directories used by the program to store data and
+settings and exit.
 .TP
 .B \-\-help
 Display help and exit.
@@ -68,26 +69,23 @@ Display the rules of the game and exit.
 The game's persistent settings.
 .TP
 .IR CFGDIR /brainjam.sol
-The solutions to your completed games.
+A record of the best solution found for each game.
 .TP
 \fIDATADIR\fR/session-\fINNNN\fR
 Move history for each game.
-.SH LICENSE
-This program is free software; it is distributed under the terms of
-the GNU General Public License version 3 (or, at your option, any
-later version).
 .SH CREDITS
-This program is written by Brian Raiter. It is based on the original
-Windows program written by Peter Liepa. The configurations were
-created by Peter Liepa with assistance from Bert van Oortmarssen, and
-are used here with their permission.
+This program is written by Brian Raiter, as a reimplementation of the
+original game written by Peter Liepa. The configurations were created
+by Peter Liepa with assistance from Bert van Oortmarssen, and are used
+here with their permission.
 .SH COPYRIGHT
-Copyright \(co 2017 Brian Raiter <\fIbreadbox@muppetlabs.com\fR>.
-.br
-License GPLv3+: GNU GPL version 3 or later. This is free software: you
-are free to change and redistribute it. There is NO WARRANTY, to the
-extent permitted by law. See <\fIhttp://gnu.org/licenses/gpl.html\fR>
-for more information.
+Copyright \(co 2017-2020 Brian Raiter <\fIbreadbox@muppetlabs.com\fR>.
+.P
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or (at
+your option) any later version. Please see the GNU General Public
+License for details.
 .SH "SEE ALSO"
 Brian Jam's home page is at
 <\fIhttp://www.muppetlabs.com/~breadbox/software/brainjam.html\fR>.
