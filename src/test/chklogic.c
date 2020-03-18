@@ -30,14 +30,13 @@ static char const *cardname(card_t card)
     };
 
     nbuf = (nbuf + 1) % 4;
-    if (isemptycard(card)) {
+    if (isemptycard(card))
         sprintf(bufs[nbuf], "Empty(%d)", card);
-    } else if (card_rank(card) < ACE || card_rank(card) > KING) {
+    else if (card_rank(card) < ACE || card_rank(card) > KING)
         sprintf(bufs[nbuf], "Undef(%d)", card);
-    } else {
+    else
         sprintf(bufs[nbuf], "%s%c",
                 ranks[card_rank(card)], *suitname(card_suit(card)));
-    }
     return bufs[nbuf];
 }
 
@@ -55,8 +54,11 @@ static char const *placename(place_t p)
         sprintf(bufs[nbuf], "tableau #%d [%c]", tableauplaceindex(p), 'A' + p);
     else if (isreserveplace(p))
         sprintf(bufs[nbuf], "reserve #%d [%c]", reserveplaceindex(p), 'A' + p);
-    else if (foundationplace(p))
-        sprintf(bufs[nbuf], "%s foundation", suitname(foundationplaceindex(p)));
+    else if (isfoundationplace(p))
+        sprintf(bufs[nbuf], "%s foundation",
+                suitname(foundationplaceindex(p)));
+    else
+        sprintf(bufs[nbuf], "invalid-place-value (%d)", p);
     return bufs[nbuf];
 }
 
@@ -80,6 +82,17 @@ static int validatelayout(gameplayinfo const *gameplay)
 
     brokenplaces = 0;
     errors = 0;
+
+    for (n = 0 ; n < NCARDS ; ++n) {
+        if (gameplay->covers[n] == 0) {
+            warn("%s: card %s removed from layout!", prefix, cardname(n));
+            ++errors;
+        } else if (gameplay->covers[n] >= mkcard(14, 0)) {
+            warn("%s: illegal value (%d) for covers[%d]",
+                 prefix, gameplay->covers[n], n);
+            ++errors;
+        }
+    }
 
     depth = NCARDS / TABLEAU_PLACE_COUNT + NRANKS;
     for (p = TABLEAU_PLACE_1ST ; p < TABLEAU_PLACE_END ; ++p) {
