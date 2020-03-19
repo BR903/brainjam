@@ -9,12 +9,12 @@
 #include "solutions/solutions.h"
 #include "game/game.h"
 
-/*
+/* A solution object, used with getsolutionfor().
  */
 static solutioninfo thesolution;
 
 /* This function is normally supplied by the solution module, but the
- * test program doesn't include that module, so a replacement is
+ * test program doesn't include that module. So, a replacement is
  * provided here.
  */
 solutioninfo const *getsolutionfor(int id)
@@ -99,7 +99,7 @@ static int validatelayout(gameplayinfo const *gameplay)
 
     for (n = 0 ; n < NCARDS ; ++n) {
         if (gameplay->covers[n] == 0) {
-            warn("%s: card %s removed from layout!", prefix, cardname(n));
+            warn("%s: card %s removed from layout", prefix, cardname(n));
             ++errors;
         } else if (gameplay->covers[n] >= mkcard(14, 0)) {
             warn("%s: illegal value (%d) for covers[%d]",
@@ -111,7 +111,7 @@ static int validatelayout(gameplayinfo const *gameplay)
     depth = NCARDS / TABLEAU_PLACE_COUNT + NRANKS;
     for (p = TABLEAU_PLACE_1ST ; p < TABLEAU_PLACE_END ; ++p) {
         if (gameplay->depth[p] > depth) {
-            warn("%s: %d cards at %s (over %d)",
+            warn("%s: %d cards at %s (max possible is %d)",
                  prefix, gameplay->depth[p], placename(p), depth);
             ++errors;
             brokenplaces |= 1 << p;
@@ -119,7 +119,7 @@ static int validatelayout(gameplayinfo const *gameplay)
     }
     for (p = RESERVE_PLACE_1ST ; p < RESERVE_PLACE_END ; ++p) {
         if (gameplay->depth[p] > 1) {
-            warn("%s: %d cards at %s (over 1)",
+            warn("%s: %d cards at %s (max possible is 1)",
                  prefix, gameplay->depth[p], placename(p));
             ++errors;
             brokenplaces |= 1 << p;
@@ -127,7 +127,7 @@ static int validatelayout(gameplayinfo const *gameplay)
     }
     for (p = FOUNDATION_PLACE_1ST ; p < FOUNDATION_PLACE_END ; ++p) {
         if (gameplay->depth[p] > NRANKS) {
-            warn("%s: %d cards at %s (over %d)",
+            warn("%s: %d cards at %s (max possible is %d)",
                  prefix, gameplay->depth[p], placename(p), NRANKS);
             ++errors;
             brokenplaces |= 1 << p;
@@ -149,7 +149,7 @@ static int validatelayout(gameplayinfo const *gameplay)
         while (!isemptycard(card)) {
             n = cardtoindex(card);
             if (seen[n]) {
-                warn("%s: multiple cards atop %s!", prefix, cardname(card));
+                warn("%s: multiple cards atop %s", prefix, cardname(card));
                 ++errors;
                 brokenplaces |= 1 << p;
                 card = 0;
@@ -159,7 +159,7 @@ static int validatelayout(gameplayinfo const *gameplay)
             ++cardcount;
             ++depth;
             if (!gameplay->covers[n]) {
-                warn("%s: missing card under %s!", prefix, cardname(card));
+                warn("%s: missing card under %s", prefix, cardname(card));
                 ++errors;
                 brokenplaces |= 1 << p;
             }
@@ -194,22 +194,22 @@ static int validatelayout(gameplayinfo const *gameplay)
     }
 
     if (cardcount != NCARDS) {
-        warn("%s: %d cards found in layout (expected %d)!",
+        warn("%s: %d cards found in layout (expected %d)",
              prefix, cardcount, NCARDS);
         ++errors;
     }
     if (tableaucount != TABLEAU_PLACE_COUNT) {
-        warn("%s: %d tableau places found in layout (expected %d)!",
+        warn("%s: %d tableau places found in layout (expected %d)",
              prefix, tableaucount, TABLEAU_PLACE_COUNT);
         ++errors;
     }
     if (reservecount != RESERVE_PLACE_COUNT) {
-        warn("%s: %d reserve places found in layout (expected %d)!",
+        warn("%s: %d reserve places found in layout (expected %d)",
              prefix, reservecount, RESERVE_PLACE_COUNT);
         ++errors;
     }
     if (foundationcount != FOUNDATION_PLACE_COUNT) {
-        warn("%s: %d foundations found in layout (expected %d)!",
+        warn("%s: %d foundations found in layout (expected %d)",
              prefix, foundationcount, FOUNDATION_PLACE_COUNT);
         ++errors;
     }
@@ -312,10 +312,11 @@ static int validatemoveable(gameplayinfo const *gameplay)
 static int validategamestate(gameplayinfo const *gameplay)
 {
     if (gameplay->locked) {
-        warn("error: validategamestate called while game state is locked!");
-        return 0;
+        warn("ERROR: validategamestate called while game state is locked");
+        return 1;
     }
-    return validatelayout(gameplay) + validateendpoint(gameplay) +
+    return validatelayout(gameplay) +
+           validateendpoint(gameplay) +
            validatemoveable(gameplay);
 }
 
@@ -330,19 +331,22 @@ static int validategamestate(gameplayinfo const *gameplay)
  * are reported on stderr to the user. The return value is the number
  * of errors seen throughout the entire test.
  */
-int main(void)
+static int testgamestate(void)
 {
     char const *prefix = "sample game solution test";
     int const gameid = 223;
     char solutionstring[] =
         "hcgggggckgfhhgjaaaaaeeeeelkifccccjggjkFFfkjccfkjgggkjFFfkjffaaaBBbbk"
         "jbbbfffibBjhhjihhlkcccckjiDDDDdddbbbbbbddddeeeijklcdaagggfffhhhhhhh";
-    signed char depths[] = { 7, 7, 7, 7, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0 };
+    signed char startingdepths[] =
+        { 7, 7, 7, 7, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     gameplayinfo thegame;
     redo_session *session;
     redo_position *position;
-    int errors, i, f;
+    gameplayinfo *allstates;
+    int errors;
+    int i;
 
     thesolution.id = gameid;
     thesolution.text = solutionstring;
@@ -352,15 +356,17 @@ int main(void)
 
     thegame.gameid = gameid;
     session = initializegame(&thegame);
-    if (memcmp(thegame.depth, depths, sizeof thegame.depth)) {
+    if (memcmp(thegame.depth, startingdepths, sizeof thegame.depth)) {
         warn("%s: initializegame created invalid initial state", prefix);
         ++errors;
     }
 
+    allstates = allocate(thesolution.size * sizeof *allstates);
     position = redo_getfirstposition(session);
+
     for (i = 0 ; i < thesolution.size ; ++i) {
-        f = applymove(&thegame, thesolution.text[i]);
-        if (!f) {
+        memcpy(&allstates[i], &thegame, sizeof thegame);
+        if (!applymove(&thegame, thesolution.text[i])) {
             warn("%s: move #%d (%c) could not be made in test game",
                  prefix, i, thesolution.text[i]);
             ++errors;
@@ -377,13 +383,23 @@ int main(void)
         ++errors;
     }
 
-    while (position->prev) {
+    while (i--) {
         position = position->prev;
+        if (!position) {
+            warn("%s: redo history broken at move %d", prefix, i);
+            ++errors;
+            break;
+        }
         restoresavedstate(&thegame, position);
+        if (memcmp(&allstates[i], &thegame, sizeof thegame)) {
+            warn("%s: altered game state at restored move %d", prefix, i);
+            ++errors;
+        }
         errors += validategamestate(&thegame);
     }
-    if (memcmp(thegame.depth, depths, sizeof thegame.depth)) {
-        warn("%s: restored game not in valid initial state", prefix);
+
+    if (position->prev) {
+        warn("%s: redo history longer than solution size", prefix);
         ++errors;
     }
 
@@ -391,4 +407,13 @@ int main(void)
     if (errors)
         warn("Total errors: %d", errors);
     return errors;
+}
+
+/*
+ * The main() function.
+ */
+
+int main(void)
+{
+    return testgamestate();
 }
