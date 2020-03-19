@@ -2,14 +2,13 @@
  *
  * The solutions are the complete set of the user's best solutions for
  * each game. Since they are a globally accessible resource, this
- * module is responsible for maintaining them and providing access.
+ * module is responsible for managing access to them.
  */
 
 #ifndef _solutions_solutions_h_
 #define _solutions_solutions_h_
 
 #include "./types.h"
-#include "redo/redo.h"
 
 /* This struct encodes the user's solution for a game. The actual
  * moves are stored as a string of commands.
@@ -60,13 +59,6 @@ extern int pickrandomunsolved(void);
  * then startpos is returned.)
  */
 extern int findnextunsolved(int startpos, int incr);
-
-/* Run through the solution recorded for the current game, storing the
- * moves in the given redo session. The return value is false if the
- * current game does not have a recorded solution. The game state is
- * restored to the starting position upon return.
- */
-extern int replaysolution(gameplayinfo *gameplay, redo_session *session);
 
 /* Record the given string as a game's solution and write it to the
  * solution file. False is returned if the file cannot be updated.

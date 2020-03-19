@@ -76,6 +76,13 @@ extern redo_position *recordgamestate(gameplayinfo const *gameplay,
 extern void restoresavedstate(gameplayinfo *gameplay,
                               redo_position const *position);
 
+/* Iterate through the solution recorded for the current game, storing
+ * the moves in the given redo session. The return value is false if
+ * the current game does not have a recorded solution. The game state
+ * is restored to the starting position upon return.
+ */
+extern int replaysolution(gameplayinfo *gameplay, redo_session *session);
+
 /* Translate a move ID into a move command by examining the current
  * game state. The return value is zero if the move ID refers to a
  * card that cannot be moved.

@@ -1,9 +1,9 @@
 /* files/files.c: managing the program's directories.
  *
- * The bulk of the code in this file is platform-specific. It is easy
- * to write platform-independent file I/O code. It is harder to write
- * platform-independent directory I/O code. Setting up default
- * directories is even harder.
+ * Much of the code in this file is platform-specific. It is easy to
+ * write platform-independent file I/O code. It is harder to write
+ * platform-independent directory I/O code. Selecting sensible default
+ * directories is even harder. So all of that logic is done here.
  */
 
 #include <stdio.h>
@@ -87,12 +87,31 @@ static int isdir(char const *path)
     return TRUE;
 }
 
+/* Return TRUE if the path exists and is an accesible directory, or if
+ * the path can be created. The latter option requires that the parent
+ * directory must already exist and be accessible. If the return value
+ * is false, errno will be set appropriately.
+ */
+static int canbedir(char const *path)
+{
+    DIR *fp;
+
+    fp = opendir(path);
+    if (!fp) {
+        if (errno == ENOENT)
+            if (!getreadonly() && createdir(path, 0777) == 0)
+                return TRUE;
+        return FALSE;
+    }
+    closedir(fp);
+    return TRUE;
+}
+
 /* Verify that a directory is present within a parent directory, or
- * create it if it doesn't exist. Note that the parent directory must
- * already exist; this function will not create a new hierarchy. The
- * return value is the full pathname to the queried directory, or NULL
- * if the requested directory was not available. The caller assumes
- * ownership of the returned string.
+ * create it if it doesn't exist. The return value is the full
+ * pathname to the queried directory, or NULL if the requested
+ * directory was not available. The caller assumes ownership of the
+ * returned string.
  */
 static char *verifydirindir(char const *dir, char const *subdir)
 {
@@ -101,27 +120,17 @@ static char *verifydirindir(char const *dir, char const *subdir)
     if (!isdir(dir))
         return NULL;
     path = fmtallocate("%s/%s", dir, subdir);
-    if (isdir(path))
+    if (canbedir(path))
         return path;
-    if (errno == ENOENT) {
-        if (getreadonly())
-            goto quit;
-        if (createdir(path, 0777) == 0)
-            return path;
-    }
-    warn("%s: %s", path, strerror(errno));
-
-  quit:
+    perror(path);
     deallocate(path);
     return NULL;
 }
 
-/* Extract the directory from the given path, if possible. Since
- * Windows paths can use both kinds of slashes as directory
- * separators, some extra logic is needed just for that platform. If
- * the directory cannot be isolated, the return value is NULL,
- * otherwise it points to a valid pathname. The caller is responsible
- * for freeing the buffer returned.
+/* Extract the directory from the given path, if possible. If the
+ * directory cannot be isolated, the return value is NULL, otherwise
+ * it points to a valid pathname. The caller is responsible for
+ * freeing the buffer returned.
  */
 static char *getdirfrompath(char const *path)
 {
@@ -145,7 +154,8 @@ static char *getdirfrompath(char const *path)
  * Each platform has a different default for where applications can
  * set up per-user writeable directories. Each platform also has a
  * different default for how to find the path to those directories. So
- * the function getroots() is completely different for each target.
+ * the function findroots() needs a completely different definition
+ * for each platform.
  */
 
 /* Locate the root directories for applications to create directories
@@ -261,9 +271,10 @@ static int choosedirectories(void)
     return TRUE;
 }
 
-/* Select program directories when the user doesn't have a home
- * directory, by locating the directory of the executable and
- * attempting to create a save directory there.
+/* Select program directories when the user doesn't have any of the
+ * necessary environment variables set to determine what path they
+ * should use. As a last-ditch measure, this function attempts to use
+ * a save subdirectory in the directory containing the executable.
  */
 static int choosehomelessdirectories(char const *executablepath)
 {
@@ -295,7 +306,7 @@ int getreadonly(void)
 }
 
 /* Turn a filename into a pathname, using datadir as the starting
- * directory.
+ * directory. If datadir is unset, the current directory will be used.
  */
 char *mkdatapath(char const *filename)
 {
@@ -306,7 +317,7 @@ char *mkdatapath(char const *filename)
 }
 
 /* Turn a filename into a pathname, using settingsdir as the starting
- * directory.
+ * directory. If settingsdir is unset, use the current directory.
  */
 char *mksettingspath(char const *filename)
 {
@@ -329,34 +340,35 @@ void setreadonly(int flag)
     readonly = flag;
 }
 
-/* Locate the directories that the program will use for its files,
- * creating them if they do not already exist. Either or both override
- * directory arguments can be NULL, in which case the program will
- * supply default values.
+/* Identify the directories that the program will use to hold its
+ * files. Either or both override directory arguments can be NULL, in
+ * which case the program will supply default directories, creating
+ * them if they do not already exist.
  */
-int setfiledirectories(char const *overridecfgdir, char const *overridedatadir,
+int setfiledirectories(char const *overridecfgdir,
+                       char const *overridedatadir,
                        char const *executablepath)
 {
-    if (overridecfgdir) {
-        if (isdir(overridecfgdir)) {
-            settingsdir = strallocate(overridecfgdir);
-        } else {
-            warn("%s: %s", overridecfgdir, strerror(errno));
-        }
-    }
     if (overridedatadir) {
-        if (isdir(overridedatadir)) {
+        if (canbedir(overridedatadir))
             datadir = strallocate(overridedatadir);
-        } else {
-            warn("%s: %s", overridedatadir, strerror(errno));
-        }
+        else
+            perror(overridedatadir);
+    }
+    if (overridecfgdir) {
+        if (overridedatadir && !strcmp(overridecfgdir, overridedatadir))
+            settingsdir = datadir;
+        else if (canbedir(overridecfgdir))
+            settingsdir = strallocate(overridecfgdir);
+        else
+            perror(overridecfgdir);
     }
     if (!settingsdir || !datadir) {
         if (!choosedirectories())
             choosehomelessdirectories(executablepath);
     }
     if (!settingsdir && datadir)
-        settingsdir = strallocate(datadir);
+        settingsdir = datadir;
 
     if (!settingsdir || !datadir)
         forcereadonly = TRUE;

@@ -6,8 +6,6 @@
 #include "./gen.h"
 #include "./types.h"
 #include "files/files.h"
-#include "game/game.h"
-#include "redo/redo.h"
 #include "solutions/solutions.h"
 
 /* The array of solutions.
@@ -147,43 +145,4 @@ int savesolution(int gameid, char const *text)
     solution->text = strallocate(text);
     solution->size = size;
     return savesolutionfile(solutions, solutioncount);
-}
-
-/* Re-enact a solution, recreating the game state for each move and
- * recording the solution in the redo session. The game state is
- * restored to the starting position upon return.
- */
-int replaysolution(gameplayinfo *gameplay, redo_session *session)
-{
-    solutioninfo const *solution;
-    redo_position *position;
-    int moveid, i, r;
-
-    solution = getsolution(gameplay->gameid);
-    if (!solution)
-        return FALSE;
-
-    position = redo_getfirstposition(session);
-    for (i = 0 ; i < solution->size ; ++i) {
-        if (!ismovecmd(solution->text[i])) {
-            warn("game %d: move %d: illegal character \"%c\" in solution",
-                 gameplay->gameid, i, solution->text[i]);
-            break;
-        }
-        moveid = mkmoveid(gameplay->cardat[movecmdtoplace(solution->text[i])],
-                          ismovecmd2(solution->text[i]));
-        if (!applymove(gameplay, solution->text[i])) {
-            warn("game %d: move %d: unable to apply move \"%c\" in solution",
-                 gameplay->gameid, i, solution->text[i]);
-            break;
-        }
-        position = recordgamestate(gameplay, session, position,
-                                   moveid, redo_nocheck);
-    }
-
-    r = gameplay->endpoint;
-    if (!r)
-        warn("game %04d: saved solution is incomplete", gameplay->gameid);
-    restoresavedstate(gameplay, redo_getfirstposition(session));
-    return r;
 }

@@ -18,9 +18,9 @@
 
 /* Read the solution file, if it hasn't been read already, and return
  * the array of solutioninfo structs through psolutions. The caller
- * inherits ownership of the array. The unusual formatting of the
+ * inherits ownership of the array. (The unusual formatting of the
  * information in this file is inherited from the original Windows
- * program.
+ * program.)
  */
 int loadsolutionfile(solutioninfo **psolutions)
 {
@@ -43,10 +43,10 @@ int loadsolutionfile(solutioninfo **psolutions)
             return -1;
         }
     }
-    deallocate(filename);
     if (!fgets(buf, sizeof buf, fp) || memcmp(buf, "[Solutions]", 11)) {
+        fprintf(stderr, "%s: invalid solution file\n", filename);
+        deallocate(filename);
         fclose(fp);
-        fprintf(stderr, "brainjam.sol: invalid solution file\n");
         return -1;
     }
     maxcount = getdeckcount();
@@ -54,12 +54,12 @@ int loadsolutionfile(solutioninfo **psolutions)
     n = 0;
     for (lineno = 1 ; fgets(buf, sizeof buf, fp) ; ++lineno) {
         if (sscanf(buf, "%4d=000%*[A-La-l](%d)", &id, &size) != 2 || id < 0) {
-            fprintf(stderr, "brainjam.sol:%d: invalid solution file entry\n",
-                    lineno);
+            fprintf(stderr, "%s:%d: invalid solution file entry\n",
+                    filename, lineno);
             continue;
         }
         if (id >= maxcount) {
-            fprintf(stderr, "brainjam.sol:%d: invalid id: %d\n", lineno, id);
+            fprintf(stderr, "%s:%d: invalid id: %d\n", filename, lineno, id);
             continue;
         }
         solutions[n].id = id;
@@ -70,12 +70,13 @@ int loadsolutionfile(solutioninfo **psolutions)
         ++n;
     }
     fclose(fp);
+    deallocate(filename);
 
     *psolutions = reallocate(solutions, n * sizeof *solutions);
     return n;
 }
 
-/* Rewrite the solution file.
+/* Store the given array of solutions to the solution file.
  */
 int savesolutionfile(solutioninfo const *solutions, int count)
 {
@@ -92,11 +93,11 @@ int savesolutionfile(solutioninfo const *solutions, int count)
         deallocate(filename);
         return FALSE;
     }
-    deallocate(filename);
     fputs("[Solutions]\n", fp);
     for (i = 0 ; i < count ; ++i)
         fprintf(fp, "%04d=000%s(%d)\n",
                 solutions[i].id, solutions[i].text, solutions[i].size);
     fclose(fp);
+    deallocate(filename);
     return TRUE;
 }

@@ -1,14 +1,17 @@
 /* files/files.h: managing data file I/O.
  *
- * The game uses several different files for storing information. All
+ * The game uses a few different files for storing information. All
  * file access is done through the functions in this module. The
  * initialization file stores the user's settings. The solutions file
  * stores all the user's solutions. Finally, there are the session
  * files, one for each game that the user has played. These store the
  * history of the user's moves in that game.
  *
- * All files are kept in a single data directory, which is chosen (and
- * created if it doesn't already exist) during program initialization.
+ * All files are kept in one or two directories, which are chosen (and
+ * created if they don't already exist) during program initialization.
+ * These two directories are referred to as the config directory (or
+ * the settings directory), and the data directory. They can be the
+ * same directory, and in many cases they are.
  */
 
 #ifndef _files_files_h_
@@ -17,17 +20,22 @@
 #include "./types.h"
 #include "redo/redo.h"
 
-/* Select the directories for storing the program's data files. cfgdir
+/* Select the directories for storing the program's files. cfgdir
  * specifies the directory for storing the game's settings, and
  * datadir specifies the directory for storing the user's data
- * (specifically, game history). If either argument is NULL, then
- * default locations are selected. The directories are created if they
- * do not already exist. The executable argument should be the path to
- * the program itself, i.e. argv[0]. If the function cannot determine
- * the usual default locations, then it will attempt to use a
+ * (specifically, game history). If either cfgdir or datadir is NULL,
+ * then default directories are selected, and they will be created if
+ * they do not already exist. (Though note that the program will not
+ * create a full path; the parent directories at least must already be
+ * present.) If values are provided for either directory, those
+ * directories must already exist; the program will not create them.
+ * The argument executable should be the path to the program itself,
+ * i.e. argv[0]. This is only used if the function cannot determine
+ * the usual default locations. In this case it will attempt to use a
  * directory in the same directory as the program. Regardless of how
- * the directories are chosen, if they cannot be accessed, then the
- * return value is false and the program is put in read-only mode.
+ * the directories are chosen, if they cannot be accessed or written
+ * to, then the return value is false and the program is forced into
+ * read-only mode.
  */
 extern int setfiledirectories(char const *cfgdir, char const *datadir,
                               char const *executable);
@@ -44,15 +52,23 @@ extern void setreadonly(int flag);
 
 /*
  * The initialization file.
+ *
+ * The main purpose of the initialization file is to preserve the
+ * configuration values stored in the settingsinfo struct fields.
+ * However, it is permitted for other settings to appear in the
+ * initialization file, and even if they are not recognized, the
+ * program will preserve them across updates. These "extra" settings
+ * are useful to the UI modules, in which one may need to store
+ * settings for a configuration that is not applicable to the other.
  */
 
 /* Read the game settings from the initialization file into the given
- * settingsinfo struct. Any settings in the struct that already have
- * values will be preserved, and the value from the file will be
- * ignored. Fields which do not appear in the initialization file will
- * be remain unchanged in either case. The return value is false if an
- * error occurred. (Note that a nonexistent file is treated the same
- * as a file that is empty.)
+ * settingsinfo struct. Fields which already have set values will not
+ * be overwritten by this function; only unset fields will be changed.
+ * Fields which do not appear in the initialization file will remain
+ * unchanged in either case. The return value is false if an error
+ * occurred. (Note that a nonexistent file is treated the same as a
+ * file that is empty.)
  */
 extern int loadrcfile(settingsinfo *settings);
 
@@ -103,14 +119,16 @@ extern void setsessionfilename(char const *filename);
 
 /* Read the game tree stored in the session file and add it to the
  * redo session, recreating every move. The game state should be
- * initialized to the starting state. (The function temporarily alters
- * the state, and then restores it before returning.) The return value
- * is false if the file exists but cannot be read.
+ * initialized to the starting state before calling this function.
+ * (The function temporarily alters the state, and then restores it
+ * before returning.) The return value is false if the file exists but
+ * cannot be read.
  */
 extern int loadsession(redo_session *session, gameplayinfo *gameplay);
 
-/* Write the redo_session contents to the current session file. The
- * return value is false if an error occurred while saving the data.
+/* Write the complete redo_session contents to the current session
+ * file. The return value is false if an error occurs while saving the
+ * data.
  */
 extern int savesession(redo_session const *session);
 

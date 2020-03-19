@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <locale.h>
 #include <getopt.h>
 #include "./gen.h"
@@ -311,7 +310,6 @@ int main(int argc, char *argv[])
     settingsinfo *settings;
 
     setlocale(LC_ALL, "");
-    srand(time(NULL));
 
     settings = getcurrentsettings();
     readcmdline(argc, argv, settings);

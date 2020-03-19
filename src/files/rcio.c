@@ -23,9 +23,11 @@ typedef struct kvpair {
 
 /* Extra settings in the initialization file, not used directly by the
  * main program. These are either settings unique to one of the I/O
- * modules, or else are entries that are entirely unused by the
- * program, but are nonetheless preserved. This permits the program to
- * use the same file as the original Windows program uses.
+ * modules, or else are entirely unused by the program, but are
+ * nonetheless preserved across rewrites. This helps the program to
+ * use the same initialization file as the original Windows program.
+ * (The expectation is that there will only be handful of such
+ * entries at most, so a simple array is sufficient.)
  */
 static kvpair *extras;
 static int extrascount = 0;
@@ -76,7 +78,7 @@ void storercsetting(char const *key, char const *value)
             break;
     if (i == extrascount) {
         ++extrascount;
-        extras = realloc(extras, extrascount * sizeof *extras);
+        extras = reallocate(extras, extrascount * sizeof *extras);
     } else {
         deallocate(extras[i].key);
     }
@@ -97,7 +99,7 @@ void storercsetting(char const *key, char const *value)
 int loadrcfile(settingsinfo *settings)
 {
     FILE *fp;
-    char buf[128];
+    char buf[256];
     char *filename;
     char *val;
     int lineno;
@@ -115,7 +117,6 @@ int loadrcfile(settingsinfo *settings)
             return FALSE;
         }
     }
-    deallocate(filename);
     clearextras();
     for (lineno = 1 ; fgets(buf, sizeof buf, fp) ; ++lineno) {
         n = strlen(buf);
@@ -134,17 +135,17 @@ int loadrcfile(settingsinfo *settings)
             continue;
         val = strchr(buf, '=');
         if (!val) {
-            warn("brainjam.ini:%d: syntax error", lineno);
+            warn("%s:%d: syntax error", filename, lineno);
             continue;
         }
         *val++ = '\0';
         if (!strcmp(buf, "lastgame")) {
-            if (sscanf(val, "%d", &id) == 1 &&
-                        id >= 0 && id < getdeckcount()) {
+            if (sscanf(val, "%d", &id) == 1 && id >= 0 &&
+                                               id < getdeckcount()) {
                 if (settings->gameid < 0)
                     settings->gameid = id;
             } else {
-                warn("brainjam.ini:%d: invalid lastgame value", lineno);
+                warn("%s:%d: invalid lastgame value", filename, lineno);
                 continue;
             }
         } else if (!strcmp(buf, "showkeys")) {
@@ -164,6 +165,7 @@ int loadrcfile(settingsinfo *settings)
         }
     }
     fclose(fp);
+    deallocate(filename);
     return TRUE;
 }
 
@@ -185,7 +187,6 @@ int savercfile(settingsinfo const *settings)
         deallocate(filename);
         return FALSE;
     }
-    deallocate(filename);
     fprintf(fp, "\n[General]\n");
     if (settings->gameid >= 0)
         fprintf(fp, "lastgame=%04d\n", settings->gameid);
@@ -200,5 +201,6 @@ int savercfile(settingsinfo const *settings)
     for (i = 0 ; i < extrascount ; ++i)
         fprintf(fp, "%s=%s\n", extras[i].key, extras[i].value);
     fclose(fp);
+    deallocate(filename);
     return TRUE;
 }

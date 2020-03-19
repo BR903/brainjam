@@ -13,6 +13,21 @@
 #define foreach_solution(s) \
     for ((s) = getnearestsolution(0) ; (s) ; (s) = getnextsolution(s))
 
+/* Return a random integer between 0 and size - 1. Since this is the
+ * only piece of code that deals in random values, it takes care of
+ * seeding the generator.
+ */
+static int randomint(int size)
+{
+    static int seeded = 0;
+
+    if (!seeded) {
+        seeded = time(NULL);
+        srand(seeded);
+    }
+    return (int)((rand() * (double)size) / (RAND_MAX + 1.0));
+}
+
 /*
  * External functions.
  */
@@ -45,8 +60,7 @@ int pickrandomunsolved(void)
     }
     if (size <= 0)
         size = total;
-    n = (int)((rand() * (double)size) / (RAND_MAX + 1.0));
-    n = array[n];
+    n = array[randomint(size)];
     deallocate(array);
     return n;
 }

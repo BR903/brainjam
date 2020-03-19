@@ -14,27 +14,26 @@
 /* A byte in a session file is a combination of a move id plus a bit
  * indicating the value of the better flag.
  */
-#define BETTER_FLAG 0x80
-#define MOVE_MASK 0x7F
-#define movevalue(branch) \
+#define BETTER_FLAG  0x80
+#define MOVE_MASK  0x7F
+#define movevalue(branch)  \
     (((branch)->move & MOVE_MASK) | ((branch)->p->better ? BETTER_FLAG : 0))
 
 /* There are three special byte values used as delimiters in the
  * session files. Impossible card values are used to avoid collision
  * with valid move IDs.
  */
-#define START_BRANCH   mkcard(14, 0)    /* start a sequence of branches */
-#define SIBLING_BRANCH mkcard(14, 1)    /* separate two sibling branches */
-#define CLOSE_BRANCH   mkcard(14, 2)    /* end a sequence of branches */
+#define START_BRANCH    mkcard(14, 0)   /* start a sequence of branches */
+#define SIBLING_BRANCH  mkcard(14, 1)   /* separate two sibling branches */
+#define CLOSE_BRANCH    mkcard(14, 2)   /* end a sequence of branches */
 
 /* The name of the current session file.
  */
 static char *sessionfilename = NULL;
 
-/* Values needed by the two recursive functions. These values do not
+/* Values needed by the recursive functions. These values do not
  * change during a recursive sequence of calls, so they are stored
- * here instead of being passed down as arguments and filling up the
- * stack frames.
+ * here instead of in every stack frame.
  */
 static FILE *fp;                /* the file being read or written */
 static gameplayinfo *gameplay;  /* the game state buffer */
@@ -54,7 +53,7 @@ static int loadsession_recurse(redo_position *position)
 
     for (;;) {
         byte = fgetc(fp);
-        if (byte == EOF || byte == CLOSE_BRANCH)
+        if (byte == CLOSE_BRANCH || byte == EOF)
             return FALSE;
         if (byte == SIBLING_BRANCH)
             return TRUE;
@@ -91,9 +90,10 @@ static void savesession_recurse(redo_position const *position)
     }
 }
 
-/* Recursively write a set of sibling branches to the session file (in
- * reverse order, so that their current order will be restored when
- * the file is read back in).
+/* Recursively write a set of sibling branches to the session file,
+ * depth first. The siblings are output in reverse order, so that
+ * their current ordering will be naturally restored when the file is
+ * read back in.
  */
 static void savesession_branchrecurse(redo_branch const *branch)
 {
@@ -122,7 +122,7 @@ void setsessionfilename(char const *filename)
 
 /* Read the game tree stored in the session file and recreate it,
  * storing all the positions in the redo session. The game state is
- * restored to the starting position upon return.
+ * restored to the starting position before returning.
  */
 int loadsession(redo_session *session_arg, gameplayinfo *gameplay_arg)
 {

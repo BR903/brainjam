@@ -8,6 +8,7 @@
 #include "./decls.h"
 #include "./decks.h"
 #include "redo/redo.h"
+#include "solutions/solutions.h"
 #include "game/game.h"
 #include "internal.h"
 
@@ -114,7 +115,7 @@ void beginmove(gameplayinfo *gameplay, moveinfo move)
     gameplay->locked |= (1 << move.from) | (1 << move.to);
     gameplay->cardat[move.from] = gameplay->covers[n];
     --gameplay->depth[move.from];
-    gameplay->covers[n] = EMPTY_PLACE;
+    gameplay->covers[n] = 0;
 }
 
 /* Complete the specified move that was begun by the beginmove()
@@ -229,4 +230,42 @@ void restoresavedstate(gameplayinfo *gameplay, redo_position const *position)
     if (gameplay->endpoint != isgamewon(gameplay))
         warn("restored game state claims endpoint = %s, but code disagrees!",
              position->endpoint ? "true" : "false");
+}
+
+/* Re-enact a solution, recreating the game state for each move and
+ * recording the solution in the redo session. The game state is
+ * restored to the starting position upon return.
+ */
+int replaysolution(gameplayinfo *gameplay, redo_session *session)
+{
+    solutioninfo const *solution;
+    redo_position *position;
+    int moveid, i;
+
+    solution = getsolutionfor(gameplay->gameid);
+    if (!solution)
+        return FALSE;
+
+    position = redo_getfirstposition(session);
+    for (i = 0 ; i < solution->size ; ++i) {
+        if (!ismovecmd(solution->text[i])) {
+            warn("game %d: move %d: illegal character \"%c\" in solution",
+                 gameplay->gameid, i, solution->text[i]);
+            break;
+        }
+        moveid = mkmoveid(gameplay->cardat[movecmdtoplace(solution->text[i])],
+                          ismovecmd2(solution->text[i]));
+        if (!applymove(gameplay, solution->text[i])) {
+            warn("game %d: move %d: unable to apply move \"%c\" in solution",
+                 gameplay->gameid, i, solution->text[i]);
+            break;
+        }
+        position = recordgamestate(gameplay, session, position,
+                                   moveid, redo_nocheck);
+    }
+
+    if (!gameplay->endpoint)
+        warn("game %04d: saved solution is not a solution", gameplay->gameid);
+    restoresavedstate(gameplay, redo_getfirstposition(session));
+    return TRUE;
 }
