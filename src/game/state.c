@@ -17,8 +17,9 @@
  * covers array should be used. The cardat array is needed only for
  * consistency in layout display.
  */
-#define SIZE_REDO_STATE (sizeof(gameplayinfo) - offsetof(gameplayinfo, covers))
-#define CMPSIZE_REDO_STATE \
+#define SIZE_REDO_STATE  \
+    (sizeof(gameplayinfo) - offsetof(gameplayinfo, covers))
+#define CMPSIZE_REDO_STATE  \
     (offsetof(gameplayinfo, cardat) - offsetof(gameplayinfo, covers))
 
 /* Return all gameplay state to empty.
@@ -47,17 +48,15 @@ static void dealcards(gameplayinfo *gameplay, int gameid)
 {
     card_t deck[NCARDS], card;
     place_t place;
-    int i, x, y;
+    int i;
 
     getgamedeck(deck, gameid);
     for (i = 0 ; i < NCARDS ; ++i) {
         card = deck[i];
-        x = i % TABLEAU_PLACE_COUNT;
-        y = i / TABLEAU_PLACE_COUNT;
-        place = tableauplace(x);
+        place = tableauplace(i % TABLEAU_PLACE_COUNT);
         gameplay->covers[cardtoindex(card)] = gameplay->cardat[place];
         gameplay->cardat[place] = card;
-        gameplay->depth[place] = y + 1;
+        ++gameplay->depth[place];
     }
 }
 
@@ -84,12 +83,14 @@ static void recalcmoveable(gameplayinfo *gameplay)
     moveinfo move;
     place_t from;
 
-    gameplay->moveable = 0;
     for (from = MOVEABLE_PLACE_1ST ; from < MOVEABLE_PLACE_END ; ++from) {
         if (!gameplay->depth[from]) {
             gameplay->moveable = (1 << MOVEABLE_PLACE_END) - 1;
             return;
         }
+    }
+    gameplay->moveable = 0;
+    for (from = MOVEABLE_PLACE_1ST ; from < MOVEABLE_PLACE_END ; ++from) {
         move = findmoveinfo(gameplay, placetomovecmd1(from));
         if (move.cmd)
             gameplay->moveable |= 1 << from;
@@ -120,7 +121,7 @@ void beginmove(gameplayinfo *gameplay, moveinfo move)
 
 /* Complete the specified move that was begun by the beginmove()
  * function, by returning the card to the layout at the new position
- * and updating the game state accordingly.
+ * and updating the rest of the game state accordingly.
  */
 void finishmove(gameplayinfo *gameplay, moveinfo move)
 {
@@ -146,15 +147,13 @@ void updategrafted(gameplayinfo *gameplay, redo_session *session,
 
     for (branch = position->next ; branch ; branch = branch->cdr) {
         applymove(gameplay, moveidtocmd(gameplay, branch->move));
+#if PARANOIA
         if (memcmp(redo_getsavedstate(branch->p), &gameplay->covers,
-                   SIZE_REDO_STATE)) {
-            if (memcmp(redo_getsavedstate(branch->p), &gameplay->covers,
-                       CMPSIZE_REDO_STATE)) {
-                warn("ERROR: applying move at count %d"
-                     " produced different state!", branch->p->movecount);
-            }
-            redo_updatesavedstate(session, branch->p, &gameplay->covers);
-        }
+                   CMPSIZE_REDO_STATE))
+            warn("ERROR: applying move at count %d produced different state!",
+                 branch->p->movecount);
+#endif
+        redo_updatesavedstate(session, branch->p, &gameplay->covers);
         updategrafted(gameplay, session, branch->p);
         restoresavedstate(gameplay, position);
     }
@@ -164,9 +163,9 @@ void updategrafted(gameplayinfo *gameplay, redo_session *session,
  * External functions.
  */
 
-/* Initialize the gameplay game state to the starting point of a game.
- * All cards are dealt to the tableau, and the foundation and reserves
- * are set to empty. Return a newly started redo session.
+/* Initialize the game state to the starting point of a game. All
+ * cards are dealt to the tableau, and the foundation and reserves are
+ * set to empty. Return a newly started redo session.
  */
 redo_session *initializegame(gameplayinfo *gameplay)
 {
@@ -203,12 +202,12 @@ redo_position *recordgamestate(gameplayinfo const *gameplay,
                             &gameplay->covers, gameplay->endpoint, checkequiv);
 }
 
-/* Copy a saved game state back into the active game. The game state
- * is formatted as a byte array, one entry per card with each entry
+/* Copy a saved state back into the given game. The game state is
+ * formatted as a byte array, one entry per card with each entry
  * identifying the card it covers. The in-memory state data also
  * contains the cardat array, so it is restored automatically as well
- * by the memcpy(). The depth field is not stored with the state,
- * however, so it needs need to be updated manually.
+ * by the memcpy(). The moveable and depth fields are not included in
+ * the saved state, so they need to be recalculated.
  */
 void restoresavedstate(gameplayinfo *gameplay, redo_position const *position)
 {
@@ -217,6 +216,12 @@ void restoresavedstate(gameplayinfo *gameplay, redo_position const *position)
 
     clearstate(gameplay);
     memcpy(&gameplay->covers, redo_getsavedstate(position), SIZE_REDO_STATE);
+    gameplay->endpoint = position->endpoint;
+#if PARANOIA
+    if (gameplay->endpoint != isgamewon(gameplay))
+        warn("restored game state claims endpoint = %s, but code disagrees!",
+             position->endpoint ? "true" : "false");
+#endif
     for (i = 0 ; i < NPLACES ; ++i) {
         gameplay->depth[i] = 0;
         card = gameplay->cardat[i];
@@ -226,10 +231,6 @@ void restoresavedstate(gameplayinfo *gameplay, redo_position const *position)
         }
     }
     recalcmoveable(gameplay);
-    gameplay->endpoint = position->endpoint;
-    if (gameplay->endpoint != isgamewon(gameplay))
-        warn("restored game state claims endpoint = %s, but code disagrees!",
-             position->endpoint ? "true" : "false");
 }
 
 /* Re-enact a solution, recreating the game state for each move and

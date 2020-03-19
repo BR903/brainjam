@@ -99,6 +99,7 @@ $(PROG): $(OBJ)
 # Any failures in the test program will cause "make check" to fail.
 check: $(PROG)
 	$(MAKE) -C test $@
+	: All tests passed.
 
 # The install rule copies the program and the man page.
 install: $(PROG)

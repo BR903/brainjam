@@ -32,8 +32,11 @@ typedef struct handlemoveparams {
 } handlemoveparams;
 
 /* How long to wait before making an automatic move (in milliseconds).
+ * Note that this delay is only applied when animation is disabled;
+ * otherwise it is assumed that the animations already create
+ * sufficient delay.
  */
-static int const autoplaydelay = 100;
+static int const autoplaydelay = 112;
 
 /* True if auto-play on foundations is enabled.
  */
@@ -61,7 +64,7 @@ static stackentry *positionstack = NULL;
 
 /* The queue of buffered user commands.
  */
-static command_t commandbuffer[6];
+static command_t bufferedcommands[6];
 static int bufferedcommandcount = 0;
 
 /*
@@ -141,23 +144,23 @@ static void stackdelete(redo_position const *position)
  */
 static int buffercommand(command_t cmd)
 {
-    int const commandbuffersize = sizeof commandbuffer / sizeof *commandbuffer;
+    int const buffersize = sizeof bufferedcommands / sizeof *bufferedcommands;
 
-    if (bufferedcommandcount >= commandbuffersize)
+    if (bufferedcommandcount >= buffersize)
         return FALSE;
-    if (bufferedcommandcount >= commandbuffersize - 2)
-        if (cmd == commandbuffer[bufferedcommandcount - 1])
+    if (bufferedcommandcount >= buffersize - 2)
+        if (cmd == bufferedcommands[bufferedcommandcount - 1])
             return FALSE;
-    commandbuffer[bufferedcommandcount] = cmd;
+    bufferedcommands[bufferedcommandcount] = cmd;
     ++bufferedcommandcount;
     return TRUE;
 }
 
-/* Return true if the command buffer is not empty.
+/* Return true if the command buffer is empty.
  */
-static int commandsinbuffer(void)
+static int isbufferempty(void)
 {
-    return bufferedcommandcount > 0;
+    return bufferedcommandcount == 0;
 }
 
 /* Remove and return the oldest command in the command buffer. Return
@@ -169,10 +172,10 @@ static command_t unbuffercommand(void)
 
     if (bufferedcommandcount <= 0)
         return cmd_none;
-    cmd = commandbuffer[0];
+    cmd = bufferedcommands[0];
     --bufferedcommandcount;
-    memmove(commandbuffer, commandbuffer + 1,
-            bufferedcommandcount * sizeof *commandbuffer);
+    memmove(bufferedcommands, bufferedcommands + 1,
+            bufferedcommandcount * sizeof *bufferedcommands);
     return cmd;
 }
 
@@ -191,26 +194,32 @@ static char *createsolutionstring(gameplayinfo *gameplay,
     redo_position const *position;
     redo_branch const *branch;
     char *string;
+    int failed;
     int size, i;
 
     position = redo_getfirstposition(session);
     size = position->solutionsize;
     string = allocate(size + 1);
+    failed = FALSE;
     for (i = 0 ; i < size ; ++i) {
         for (branch = position->next ; branch ; branch = branch->cdr)
             if (branch->p->solutionsize == size)
                 break;
         if (!branch) {
             warn("failed to create solution: no correct move at %d", i + 1);
-            string[i] = '?';
-            continue;
+            failed = TRUE;
+            break;
         }
         restoresavedstate(gameplay, position);
         string[i] = moveidtocmd(gameplay, branch->move);
         position = branch->p;
     }
-    restoresavedstate(gameplay, currentposition);
     string[size] = '\0';
+    restoresavedstate(gameplay, currentposition);
+    if (failed) {
+        deallocate(string);
+        string = NULL;
+    }
     return string;
 }
 
@@ -220,9 +229,9 @@ static char *createsolutionstring(gameplayinfo *gameplay,
 
 /* Look for a card that can be moved directly onto a foundation pile.
  * If one is found, the return value is the move command for that
- * move. Zero is returned if no such move is currently available. (If
+ * move. Zero is returned if no such move is currently available. If
  * there is more than one card available, the function will prefer a
- * card with the same suit as that of the previous such move.)
+ * card with the same suit as that of the most recently returned move.
  */
 static movecmd_t findfoundationmove(gameplayinfo const *gameplay)
 {
@@ -308,14 +317,16 @@ static void handlemove_callback(void *data)
         if (!gameplay->bestsolution ||
                         gameplay->bestsolution > pos->solutionsize) {
             buf = createsolutionstring(gameplay, session);
-            savesolution(gameplay->gameid, buf);
-            deallocate(buf);
-            gameplay->bestsolution = pos->solutionsize;
-            showsolutionwrite();
+            if (buf) {
+                savesolution(gameplay->gameid, buf);
+                deallocate(buf);
+                gameplay->bestsolution = pos->solutionsize;
+                showsolutionwrite();
+            }
         }
     }
 
-    if (commandsinbuffer())
+    if (!isbufferempty())
         ungetinput(unbuffercommand(), 0);
     else if (autoplay)
         ungetinput(cmd_autoplay, animation ? 0 : autoplaydelay);
@@ -326,9 +337,9 @@ static void handlemove_callback(void *data)
  * still in progress, the change to the game state is begun. After any
  * animation has finished, handlemove_callback() will complete the
  * move. (Note that in the case where an earlier move is still in
- * progress but this new move does not intersect with it, this
- * function will still refuse the move, but will schedule it to be
- * automatically retried.)
+ * progress but this new move does not intersect with it, the move
+ * will be stored in the buffer instead, to be resubmitted once the
+ * current move is complete.)
  */
 static int handlemove(gameplayinfo *gameplay, redo_session *session,
                       movecmd_t movecmd)
@@ -385,8 +396,8 @@ static void moveposition(gameplayinfo *gameplay, redo_position *pos)
     restoresavedstate(gameplay, pos);
 }
 
-/* Set all mru moves forward from this position to those of the
- * shortest solution.
+/* Set the default redo moves forward from this position to those of
+ * the shortest solution.
  */
 static void setminimalpath(redo_position *pos)
 {
@@ -402,33 +413,40 @@ static void setminimalpath(redo_position *pos)
     }
 }
 
+/* Replace several navigation commands with other commands (usually
+ * nothing) when the branching redo feature is disabled.
+ */
+static command_t remapcommand(command_t cmd)
+{
+    if (!branchingredo) {
+        switch (cmd) {
+          case cmd_undo10:              return cmd_nop;
+          case cmd_redo10:              return cmd_nop;
+          case cmd_undotobranch:        return cmd_nop;
+          case cmd_redotobranch:        return cmd_nop;
+          case cmd_switchtobetter:      return cmd_nop;
+          case cmd_pushbookmark:        return cmd_nop;
+          case cmd_popbookmark:         return cmd_nop;
+          case cmd_swapbookmark:        return cmd_nop;
+          case cmd_dropbookmark:        return cmd_nop;
+          case cmd_setminimalpath:      return cmd_nop;
+        }
+    }
+    return cmd;
+}
+
 /* Interpret and apply a single navigation command. Nearly all of the
  * keys that don't map to move commands are handled in this switch
- * statement. The function return false if the user asked to quit the
- * current game. (Note that many of these commands are unavailable if
- * the branching redo feature is disabled.)
+ * statement. The function returns false if the user asked to quit the
+ * current game.
  */
-static int handlenavkey(gameplayinfo *gameplay, redo_session *session, int cmd)
+static int handlenavkey(gameplayinfo *gameplay, redo_session *session,
+                        command_t cmd)
 {
     redo_position *pos;
     int i;
 
-    if (!branchingredo) {
-        switch (cmd) {
-          case cmd_undo10:              cmd = cmd_nop;          break;
-          case cmd_redo10:              cmd = cmd_nop;          break;
-          case cmd_undotobranch:        cmd = cmd_nop;          break;
-          case cmd_redotobranch:        cmd = cmd_nop;          break;
-          case cmd_switchtobetter:      cmd = cmd_nop;          break;
-          case cmd_pushbookmark:        cmd = cmd_nop;          break;
-          case cmd_popbookmark:         cmd = cmd_nop;          break;
-          case cmd_swapbookmark:        cmd = cmd_nop;          break;
-          case cmd_dropbookmark:        cmd = cmd_nop;          break;
-          case cmd_setminimalpath:      cmd = cmd_nop;          break;
-        }
-    }
-
-    switch (cmd) {
+    switch (remapcommand(cmd)) {
       case cmd_erase:
         pos = redo_dropposition(session, currentposition);
         if (pos != currentposition) {
@@ -566,15 +584,15 @@ void setbranching(int f)
     branchingredo = f;
 }
 
-/* Enter the central loop of game play. Render the game state, wait
- * for a command to be input, apply it to the game state and the redo
+/* Run the inner loop of game play. Display the game state, wait for a
+ * command to be input, apply it to the game state and the redo
  * session, and loop. Continue until one of the quit commands is
  * received.
  */
 int gameplayloop(gameplayinfo *gameplay, redo_session *session)
 {
     renderparams params;
-    int ch;
+    command_t cmd;
 
     currentposition = redo_getfirstposition(session);
     gameplay->bestsolution = currentposition->solutionsize;
@@ -586,21 +604,21 @@ int gameplayloop(gameplayinfo *gameplay, redo_session *session)
         params.position = currentposition;
         params.bookmark = !isstackempty();
         rendergame(&params);
-        ch = getinput();
-        if (ch == cmd_quitprogram)
+        cmd = getinput();
+        if (cmd == cmd_quitprogram)
             return FALSE;
-        if (ch == cmd_autoplay)
-            ch = findfoundationmove(gameplay);
-        if (ismovecmd(ch)) {
+        if (cmd == cmd_autoplay)
+            cmd = findfoundationmove(gameplay);
+        if (ismovecmd(cmd)) {
             if (!gameplay->moveable) {
                 ding();
                 continue;
             }
-            if (!handlemove(gameplay, session, ch))
+            if (!handlemove(gameplay, session, cmd))
                 ding();
             continue;
-        } else if (ch) {
-            if (!handlenavkey(gameplay, session, ch))
+        } else if (cmd) {
+            if (!handlenavkey(gameplay, session, cmd))
                 return TRUE;
         }
     }

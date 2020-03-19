@@ -55,7 +55,7 @@ void deallocate(void *p)
  */
 char *strallocate(char const *str)
 {
-    unsigned int size;
+    size_t size;
 
     if (!str)
         return NULL;

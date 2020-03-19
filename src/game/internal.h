@@ -32,8 +32,8 @@ extern moveinfo findmoveinfo(gameplayinfo const *gameplay, movecmd_t movecmd);
 extern void beginmove(gameplayinfo *gameplay, moveinfo move);
 
 /* Complete a begun move by returning the card being moved to the
- * game, at its new position. All relevant game state (such as the
- * moveable bitfield) is appropriately updated.
+ * game, at its new position. All relevant game state is appropriately
+ * updated.
  */
 extern void finishmove(gameplayinfo *gameplay, moveinfo move);
 

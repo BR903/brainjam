@@ -20,14 +20,13 @@
  *
  * When more than one legal move is available, the order of preference
  * is for moving first to a foundation pile, second to a tableau stack
- * with the next-higher card showing, third to an empty tableau stack,
- * and fourth to an empty reserve place. Finally, if the movecmd is
- * uppercase, then the second available move is taken instead of the
- * first. (Note that there is no mechanism for selecting a third
+ * with the next-higher card showing, third to an empty tableau place,
+ * and fourth to an empty reserve place. The movecmd can specify that
+ * the function should choose the first available choice, or the
+ * second. (Note that there is no mechanism for selecting a third
  * choice, even though situations can arise where it is helpful to be
- * able to do so. This mirrors the functionality of the original
- * Windows game, so that the best possible solutions from that program
- * continue to apply to this program.)
+ * able to do so. This matches the game logic of the original Windows
+ * program.)
  */
 moveinfo findmoveinfo(gameplayinfo const *gameplay, movecmd_t movecmd)
 {
@@ -75,7 +74,8 @@ moveinfo findmoveinfo(gameplayinfo const *gameplay, movecmd_t movecmd)
  */
 
 /* Translate a move ID into a move command using the current game
- * state. Zero is returned if the move ID is not currently valid.
+ * state. Zero is returned if the card specified by the move ID is
+ * not accessible.
  */
 movecmd_t moveidtocmd(gameplayinfo const *gameplay, int moveid)
 {

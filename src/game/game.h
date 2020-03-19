@@ -1,7 +1,7 @@
 /* game/game.h: manipulating the game state.
  *
- * These functions provide all of the game logic -- of the gameplay
- * user interface as well as the rules of Brain Jam itself. The
+ * These functions provide all of the game logic, both of the gameplay
+ * user interface and of the rules of Brain Jam itself. The
  * gameplayinfo struct holds all of the data that tracks the game
  * state. Code in other modules can examine its fields, but this is
  * the only module that is allowed to directly alter them.
@@ -29,7 +29,7 @@ struct gameplayinfo {
     int endpoint;               /* true if the user has reached an endpoint */
     signed char depth[NPLACES]; /* the number of cards at each place */
     card_t covers[NCARDS];      /* the card that each card is on top of */
-    card_t cardat[NPLACES];       /* the card in play at each place */
+    card_t cardat[NPLACES];     /* the card in play at each place */
 };
 
 /* Enable or disable the auto-play feature. When the feature is
@@ -76,10 +76,10 @@ extern redo_position *recordgamestate(gameplayinfo const *gameplay,
 extern void restoresavedstate(gameplayinfo *gameplay,
                               redo_position const *position);
 
-/* Iterate through the solution recorded for the current game, storing
- * the moves in the given redo session. The return value is false if
- * the current game does not have a recorded solution. The game state
- * is restored to the starting position upon return.
+/* Iterate through the user's stored solution for the current game,
+ * storing the moves in the given redo session. The return value is
+ * false if the current game does not have a recorded solution. The
+ * game state is restored to the starting position upon return.
  */
 extern int replaysolution(gameplayinfo *gameplay, redo_session *session);
 
@@ -89,15 +89,15 @@ extern int replaysolution(gameplayinfo *gameplay, redo_session *session);
  */
 movecmd_t moveidtocmd(gameplayinfo const *gameplay, int moveid);
 
-/* Run the user interface for the current setup, using the given game
- * state and redo session to store progress. When invoked, the game
- * state must be initialized to the game's starting point. The redo
- * session can be empty, or it can contain redo history from an
- * earlier play session. The function returns when the user leaves the
- * game. If an improved solution is discovered during game play, it
- * will be automatically saved to the user's solution file. The return
- * value is true if the program should return the user to the list of
- * games, or false if the program should exit.
+/* Run the user interface for a game, using the given game state and
+ * redo session to store progress. When invoked, the game state must
+ * be initialized to the game's starting point. The redo session can
+ * be empty, or it can contain redo history from an earlier play
+ * session. The function returns when the user leaves the game. If an
+ * improved solution is discovered during game play, it will be
+ * automatically saved to the user's solution file. The return value
+ * is true if the program should return the user to the list of games,
+ * or false if the program should exit.
  */
 extern int gameplayloop(gameplayinfo *gameplay, redo_session *session);
 
