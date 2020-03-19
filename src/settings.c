@@ -13,13 +13,13 @@
  * only used the first time the program runs, before an initialization
  * file has been created.
  */
-#define DEFAULT_GAMEID 0
-#define DEFAULT_SHOWKEYS 0
-#define DEFAULT_ANIMATION 1
-#define DEFAULT_AUTOPLAY 1
-#define DEFAULT_BRANCHING 0
-#define DEFAULT_READONLY 0
-#define DEFAULT_FORCETEXTMODE 0
+#define DEFAULT_GAMEID  0
+#define DEFAULT_SHOWKEYS  0
+#define DEFAULT_ANIMATION  1
+#define DEFAULT_AUTOPLAY  1
+#define DEFAULT_BRANCHING  0
+#define DEFAULT_READONLY  0
+#define DEFAULT_FORCETEXTMODE  0
 
 /* The global settings are stored here.
  */

@@ -10,7 +10,7 @@
 
 /* Macro to declare a loop over all solutions.
  */
-#define foreach_solution(s) \
+#define foreach_solution(s)  \
     for ((s) = getnearestsolution(0) ; (s) ; (s) = getnextsolution(s))
 
 /* Return a random integer between 0 and size - 1. Since this is the

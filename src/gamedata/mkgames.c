@@ -13,12 +13,12 @@
 
 /* A deck contains 52 cards.
  */
-#define NCARDS 52
+#define NCARDS  52
 
 /* Each card is encoded as a single letter, with capital letters
  * representing the first 26 and lowercase letters the last 26.
  */
-#define lettertoindex(c) ((c) < 'a' ? (c) - 'A' : (c) - 'a' + 26)
+#define lettertoindex(c)  ((c) < 'a' ? (c) - 'A' : (c) - 'a' + 26)
 
 /* This global variable is used in outputting error messages.
  */

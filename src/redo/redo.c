@@ -37,9 +37,9 @@ static int const hashtablebitsize = 8191;
 
 /* Increment a redo_position pointer. (Although the size of a position
  * is constant for a given session, it is not available at compile
- * time, so the program must do its own pointer arithmetic.)
+ * time, so the code must do its own pointer arithmetic.)
  */
-#define incpos(s, p) ((redo_position*)((char*)(p) + (s)->elementsize))
+#define incpos(s, p)  ((redo_position*)((char*)(p) + (s)->elementsize))
 
 /*
  * The position hash table.
@@ -115,8 +115,8 @@ static int sethashentry(redo_session *session, unsigned short value)
 /* Return true if a hash table is present and the given value is not
  * in it, otherwise return false. The lookup is framed in the negative
  * because a value being in the hash table doesn't mean the actual
- * state is present, and similarly nothing certain can be said if the
- * hash table itself does not exist.
+ * state being sought is present in the tree. And similarly, nothing
+ * certain can be said if the hash table itself does not exist.
  */
 static int notintable(redo_session const *session, unsigned short value)
 {
@@ -146,7 +146,8 @@ static void *getwriteablestatedata(redo_position *position)
     return position + 1;
 }
 
-/* Copy a state to a position.
+/* Copy a state to a position. This function sets the position's hash
+ * value.
  */
 static void savestatedata(redo_session const *session, redo_position *position,
                           void const *state, int endpoint)
@@ -195,7 +196,7 @@ static void saveextrastatedata(redo_session const *session,
  *
  * redo_branch structs are also allocated in chunks. Unused structs
  * are kept in a linked list by reusing the cdr field; a NULL value in
- * the p field indicates that a struct is unused. The redo_position
+ * the p field indicates that a struct is unused. The redo_branch
  * chunks reserve the first element, instead of the last, to hold the
  * pointer to the next chunk. redo_session usees the bfree and barray
  * fields to point to the heads of these lists.
@@ -221,6 +222,7 @@ static int newposarray(redo_session *session)
         pos = pos->prev;
     }
     last->prev = NULL;
+
     pos->inuse = 0;
     pos->inarray = 0;
     pos->prev = session->parray;
@@ -281,7 +283,7 @@ static void droppositionstruct(redo_session *session, redo_position *position)
     --session->positioncount;
 }
 
-/* Grab an unused redo_branch.
+/* Grab an unused redo_branch and initialize it with the given values.
  */
 static redo_branch *getbranchstruct(redo_session *session, redo_position *p,
                                     int move, redo_branch *cdr)
@@ -409,11 +411,12 @@ static void recalchashtable(redo_session *session)
                 sethashentry(session, pos->hashvalue);
 }
 
-/* Delete the nodes in the path leading from branchpoint to leaf in
- * the session. Nodes are deleted from leaf upwards. The return value
- * is true if all positions between leaf and branchpoint are deleted.
- * If a position is found that has more than one move leading from it,
- * no further deletions are done and the function returns false.
+/* Delete the positions in the path leading from branchpoint to leaf
+ * in the session. Positions are deleted from leaf upwards. The return
+ * value is true if all positions between leaf and branchpoint are
+ * deleted. If a position is found that has more than one move leading
+ * from it, no further deletions are done and the function returns
+ * false.
  */
 static int prunebranch(redo_session *session, redo_position *leaf,
                        redo_position *branchpoint)
@@ -615,14 +618,14 @@ redo_position *redo_getnextposition(redo_position *position, int move)
     return NULL;
 }
 
-/* Add a new node to the session, leading from prev via move. If such
- * a node already exists, it is returned; otherwise, the node is
- * created, fully initialized, and returned. In the latter case, the
- * state data is stored with the new position. If checkequiv's value
- * is redo_check, then the function will check for equivalent nodes in
- * the session. If one is found, the better field will be intialized
- * to point to it, or, if the new node is actually the other node's
- * better, grafting behavior with be applied.
+/* Add a new node to the session, leading from prev with move as the
+ * branch's label. If such a node already exists, it is returned;
+ * otherwise, the node is created, fully initialized, and returned. In
+ * the latter case, the state data is stored with the new position. If
+ * checkequiv's value is redo_check, then the function will check for
+ * equivalent nodes in the session. If one is found, the better field
+ * will be intialized to point to it, or, if the new node is actually
+ * the other node's better, grafting behavior with be applied.
  */
 redo_position *redo_addposition(redo_session *session,
                                 redo_position *prev, int move,
@@ -725,8 +728,9 @@ redo_position *redo_dropposition(redo_session *session,
 
 /* Check that the given state isn't a revisiting of a state already
  * seen in the given move path. If it is, change *pposition to the
- * earlier position. If the intermediate steps are a single line and
- * within the length of prunelimit, then they are dropped.
+ * earlier position. If the intermediate steps are a single line (i.e.
+ * no sibling branches) and within the length of prunelimit, then they
+ * are dropped.
  */
 int redo_suppresscycle(redo_session *session, redo_position **pposition,
                        void const *state, int prunelimit)

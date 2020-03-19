@@ -158,15 +158,15 @@
 
 /* Testing for a valid move command.
  */
-#define ismovecmd1(ch) ((ch) >= 'a' && (ch) < 'a' + MOVEABLE_PLACE_COUNT)
-#define ismovecmd2(ch) ((ch) >= 'A' && (ch) < 'A' + MOVEABLE_PLACE_COUNT)
-#define ismovecmd(ch) (ismovecmd1(ch) || ismovecmd2(ch))
+#define ismovecmd1(ch)  ((ch) >= 'a' && (ch) < 'a' + MOVEABLE_PLACE_COUNT)
+#define ismovecmd2(ch)  ((ch) >= 'A' && (ch) < 'A' + MOVEABLE_PLACE_COUNT)
+#define ismovecmd(ch)  (ismovecmd1(ch) || ismovecmd2(ch))
 
 /* Macros for translating between a move command and a place.
  */
-#define movecmdtoplace(m) (((m) - 'A') & ~('a' - 'A'))
-#define placetomovecmd1(p) ('a' + placetoindex(p))
-#define placetomovecmd2(p) ('A' + placetoindex(p))
+#define movecmdtoplace(m)  (((m) - 'A') & ~('a' - 'A'))
+#define placetomovecmd1(p)  ('a' + placetoindex(p))
+#define placetomovecmd2(p)  ('A' + placetoindex(p))
 
 /*
  * A "move ID" identifies the card being moved, rather than the place
@@ -178,20 +178,21 @@
 
 /* Testing for a valid move ID.
  */
-#define MOVEID_CARD_MASK 0x3F
-#define MOVEID_ALT_FLAG 0x40
-#define ismoveid1(moveid) (((moveid) & MOVEID_ALT_FLAG) == 0)
-#define ismoveid2(moveid) (((moveid) & MOVEID_ALT_FLAG) != 0)
+#define MOVEID_CARD_MASK  0x3F
+#define MOVEID_ALT_FLAG  0x40
+#define ismoveid1(moveid)  (((moveid) & MOVEID_ALT_FLAG) == 0)
+#define ismoveid2(moveid)  (((moveid) & MOVEID_ALT_FLAG) != 0)
 
 /* Macros for translating between a move ID and a card.
  */
-#define moveidtocard(moveid) ((moveid) & MOVEID_CARD_MASK)
-#define moveidtocardindex(moveid) cardtoindex(moveidtocard(moveid))
-#define cardtomoveid1(card) (card)
-#define cardtomoveid2(card) ((card) | MOVEID_ALT_FLAG)
+#define moveidtocard(moveid)  ((moveid) & MOVEID_CARD_MASK)
+#define moveidtocardindex(moveid)  cardtoindex(moveidtocard(moveid))
+#define cardtomoveid1(card)  (card)
+#define cardtomoveid2(card)  ((card) | MOVEID_ALT_FLAG)
 
 /* Macro to generate a move ID.
  */
-#define mkmoveid(card, alt) ((alt) ? cardtomoveid2(card) : cardtomoveid1(card))
+#define mkmoveid(card, alt)  \
+    ((alt) ? cardtomoveid2(card) : cardtomoveid1(card))
 
 #endif
