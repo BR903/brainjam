@@ -224,6 +224,49 @@ static char *createsolutionstring(gameplayinfo *gameplay,
 }
 
 /*
+ * Handling move deletion.
+ */
+
+/* Delete a game position. In addition to removing it from the session
+ * history, the position might also need to be removed from the stack
+ * of saved positions, and its removal might require updating the
+ * user's best solution size. The return value is the previous
+ * position in the history, or the given position if it could not be
+ * deleted.
+ */
+static redo_position *forgetposition(gameplayinfo *gameplay,
+                                     redo_session *session,
+                                     redo_position *position)
+{
+    redo_position *pos;
+
+    pos = redo_dropposition(session, position);
+    if (pos == position)
+        return pos;
+
+    gameplay->bestsolution = redo_getfirstposition(session)->solutionsize;
+    stackdelete(position);
+    currentposition = NULL;
+    if (backone == position)
+        backone = NULL;
+    return pos;
+}
+
+/* Delete undone moves branching forward from the given position
+ * recursively. This function allows the redo session to mimic the
+ * behavior of a simple undo-redo system, by discarding an undone
+ * branch when a new branch is explored.
+ */
+static redo_position *forgetundonepositions(gameplayinfo *gameplay,
+                                            redo_session *session,
+                                            redo_position *position)
+{
+    if (position->next)
+        forgetundonepositions(gameplay, session, position->next->p);
+    return forgetposition(gameplay, session, position);
+}
+
+/*
  * How cards are moved.
  */
 
@@ -259,20 +302,6 @@ static movecmd_t findfoundationmove(gameplayinfo const *gameplay)
     return ret;
 }
 
-/* Delete undone moves branching forward from the given position
- * recursively. This function provides the behavior of a simple
- * undo-redo system, by discarding an undone branch when a new branch
- * is explored.
- */
-static redo_position *eraseundonepositions(redo_session *session,
-                                           redo_position *position)
-{
-    if (position->next)
-        eraseundonepositions(session, position->next->p);
-    stackdelete(position);
-    return redo_dropposition(session, position);
-}
-
 /* Finish the process of a moving a card, as started by handlemove().
  * Game state is updated, and the move is added to the redo session.
  * If the move created a new and shorter solution, it is saved to
@@ -306,7 +335,7 @@ static void handlemove_callback(void *data)
     }
 
     if (currentposition->next && !branchingredo)
-        eraseundonepositions(session, currentposition->next->p);
+        forgetundonepositions(gameplay, session, currentposition->next->p);
     currentposition = recordgamestate(gameplay, session, currentposition,
                                       moveid, redo_check);
     if (currentposition->next)
@@ -448,14 +477,11 @@ static int handlenavkey(gameplayinfo *gameplay, redo_session *session,
 
     switch (remapcommand(cmd)) {
       case cmd_erase:
-        pos = redo_dropposition(session, currentposition);
-        if (pos != currentposition) {
-            stackdelete(currentposition);
-            currentposition = NULL;
+        pos = forgetposition(gameplay, session, currentposition);
+        if (pos != currentposition)
             moveposition(gameplay, pos);
-        } else {
+        else
             ding();
-        }
         break;
       case cmd_jumptostart:
         moveposition(gameplay, redo_getfirstposition(session));
