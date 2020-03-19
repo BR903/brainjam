@@ -6,7 +6,21 @@
 #include "./gen.h"
 #include "./decls.h"
 #include "redo/redo.h"
+#include "solutions/solutions.h"
 #include "game/game.h"
+
+/*
+ */
+static solutioninfo thesolution;
+
+/* This function is normally supplied by the solution module, but the
+ * test program doesn't include that module, so a replacement is
+ * provided here.
+ */
+solutioninfo const *getsolutionfor(int id)
+{
+    return id == thesolution.id ? &thesolution : NULL;
+}
 
 /* Return a string representing a card suit.
  */
@@ -250,7 +264,8 @@ static int validateendpoint(gameplayinfo const *gameplay)
 }
 
 /* Validate the bit flags of the moveable field correspond to the
- * cards that can be moved.
+ * cards that can be moved. Note that an empty place is permitted to
+ * have its flag in either state, so those bits are skipped over.
  */
 static int validatemoveable(gameplayinfo const *gameplay)
 {
@@ -319,7 +334,7 @@ int main(void)
 {
     char const *prefix = "sample game solution test";
     int const gameid = 223;
-    char const *solution =
+    char solutionstring[] =
         "hcgggggckgfhhgjaaaaaeeeeelkifccccjggjkFFfkjccfkjgggkjFFfkjffaaaBBbbk"
         "jbbbfffibBjhhjihhlkcccckjiDDDDdddbbbbbbddddeeeijklcdaagggfffhhhhhhh";
     signed char depths[] = { 7, 7, 7, 7, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -328,6 +343,10 @@ int main(void)
     redo_session *session;
     redo_position *position;
     int errors, i, f;
+
+    thesolution.id = gameid;
+    thesolution.text = solutionstring;
+    thesolution.size = sizeof solutionstring - 1;
 
     errors = 0;
 
@@ -339,16 +358,16 @@ int main(void)
     }
 
     position = redo_getfirstposition(session);
-    for (i = 0 ; solution[i] ; ++i) {
-        f = applymove(&thegame, solution[i]);
+    for (i = 0 ; i < thesolution.size ; ++i) {
+        f = applymove(&thegame, thesolution.text[i]);
         if (!f) {
-            warn("%s: move #%d (%c) could not be made in sample game",
-                 prefix, i, solution[i]);
+            warn("%s: move #%d (%c) could not be made in test game",
+                 prefix, i, thesolution.text[i]);
             ++errors;
             break;
         }
         position = recordgamestate(&thegame, session, position,
-                                   solution[i], redo_nocheck);
+                                   thesolution.text[i], redo_nocheck);
         errors += validategamestate(&thegame);
     }
 
