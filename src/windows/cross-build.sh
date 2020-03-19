@@ -7,8 +7,8 @@
 # verbs: "check" will print out the values that the script will use
 # for the target and prefix, "exec" will run an arbitrary program, and
 # "sh" will run an arbitrary shell command. (Additionally, "sh" can be
-# replaced with the name of a shell in order to use a feature specific
-# to that shell.)
+# replaced with the name of a specific shell in order to use a feature
+# particular to that shell.)
 #
 # This script makes a number of semi-educated guesses about where the
 # cross-compiling tools should be located on your filesystem. It is by
@@ -64,15 +64,15 @@ fail ()
 # the verb are passed to the executed tool.)
 while test $# -gt 0 ; do
   case "$1" in
-    -m32) proc=i686 ;;
-    -m64) proc=x86_64 ;;
+    -m32)       proc=i686 ;;
+    -m64)       proc=x86_64 ;;
     --target=*) TARGET="${1#--target=}" ;;
     --prefix=*) prefix="${1#--prefix=}" ;;
-    --help) usage ;;
-    --version) version ;;
-    --) ;;
-    -*) fail "invalid option: \"$1\"" ;;
-    *) break
+    --help)     usage ;;
+    --version)  version ;;
+    --)         break ;;
+    -*)         fail "invalid option: \"$1\"" ;;
+    *)          break ;;
   esac
   shift
 done
@@ -143,7 +143,6 @@ case "$verb" in
     echo "Target: $TARGET"
     echo "Build:  $BUILD"
     echo "Prefix: $prefix"
-    exit 0
     ;;
   configure | ./configure)
     cache="$TARGET-config.cache"

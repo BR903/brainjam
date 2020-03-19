@@ -1,12 +1,8 @@
 Before 1.0:
 
-* BUG: If the user deletes (i.e. uses undo-and-forget) the last
-  position of a solution, the program doesn't detect that the minimum
-  solution size for the session may now be incorrect, or that the
-  session may not even have a solution. Fixing this requires
-  (potentially) a complete traversal of the tree. This should probably
-  be considered a bug in libredo, and fixed there. (Though another fix
-  would be to just forbid deleting endpoint positions.)
+* BUG: The code to emulate non-branching redo is broken. Undoing moves
+  and then going off in a different direction leaves the session tree
+  in a broken state.
 
 * Work on the layout for the opening screen. Seems like it could be
   improved.
