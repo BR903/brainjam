@@ -246,9 +246,10 @@ static redo_position *forgetposition(gameplayinfo *gameplay,
 
     gameplay->bestsolution = redo_getfirstposition(session)->solutionsize;
     stackdelete(position);
-    currentposition = NULL;
+    if (currentposition == position)
+        currentposition = pos;
     if (backone == position)
-        backone = NULL;
+        backone = pos;
     return pos;
 }
 
@@ -453,6 +454,8 @@ static command_t remapcommand(command_t cmd)
           case cmd_redo10:              return cmd_nop;
           case cmd_undotobranch:        return cmd_nop;
           case cmd_redotobranch:        return cmd_nop;
+          case cmd_jumptostart:         return cmd_nop;
+          case cmd_jumptoend:           return cmd_nop;
           case cmd_switchtobetter:      return cmd_nop;
           case cmd_pushbookmark:        return cmd_nop;
           case cmd_popbookmark:         return cmd_nop;
