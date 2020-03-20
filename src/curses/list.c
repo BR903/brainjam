@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include "./gen.h"
+#include "./glyphs.h"
 #include "./decks.h"
 #include "solutions/solutions.h"
 #include "game/game.h"
@@ -16,7 +17,7 @@
 static char const *listhelptitle = "Selection Key Commands";
 static char const *listhelptext =
     "Select a game              Ret or Spc\n"
-    "Scroll selection           \342\206\221 \342\206\223\n"
+    "Scroll selection           " GLYPH_UPARROW " " GLYPH_DOWNARROW " \n"
     "Scroll one screen's worth  PgUp PgDn\n"
     "Scroll to top              Home\n"
     "Scroll to bottom           End\n"

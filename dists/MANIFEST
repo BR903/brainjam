@@ -19,6 +19,7 @@ src/decks.h
 src/decls.h
 src/gen.c
 src/gen.h
+src/glyphs.h
 src/incbin.h
 src/settings.c
 src/settings.h

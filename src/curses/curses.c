@@ -5,6 +5,7 @@
 #include <time.h>
 #include <ncurses.h>
 #include "./types.h"
+#include "./glyphs.h"
 #include "./settings.h"
 #include "redo/redo.h"
 #include "curses/curses.h"
@@ -62,7 +63,7 @@ static char const *commandshelptext =
     "Redo next move                            ctrl-Y\n"
     "Undo to the starting position             Home\n"
     "Redo all undone moves                     End\n"
-    "Return to the previously viewed position  \342\200\223 \n"
+    "Return to the previously viewed position  " GLYPH_DASH " \n"
     "Redraw the screen                         ctrl-L\n"
     "Display the options menu                  ctrl-O\n"
     "Display this help                         ? or F1\n"
@@ -71,13 +72,13 @@ static char const *commandshelptext =
     "\n"
     "The following commands are available when branching redo is enabled:\n"
     "\n"
-    "Undo previous move                        \342\206\220 \n"
-    "Redo next move                            \342\206\222 \n"
+    "Undo previous move                        " GLYPH_LEFTARROW " \n"
+    "Redo next move                            " GLYPH_RIGHTARROW " \n"
     "Undo and forget previous move             Bkspc\n"
     "Undo previous 10 moves                    PgUp\n"
     "Redo next 10 moves                        PgDn\n"
-    "Undo backward to previous branch point    \342\206\221 \n"
-    "Redo forward to next branch point         \342\206\223 \n"
+    "Undo backward to previous branch point    " GLYPH_UPARROW " \n"
+    "Redo forward to next branch point         " GLYPH_DOWNARROW " \n"
     "Set redo moves to shortest solution       !\n"
     "Switch to \"better\" position               =\n"
     "Bookmark the current position             shift-M\n"
@@ -258,7 +259,7 @@ int getkey(void)
  */
 static int runoptions(settingsinfo *settings)
 {
-    char const *checked[2] = { "\342\227\246", "\342\200\242" };
+    char const *checked[2] = { GLYPH_OPENDOT, GLYPH_BULLET };
     char const *able[2] = { "disable", "enable" };
     char const *abled[2] = { "disabled", "enabled" };
     int autoplay, branching, showkeys;

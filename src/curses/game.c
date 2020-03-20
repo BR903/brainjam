@@ -5,6 +5,7 @@
 #include <ncurses.h>
 #include "./types.h"
 #include "./commands.h"
+#include "./glyphs.h"
 #include "./decks.h"
 #include "./ui.h"
 #include "redo/redo.h"
@@ -136,7 +137,7 @@ static void drawcard(int card, int emptymode)
         "7 ", "8 ", "9 ", "10", "J ", "Q ", "K "
     };
     static char const *suits[NSUITS] = {
-        "\342\231\243", "\342\231\246", "\342\231\245", "\342\231\240"
+        GLYPH_CLUB, GLYPH_DIAMOND, GLYPH_HEART, GLYPH_SPADE
     };
     static int const suitmodes[NSUITS] = {
         MODEID_BLACKCARD, MODEID_REDCARD, MODEID_REDCARD, MODEID_BLACKCARD
@@ -186,7 +187,7 @@ static void drawnavinfo(gameplayinfo const *gameplay,
     }
     if (showmoveable)
         showmoveable = gameplay->moveable & (1 << place);
-    addstr(showmoveable ? "\342\200\242" : " ");
+    addstr(showmoveable ? GLYPH_BULLET : " ");
     if (shiftpos) {
         if (shiftpos->solutionsize)
             printw("%-3d", shiftpos->solutionsize);

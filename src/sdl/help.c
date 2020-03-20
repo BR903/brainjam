@@ -238,7 +238,7 @@ static int updatelistwidth(void)
 /* Provide a buffer for temporarily holding strings. The argument
  * specifies the size of the string, not including the terminating NUL
  * byte. For code that just needs a sequence of temporary buffers,
- * this function avoid having to call allocate()/free() over and over.
+ * this function avoids having to allocate and deallocate repeatedly.
  */
 static char *getbuffer(int size)
 {

@@ -242,7 +242,7 @@ static redo_position *forgetposition(gameplayinfo *gameplay,
 
     pos = redo_dropposition(session, position);
     if (pos == position)
-        return pos;
+        return NULL;
 
     gameplay->bestsolution = redo_getfirstposition(session)->solutionsize;
     stackdelete(position);
@@ -481,7 +481,7 @@ static int handlenavkey(gameplayinfo *gameplay, redo_session *session,
     switch (remapcommand(cmd)) {
       case cmd_erase:
         pos = forgetposition(gameplay, session, currentposition);
-        if (pos != currentposition)
+        if (pos)
             moveposition(gameplay, pos);
         else
             ding();

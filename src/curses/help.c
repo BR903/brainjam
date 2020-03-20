@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ncurses.h>
 #include "./gen.h"
+#include "./glyphs.h"
 #include "internal.h"
 
 /* The data required to properly display each section of help text.
@@ -146,7 +147,7 @@ static void drawhelptext(sectioninfo *section, int pagesize)
         if (i >= 0) {
             if (i >= thumbpos && i < thumbpos + thumbsize) {
                 textmode(MODEID_DIMMED);
-                addstr("\342\226\210 ");
+                addstr(GLYPH_BLOCK " ");
                 textmode(MODEID_NORMAL);
             } else {
                 addstr("  ");
