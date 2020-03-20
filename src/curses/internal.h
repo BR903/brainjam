@@ -12,8 +12,8 @@
  */
 #define MODEID_NORMAL     0             /* plain text */
 #define MODEID_SELECTED   1             /* a selected element */
-#define MODEID_MARKED     2             /* an element that has been marked */
-#define MODEID_HIGHLIGHT  3             /* a highlighted element */
+#define MODEID_HIGHLIGHT  2             /* a highlighted element */
+#define MODEID_DARKER     3             /* a somewhat darkened element */
 #define MODEID_DIMMED     4             /* a disabled or unselected element */
 #define MODEID_TITLE      5             /* title text */
 #define MODEID_BLACKCARD  6             /* text representing a black card */

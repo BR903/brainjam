@@ -2,7 +2,6 @@
  */
 
 #include <stdlib.h>
-#include <time.h>
 #include <ncurses.h>
 #include "./gen.h"
 #include "./decks.h"
@@ -27,7 +26,7 @@ static char const *listhelptext =
     "Display this help          ? or F1\n"
     "Quit the program           Q";
 
-/* Placement of the list display elements, using an 80x24 active area.
+/* Placement of the list display elements.
  */
 static int const titlelinex = 11;       /* x-coordinate of the screen title */
 static int const titleliney = 0;        /* y-coordinate of the screen title */
@@ -54,7 +53,7 @@ static void drawgamelist(int first, int count, int selected)
     int id, best, i;
 
     move(gamelisty, gamelistx);
-    textmode(MODEID_MARKED);
+    textmode(MODEID_DARKER);
     if (getsolutioncount() > 0)
         addstr("Game    Moves    Best");
     else
@@ -133,10 +132,10 @@ static int findmouseselection(void)
     return event.y - gamelisty - 1;
 }
 
-/* Output a scrollable list of games, initially centered on a chosen
+/* Display a scrollable list of games, initially centered on a chosen
  * game, and manage the I/O for moving around and selecting an entry.
- * The return value is the game ID selected by the user, or -1 if the
- * user opted to exit the program instead.
+ * The return value is the game ID that was selected by the user, or
+ * -1 if the user opted to exit the program instead.
  */
 static int runselectionloop(int selected)
 {

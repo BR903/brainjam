@@ -6,7 +6,7 @@
 #include "./gen.h"
 #include "internal.h"
 
-/* The data used to manage each section of help text.
+/* The data required to properly display each section of help text.
  */
 typedef struct sectioninfo {
     char const *title;          /* the title of the section */
@@ -51,8 +51,8 @@ static int countlines(char const *text)
     return count;
 }
 
-/* Replace or remove the section at index, depending on whether or not
- * text is defined.
+/* Replace the text of the section at index. If text is NULL, then the
+ * section is removed instead.
  */
 static void updatehelpsection(int index, char const *text)
 {
@@ -69,11 +69,11 @@ static void updatehelpsection(int index, char const *text)
     }
 }
 
-/* Add a new section, appending it to the array of sections. (or
+/* Add a new section, appending it to the array of sections. (Or
  * prepending it, if putfirst is true.) If title is the title of a
  * section that already exists, then the original section is replaced
  * instead. If text is NULL, then nothing is added, and any previously
- * added section is removed instead.
+ * added section is removed.
  */
 static void sethelpsection(char const *title, char const *text, int putfirst)
 {
@@ -108,11 +108,11 @@ static void sethelpsection(char const *title, char const *text, int putfirst)
  * Rendering the help display.
  */
 
-/* Output the text of the current section, starting at the current
+/* Render the text of the current section, starting at the current
  * line. (The cursor is assumed to be in the far left column when this
- * function is called.) If the text too long to fit within the given
- * page size, then the section's topline field is used to determine
- * how far into the text to begin displaying, and a scroll thumb is
+ * function is called.) If the text too long to fit within pagesize
+ * lines, then the section's topline field is used to determine how
+ * far into the text to begin displaying, and a scroll thumb is
  * rendered to the left of the text.
  */
 static void drawhelptext(sectioninfo *section, int pagesize)
@@ -160,7 +160,7 @@ static void drawhelptext(sectioninfo *section, int pagesize)
 
 /* Render the list of help topics at the current cursor position,
  * arranged into two columns. This function assumes that there is
- * enough room on to display for all titles to be rendered.
+ * enough room on the display for all titles to be rendered.
  */
 static void drawhelpsections(void)
 {
@@ -179,7 +179,7 @@ static void drawhelpsections(void)
             textmode(MODEID_NORMAL);
             addch(' ');
         } else {
-            textmode(MODEID_MARKED);
+            textmode(MODEID_DARKER);
             addch('1' + n);
             textmode(MODEID_NORMAL);
             printw(" - %-32s ", sections[n].title);
@@ -195,7 +195,7 @@ static void drawhelpdisplay(int maxtextlines)
 {
     erase();
     move(0, 0);
-    textmode(MODEID_MARKED);
+    textmode(MODEID_SELECTED);
     addstr(sections[currentsection].title);
     textmode(MODEID_NORMAL);
     move(helptexty, 0);
@@ -278,7 +278,7 @@ int runhelp(char const *title)
 }
 
 /*
- * API functions.
+ * API function.
  */
 
 /* Add a topic to the list of sections.

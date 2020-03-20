@@ -1,7 +1,6 @@
 /* curses/game.c: the game display.
  */
 
-#include <string.h>
 #include <time.h>
 #include <ncurses.h>
 #include "./types.h"
@@ -30,7 +29,7 @@ static time_t saveiconshown = 0;
 
 /* True if the move key guides should be displayed.
  */
-static int showkeyguides;
+static int showkeyguides = FALSE;
 
 /*
  * Input management.
@@ -74,8 +73,9 @@ static command_t translatemouseinput(void)
 }
 
 /* Map keyboard input events to user commands. Any normal key event
- * not mapped to a special command value (such as move commands) is
- * returned unchanged.
+ * that is not already mapped to a special command value is returned
+ * unchanged. (Specifically, this includes the letters representing
+ * move commands.)
  */
 static command_t translategameinput(int ch)
 {
@@ -277,9 +277,9 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
     move(toprowy + 1, rightcolumnx);
     drawbetterinfo(position);
     if (gameplay->endpoint)
-        mvaddstr(toprowy + 2, rightcolumnx, " done");
+        mvaddstr(toprowy + 2, rightcolumnx, " DONE");
     else if (!gameplay->moveable)
-        mvaddstr(toprowy + 2, rightcolumnx, "stuck");
+        mvaddstr(toprowy + 2, rightcolumnx, "STUCK");
     if (bookmark)
         mvaddstr(toprowy + 3, rightcolumnx, "mark ");
 
@@ -287,7 +287,7 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
         if (time(NULL) > saveiconshown)
             saveiconshown = 0;
         else
-            mvaddstr(bottomareay, rightcolumnx, "  save");
+            mvaddstr(bottomareay, rightcolumnx, "[save]");
     }
     if (gameplay->bestsolution) {
         mvprintw(bottomareay + 1, rightcolumnx + 3, "%4d",
@@ -315,7 +315,7 @@ void curses_rendergame(renderparams const *params)
 }
 
 /* Retrieve a single key event. Commands to view help and redraw the
- * display are handled automatically; everything else is passed back
+ * display are handled internally; everything else is passed back
  * up to the caller.
  */
 command_t curses_getinput(void)

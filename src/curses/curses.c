@@ -16,9 +16,9 @@ static char const *gameplayhelptitle = "How to Play";
 static char const *gameplayhelptext =
     "To move a card, use a letter key corresponding to its current"
     " location. Cards at the bottom of a tableau column can be moved with the"
-    " letter keys A through H, each letter referring to the eight columns"
-    " going from left to right. Cards in the reserve can be moved with the"
-    " letter keys I through L, again reading from left to right.\n"
+    " letter keys \"a\" through \"h\", each letter referring to the eight"
+    " columns going from left to right. Cards in the reserve can be moved with"
+    " the letter keys \"i\" through \"l\", again reading from left to right.\n"
     "\n"
     "When you press a letter key, the card will be moved if it has a legal"
     " move available. If the card has more than one legal move, the program"
@@ -27,15 +27,14 @@ static char const *gameplayhelptext =
     " tableau column rather than an empty reserve, since the former can also"
     " be built upon).\n"
     "\n"
-    "You can select an alternate destination for your move by holding down the"
-    " Shift key when pressing the letter key (or presumably by using the Caps"
-    " Lock key).\n"
+    "You can select an alternate destination for your move by using a"
+    " capital letter \"A\" through \"L\".\n"
     "\n"
     "These letters will also appear underneath cards after undoing a move, to"
     " indicate which move the redo command will execute. A move is"
-    " represented as a lower case letter on the left-hand side, or as an"
+    " represented as a lowercase letter on the left-hand side, or as an"
     " uppercase letter on the right-hand side for a move to the alternate"
-    "destination.\n"
+    " destination.\n"
     "\n"
     "As you are playing, the current number of moves is displayed in the top"
     " right corner.\n"
@@ -154,8 +153,8 @@ static int startup(void)
         init_pair(8, 0, COLOR_YELLOW);
         modes[MODEID_NORMAL] = A_NORMAL;
         modes[MODEID_SELECTED] = COLOR_PAIR(3);
-        modes[MODEID_MARKED] = COLOR_PAIR(2);
         modes[MODEID_HIGHLIGHT] = A_BOLD;
+        modes[MODEID_DARKER] = COLOR_PAIR(2);
         modes[MODEID_DIMMED] = COLOR_PAIR(1) | A_BOLD;
         modes[MODEID_TITLE] = COLOR_PAIR(4) | A_BOLD;
         modes[MODEID_BLACKCARD] = COLOR_PAIR(5);
@@ -165,8 +164,8 @@ static int startup(void)
     } else {
         modes[MODEID_NORMAL] = A_NORMAL;
         modes[MODEID_SELECTED] = A_STANDOUT;
-        modes[MODEID_MARKED] = A_DIM;
         modes[MODEID_HIGHLIGHT] = A_BOLD;
+        modes[MODEID_DARKER] = A_DIM;
         modes[MODEID_DIMMED] = A_DIM;
         modes[MODEID_TITLE] = A_BOLD;
         modes[MODEID_BLACKCARD] = A_REVERSE;
@@ -197,7 +196,7 @@ int validatesize(void)
     if (termwidth >= 80 && termheight >= 24)
         return TRUE;
     clear();
-    addstr("Program needs a display size of at least 80x24.\n");
+    addstr("(This program needs a display size of at least 80x24.)\n");
     refresh();
     return FALSE;
 }
@@ -269,7 +268,7 @@ static int runoptions(settingsinfo *settings)
     branching = settings->branching ? 1 : 0;
     for (;;) {
         erase();
-        textmode(MODEID_MARKED);
+        textmode(MODEID_TITLE);
         mvaddstr(0, 16, "OPTIONS");
         textmode(MODEID_NORMAL);
         mvaddstr(2, 1, checked[showkeys]);
