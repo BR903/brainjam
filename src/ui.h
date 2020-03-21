@@ -74,14 +74,16 @@ typedef struct uimap {
      */
     void (*showsolutionwrite)(void);
 
-    /* Animate the card currently at position from, having it slide
-     * across the display to position to, and then invoking the given
-     * callback after the animation completes. If animations are
-     * currently disabled, this function will simply invoke the
-     * callback directly and return.
+    /* Animate a card, having it slide across the display from place
+     * from to place to, and then invoking the given callback after
+     * the animation completes. This function assumes that the given
+     * card is not actually at either place in the current layout, for
+     * the purposes of determining what its starting and ending
+     * positions should be. If animations are currently disabled, this
+     * function will simply invoke the callback directly and return.
      */
-    void (*movecard)(card_t card, position_t from, position_t to,
-                     void (*callback)(void*), void *data);
+    void (*movecard)(gameplayinfo const *gameplay, card_t card, place_t from,
+                     place_t to, void (*callback)(void*), void *data);
 
     /* Display the program's settings and allow the user to modify
      * them. A return value of true indicates that the changed
@@ -113,16 +115,16 @@ extern uimap _ui;
 
 /* Macros to de-clutter use of the user interface functions.
  */
-#define rendergame(rp)               (_ui.rendergame(rp))
-#define getinput()                   (_ui.getinput())
-#define ungetinput(ch, ms)           (_ui.ungetinput(ch, ms))
-#define setshowkeyguidesflag(f)      (_ui.setshowkeyguidesflag(f))
-#define setcardanimationflag(f)      (_ui.setcardanimationflag(f))
-#define ding()                       (_ui.ding())
-#define showsolutionwrite()          (_ui.showsolutionwrite())
-#define movecard(cd, fr, to, cb, dt) (_ui.movecard(cd, fr, to, cb, dt))
-#define changesettings(si)           (_ui.changesettings(si))
-#define selectgame(id)               (_ui.selectgame(id))
-#define addhelpsection(tl, tx, pf)   (_ui.addhelpsection(tl, tx, pf))
+#define rendergame(rp)                   (_ui.rendergame(rp))
+#define getinput()                       (_ui.getinput())
+#define ungetinput(ch, ms)               (_ui.ungetinput(ch, ms))
+#define setshowkeyguidesflag(f)          (_ui.setshowkeyguidesflag(f))
+#define setcardanimationflag(f)          (_ui.setcardanimationflag(f))
+#define ding()                           (_ui.ding())
+#define showsolutionwrite()              (_ui.showsolutionwrite())
+#define movecard(gp, cd, fr, to, cb, dt) (_ui.movecard(gp, cd, fr, to, cb, dt))
+#define changesettings(si)               (_ui.changesettings(si))
+#define selectgame(id)                   (_ui.selectgame(id))
+#define addhelpsection(tl, tx, pf)       (_ui.addhelpsection(tl, tx, pf))
 
 #endif

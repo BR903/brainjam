@@ -104,51 +104,6 @@
 #define indextoplace(n) ((n) + MOVEABLE_PLACE_1ST)
 
 /*
- * The position_t type. A "position" is more specific than a place; in
- * the case of a tableau stack, it also specifies the relative
- * location of the card within the stack.
- */
-
-/* In practice, the maximum tableau depth is 19. This value is rounded
- * up to provide a margin of safety.
- */
-#define MAX_TABLEAU_DEPTH 24
-
-/* The positions of the layout.
- */
-#define POS_FACTOR MAX_TABLEAU_DEPTH
-#define POS_RESERVE_OFFSET (TABLEAU_PLACE_COUNT * POS_FACTOR)
-#define POS_FOUNDATION_OFFSET \
-    (TABLEAU_PLACE_COUNT * POS_FACTOR + RESERVE_PLACE_COUNT)
-
-/* Macros for working with position values.
- */
-#define tableaupos(n, d) ((n) * POS_FACTOR + (d))
-#define reservepos(n) (POS_RESERVE_OFFSET + (n))
-#define foundationpos(n) (POS_FOUNDATION_OFFSET + (n))
-#define istableaupos(p) ((p) < POS_RESERVE_OFFSET)
-#define isreservepos(p) \
-    ((p) >= POS_RESERVE_OFFSET && (p) < POS_FOUNDATION_OFFSET)
-#define isfoundationpos(p) ((p) >= POS_FOUNDATION_OFFSET)
-#define tableauposindex(p) ((p) / POS_FACTOR)
-#define tableauposdepth(p) ((p) % POS_FACTOR)
-#define reserveposindex(p) ((p) - POS_RESERVE_OFFSET)
-#define foundationposindex(p) ((p) - POS_FOUNDATION_OFFSET)
-
-/* Translating between places and positions. In the case of a tableau
- * stack, placetopos() will return the first position in the stack
- * (i.e. the position furthest from the playable card).
- */
-#define postoplace(pos) \
-    (istableaupos(pos) ? tableauplace(tableauposindex(pos)) : \
-     isreservepos(pos) ? reserveplace(reserveposindex(pos)) : \
-                       foundationplace(foundationposindex(pos)))
-#define placetopos(place) \
-    (istableauplace(place) ? tableaupos(tableauplaceindex(place), 0) : \
-     isreserveplace(place) ? reservepos(reserveplaceindex(place)) : \
-                             foundationpos(foundationplaceindex(place)))
-
-/*
  * The movecmd_t type. A "move command" is an ASCII letter that
  * indicates the place a card is moved from, either a lowercase or
  * capital letter 'A' through 'L'. A lowercase letter indicates that

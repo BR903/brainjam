@@ -20,12 +20,6 @@ typedef unsigned char card_t;
  */
 typedef signed char place_t;
 
-/* A position is any location in the layout that can contain a card.
- * This includes every card in a spread tableau stack. The game's
- * state is stored as an array of 52 positions.
- */
-typedef unsigned char position_t;
-
 /* A move command is a lowercase or uppercase letter, corresponding to
  * the user's keyboard commands for moving cards.
  */

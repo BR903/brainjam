@@ -256,7 +256,8 @@ extern displaymap inithelpdisplay(void);
  */
 extern int sdl_setshowkeyguidesflag(int flag);
 extern int sdl_setcardanimationflag(int flag);
-extern void sdl_movecard(card_t card, position_t from, position_t to,
+extern void sdl_movecard(gameplayinfo const *gameplay, card_t card,
+                         place_t from, place_t to,
                          void (*callback)(void*), void *data);
 extern void sdl_showsolutionwrite(void);
 

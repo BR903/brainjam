@@ -231,7 +231,7 @@ static char *createsolutionstring(gameplayinfo *gameplay,
  * history, the position might also need to be removed from the stack
  * of saved positions, and its removal might require updating the
  * user's best solution size. The return value is the previous
- * position in the history, or the given position if it could not be
+ * position in the history, or NULL if the position could not be
  * deleted.
  */
 static redo_position *forgetposition(gameplayinfo *gameplay,
@@ -376,7 +376,6 @@ static int handlemove(gameplayinfo *gameplay, redo_session *session,
 {
     handlemoveparams *params;
     moveinfo move;
-    position_t srcpos, destpos;
 
     move = findmoveinfo(gameplay, movecmd);
     if (!move.cmd)
@@ -388,20 +387,14 @@ static int handlemove(gameplayinfo *gameplay, redo_session *session,
         return FALSE;
     }
 
-    srcpos = placetopos(move.from);
-    if (istableaupos(srcpos))
-        srcpos += gameplay->depth[move.from] - 1;
-    destpos = placetopos(move.to);
-    if (istableaupos(destpos))
-        destpos += gameplay->depth[move.to];
-
     beginmove(gameplay, move);
 
     params = allocate(sizeof *params);
     params->gameplay = gameplay;
     params->session = session;
     params->move = move;
-    movecard(move.card, srcpos, destpos, handlemove_callback, params);
+    movecard(gameplay, move.card, move.from, move.to,
+             handlemove_callback, params);
 
     return TRUE;
 }

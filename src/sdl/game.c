@@ -264,18 +264,6 @@ static SDL_Point setlayout(SDL_Point display)
     return size;
 }
 
-/* Return the coordinates of a card position.
- */
-static SDL_Rect getposcoords(position_t position)
-{
-    SDL_Rect rect;
-
-    rect = placeloc[postoplace(position)];
-    if (istableaupos(position))
-        rect.y += _graph.dropheight * tableauposdepth(position);
-    return rect;
-}
-
 /*
  * Managing overlays.
  */
@@ -415,22 +403,30 @@ static void createsaveanimation(void)
     startanimation(anim, 10);
 }
 
-/* Create an overlay of a card at the rectangle from, along with an
- * animation to move the card to the rectangle to. A callback is
- * invoked once the animation completes.
+/* Animate a card moving across the layout, with from and to
+ * specifying the starting and ending points. First an overlay is
+ * created to render the card at its starting position, then an
+ * animation is created to move the overlay to its ending position. A
+ * callback is attached to the animation, to be invoked once it ends.
  */
-static void createcardanimation(char card, SDL_Rect from, SDL_Rect to,
+static int createcardanimation(gameplayinfo const *gameplay,
+                               card_t card, place_t from, place_t to,
                                void (*callback)(void*), void *data)
 {
     overlayinfo *overlay;
     animinfo *anim;
     animcleanupparams *params;
+    SDL_Rect rect;
+
+    rect = placeloc[from];
+    if (istableauplace(from))
+        rect.y += gameplay->depth[from] * _graph.dropheight;
 
     overlay = newoverlayinfo();
     overlay->icon = 0;
     overlay->card = card;
     overlay->texture = NULL;
-    overlay->pos = from;
+    overlay->pos = rect;
     overlay->alpha = SDL_ALPHA_OPAQUE;
 
     params = allocate(sizeof *params);
@@ -442,11 +438,15 @@ static void createcardanimation(char card, SDL_Rect from, SDL_Rect to,
     anim->steps = 16;
     anim->pval1 = &overlay->pos.x;
     anim->pval2 = &overlay->pos.y;
-    anim->destval1 = to.x;
-    anim->destval2 = to.y;
+    anim->destval1 = placeloc[to].x;
+    anim->destval2 = placeloc[to].y;
+    if (istableauplace(to))
+        anim->destval2 += gameplay->depth[to] * _graph.dropheight;
     anim->callback = animcleanup;
     anim->data = params;
+
     startanimation(anim, 10);
+    return TRUE;
 }
 
 /*
@@ -991,15 +991,14 @@ int sdl_setcardanimationflag(int flag)
  * callback once the animation completes. If animations are turned
  * off, invoke the callback directly and return.
  */
-void sdl_movecard(card_t card, position_t from, position_t to,
+void sdl_movecard(gameplayinfo const *gameplay, card_t card,
+                  place_t from, place_t to,
                   void (*callback)(void*), void *data)
 {
-    if (cardanimation) {
-        createcardanimation(card, getposcoords(from), getposcoords(to),
-                            callback, data);
-    } else {
+    if (cardanimation)
+        createcardanimation(gameplay, card, from, to, callback, data);
+    else
         (*callback)(data);
-    }
 }
 
 /* Temporarily display the save icon.

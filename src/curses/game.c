@@ -23,6 +23,12 @@ static int const cardspacingx = 8;      /* horizontal space between cards */
 static int const rightcolumnx = 70;     /* left edge of information column */
 static int const bottomareay = 19;      /* top edge of bottom-right corner */
 
+/* The maximum number of cards that can be in a tableau stack. The
+ * most is actually 18 cards. This is rounded up, in the interest of
+ * adding a margin of tolerance.
+ */
+static int const tableaumaxdepth = 20;
+
 /* If nonzero, indicates the time at which the save indicator should
  * stop being visible.
  */
@@ -61,7 +67,7 @@ static command_t translatemouseinput(void)
         if (n < 0 || n >= RESERVE_PLACE_COUNT)
             return cmd_nop;
         place = reserveplace(n);
-    } else if (event.y >= tableauy && event.y < tableauy + MAX_TABLEAU_DEPTH) {
+    } else if (event.y >= tableauy && event.y < tableauy + tableaumaxdepth) {
         n = (event.x - tableaux) / cardspacingx;
         if (n < 0 || n >= TABLEAU_PLACE_COUNT)
             return cmd_nop;
@@ -348,9 +354,11 @@ int curses_setcardanimationflag(int flag)
 /* Animations are not available in this UI, so this function simply
  * invokes the callback directly.
  */
-void curses_movecard(card_t card, position_t from, position_t to,
+void curses_movecard(gameplayinfo const *gameplay, card_t card,
+                     place_t from, place_t to,
                      void (*callback)(void*), void *data)
 {
+    (void)gameplay;
     (void)card;
     (void)from;
     (void)to;
