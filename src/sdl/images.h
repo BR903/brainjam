@@ -1,7 +1,7 @@
 /* sdl/images.h: image resources.
  *
- * These functions provide access to a number of images which have
- * been compiled directly into the binary.
+ * These functions provide access the static images that are
+ * compiled into the binary and used to build the user interface.
  */
 
 #ifndef _sdl_images_h_
@@ -14,7 +14,26 @@
  * layout data. The IDs all begin with the "IMAGE_" prefix.
  */
 #include "sdl/alertids.h"
-#include "sdl/biconids.h"
+#include "sdl/labelids.h"
+
+/* Load all of the interface's graphics.
+ */
+extern void initializeimages(void);
+
+/* Return a copy of a button graphic. Note that this function can only
+ * be called after initializeimages() and before finalizeimages().
+ */
+extern SDL_Surface *getbuttonlabel(int id);
+
+/* Deallocate the button icon images, as they should all have been
+ * copied to the button textures after initialization is completed.
+ */
+extern void finalizeimages(void);
+
+/* Load the titlebar graphics for the opening display and return them
+ * as two separate textures.
+ */
+extern void loadsplashgraphics(SDL_Texture **pbanner, SDL_Texture **pheadline);
 
 /* Return the width of an alert image.
  */
@@ -24,29 +43,11 @@ extern int getimagewidth(int id);
  */
 extern int getimageheight(int id);
 
-/* Load all of the interface's graphics.
- */
-extern void initializeimages(void);
-
-/* Return a copy of a button graphic. Note that this function can only
- * be called after initializeimages() and before finalizeimages().
- */
-extern SDL_Surface *getbuttonicon(int id);
-
-/* Deallocate image surfaces needed only during initialization.
- */
-extern void finalizeimages(void);
-
-/* Create the titlebar graphics for the opening display and return
- * them as two separate textures.
- */
-extern void loadsplashgraphics(SDL_Texture **pbanner, SDL_Texture **pheadline);
-
-/* Render an image texture at the given location on the display.
+/* Render an alert image at the given location on the display.
  */
 extern void renderimage(int imageid, int x, int y);
 
-/* Render an image texture at the given location, using alpha to blend
+/* Render an alert image at the given location, using alpha to blend
  * it with the current contents.
  */
 extern void renderalphaimage(int imageid, int alpha, int x, int y);

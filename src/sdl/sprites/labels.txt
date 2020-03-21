@@ -1,4 +1,4 @@
-# sdl/sprites/bicons.txt: layout of the button icons sheet
+# sdl/sprites/labels.txt: layout of the button labels sheet
 #
 # This data file lists the various small images that appear on
 # pushbuttons, and defines their placement in a larger single image.

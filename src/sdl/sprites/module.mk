@@ -11,12 +11,12 @@ ALERTIMGLIST := \
 $(ALERTSOUTPUT): $(ALERTSLAYOUT) $(ALERTIMGLIST) sdl/sprites/mkimage.py
 	sdl/sprites/mkimage.py sdl/sprites $(ALERTSOUTPUT) < $<
 
-# sdl/bicons.png contains all the graphics used on pushbuttons.
+# sdl/labels.png contains all the graphics used on pushbuttons.
 
-BICONSLAYOUT := sdl/sprites/bicons.txt
-BICONSOUTPUT := sdl/bicons.png sdl/biconids.h sdl/biconpos.h
-BICONIMGLIST := \
-    $(shell sed -n 's,^\([^\#][^ ]*\).*,sdl/sprites/\1.png,p' $(BICONSLAYOUT))
+LABELSLAYOUT := sdl/sprites/labels.txt
+LABELSOUTPUT := sdl/labels.png sdl/labelids.h sdl/labelpos.h
+LABELIMGLIST := \
+    $(shell sed -n 's,^\([^\#][^ ]*\).*,sdl/sprites/\1.png,p' $(LABELSLAYOUT))
 
-$(BICONSOUTPUT): $(BICONSLAYOUT) $(BICONIMGLIST) sdl/sprites/mkimage.py
-	sdl/sprites/mkimage.py sdl/sprites $(BICONSOUTPUT) < $<
+$(LABELSOUTPUT): $(LABELSLAYOUT) $(LABELIMGLIST) sdl/sprites/mkimage.py
+	sdl/sprites/mkimage.py sdl/sprites $(LABELSOUTPUT) < $<
