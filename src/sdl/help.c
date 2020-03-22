@@ -546,8 +546,10 @@ static void render(void)
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.bkgndcolor));
     SDL_RenderClear(_graph.renderer);
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.dimmedcolor));
-    SDL_RenderDrawLines(_graph.renderer, listoutline, 5);
-    SDL_RenderDrawLines(_graph.renderer, textoutline, 5);
+    SDL_RenderDrawLines(_graph.renderer, listoutline,
+                        sizeof listoutline / sizeof *listoutline);
+    SDL_RenderDrawLines(_graph.renderer, textoutline,
+                        sizeof textoutline / sizeof *textoutline);
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
 
     rect.x = listrect.x;
@@ -597,7 +599,8 @@ static void render(void)
  */
 
 /* Scroll the current text by a relative amount, using animation to
- * keep the movement smooth.
+ * keep the movement smooth. The return value is cmd_redraw or
+ * cmd_none, depending on whether or not a visible change took place.
  */
 static command_t scrolltext(int delta)
 {
@@ -622,7 +625,9 @@ static command_t scrolltext(int delta)
     return cmd_redraw;
 }
 
-/* Change the section currently being displayed.
+/* Change the section currently being displayed. The return value is
+ * cmd_none if the given section is already current, and cmd_redraw
+ * otherwise.
  */
 static command_t setcurrentsection(int index)
 {
@@ -639,7 +644,10 @@ static command_t setcurrentsection(int index)
     return cmd_redraw;
 }
 
-/* Change the displayed section relative to the currently displayed section.
+/* Change the displayed section relative to the currently displayed
+ * section. If wraparound is true, then the current section index
+ * rotates through the possible values, wrapping around on either end.
+ * Otherwise, the current section index is clamped on either end.
  */
 static command_t changesection(int delta, int wraparound)
 {
@@ -655,7 +663,9 @@ static command_t changesection(int delta, int wraparound)
     return setcurrentsection(index);
 }
 
-/* Apply keyboard events to the help display.
+/* Handle keyboard input for the help display. The return value is
+ * cmd_none if the key has no defined action (or did not change the
+ * appearance of the help display), or cmd_redraw otherwise.
  */
 static command_t applykeycmd(SDL_Keysym keysym)
 {
@@ -672,7 +682,10 @@ static command_t applykeycmd(SDL_Keysym keysym)
     return cmd_none;
 }
 
-/* Filter the input events for interactions with the help display.
+/* Filter the input events for interactions with the help display. In
+ * addition to keyboard commands, the mouse can be used to change the
+ * current section, and the mouse wheel can be used to scroll either
+ * the text or the selected section.
  */
 static command_t eventhandler(SDL_Event *event)
 {
@@ -731,7 +744,9 @@ displaymap inithelpdisplay(void)
  * API function.
  */
 
-/* Add a new topic to the help display.
+/* Add a new topic to the help display. The function first looks to
+ * see if the title is replacing (or removing) an existing section. If
+ * not, then the section is inserted.
  */
 void sdl_addhelpsection(char const *title, char const *text, int placefirst)
 {

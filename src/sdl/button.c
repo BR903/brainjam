@@ -125,7 +125,7 @@ static SDL_Surface *makepushbuttonbkgndset(int w, int h)
     rect.h = h;
     color = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
     for (i = 0 ; i < 4 ; ++i) {
-        if ((i & (BSTATE_DOWN | BSTATE_SELECT)) == 0)
+        if (i != (BSTATE_DOWN | BSTATE_HOVER))
             SDL_BlitSurface(bkgnd, NULL, image, &rect);
         drawrect(image, color, rect.x, rect.y, rect.w, rect.h);
         rect.y += h;
@@ -160,7 +160,7 @@ static SDL_Surface *makeopenleftbkgndset(int w, int h)
     rect.h = h;
     color = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
     for (i = 0 ; i < 8 ; ++i) {
-        if ((i & (BSTATE_DOWN | BSTATE_SELECT)) == 0)
+        if ((i & BSTATE_SELECT) == 0 && i != (BSTATE_DOWN | BSTATE_HOVER))
             SDL_BlitSurface(bkgnd, NULL, image, &rect);
         if (i & BSTATE_SELECT)
             drawopenleftrect(image, color, &rect);

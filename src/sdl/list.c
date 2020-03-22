@@ -15,30 +15,30 @@
 #include "button.h"
 #include "scroll.h"
 
-/* The index of the current selection.
+/* The currently selected game ID.
  */
 static int selection;
 
 /* The various buttons that appear on the list display.
  */
-static button helpbutton, quitbutton, playbutton;
-static button prevbutton, randbutton, nextbutton, clipbutton;
+static button helpbutton, quitbutton, playbutton, clipbutton;
+static button prevbutton, randbutton, nextbutton;
 
 /* The scrollbar for the selection list.
  */
 static scrollbar scroll;
 
-/* The locations of the elements of the list display.
+/* The locations of the list display elements.
  */
 static SDL_Rect bannerrect;             /* location of the banner graphic */
 static SDL_Rect headlinerect;           /* location of the headline text */
 static SDL_Rect listrect;               /* location of the game list */
 static SDL_Rect scorearea;              /* location of the score display */
-static SDL_Point scorelabel;            /* position of score display text */
+static SDL_Point scorelabel;            /* position of score label text */
 static SDL_Point scorenumber;           /* position of score */
 static SDL_Point markersize;            /* size of game list markers */
-static int rowheight;                   /* height of one list entry */
 static int markeroffset;                /* vertical offset of list markers */
+static int rowheight;                   /* height of one list entry */
 
 /* The texture of the banner graphic.
  */
@@ -49,7 +49,7 @@ static SDL_Texture *bannertexture;
 static SDL_Texture *headlinetexture;
 
 /*
- * Managing the list selection and the list's scroll position.
+ * Managing the list's selection and scroll position.
  */
 
 /* Clamp the given value to the scrollbar range.
@@ -63,19 +63,18 @@ static int clampscrollpos(int n)
     return n;
 }
 
-/* Update the display's state after the selection has changed.
+/* Change the currently selected game, updating the state of the
+ * clipboard button in the process.
  */
-static void updateselection(void)
+static void changeselection(int id)
 {
-    if (getsolutionfor(selection))
-        clipbutton.state = BSTATE_NORMAL;
-    else
-        clipbutton.state = BSTATE_DISABLED;
+    selection = id;
+    clipbutton.state = getsolutionfor(id) ? BSTATE_NORMAL : BSTATE_DISABLED;
 }
 
 /* Choose a scroll position for the list that ensures that the current
- * selection is visible. (Or at least that it is mostly visible -- it's
- * considered acceptable for it to be partially off the edge.)
+ * selection is visible. (Or mostly visible at least -- it's okay for
+ * it to be partially off the edge.)
  */
 static int normalizeposition(void)
 {
@@ -96,7 +95,11 @@ static int normalizeposition(void)
 }
 
 /* If the selection is currently not visible, move it to one of the
- * rows that is visible.
+ * rows that is visible. (Note that changing the selection can
+ * sometimes cause the list to scroll, thus altering visibility. To
+ * avoid the risk of a feedback loop causing jitter or twitching, this
+ * function updates the selection using the lower-level
+ * changeselection() function instead of setselection().)
  */
 static void normalizeselection(void)
 {
@@ -105,12 +108,10 @@ static void normalizeselection(void)
     pos = selection * rowheight;
     if (pos < scroll.value - rowheight / 3) {
         pos = scroll.value + 2 * rowheight / 3;
-        selection = pos / rowheight;
-        updateselection();
+        changeselection(pos / rowheight);
     } else if (pos > scroll.value + scroll.pagesize - rowheight / 2) {
         pos = scroll.value + scroll.pagesize - rowheight / 2;
-        selection = pos / rowheight;
-        updateselection();
+        changeselection(pos / rowheight);
     }
 }
 
@@ -127,7 +128,7 @@ static void scrollfinish(void *data, int done)
 /* Scroll the list to the given position, using an animation to make
  * the movement more smooth.
  */
-static int scrolllist(int position)
+static int scrolltoposition(int position)
 {
     animinfo *anim;
 
@@ -146,8 +147,8 @@ static int scrolllist(int position)
 }
 
 /* Change the current selection, forcing it into the range of valid
- * games. The scrolling list is updated so that the selection
- * is visible. Returns cmd_redraw, or cmd_none if the display is
+ * games. The scrolling list is updated if necessary so that the new
+ * selection is visible. Returns cmd_redraw, even if the selection is
  * unchanged.
  */
 static command_t setselection(int id)
@@ -159,26 +160,9 @@ static command_t setselection(int id)
         id = 0;
     else if (id >= count)
         id = count - 1;
-    selection = id;
-    updateselection();
-    scrolllist(normalizeposition());
+    changeselection(id);
+    scrolltoposition(normalizeposition());
     return cmd_redraw;
-}
-
-/*
- * Clipboard function.
- */
-
-/* Copy the text of the selected game's solution to the clipboard.
- */
-static void copyselectedsolution(int selected)
-{
-    solutioninfo const *solution;
-
-    (void)selected;
-    solution = getsolutionfor(selection);
-    if (solution)
-        SDL_SetClipboardText(solution->text);
 }
 
 /*
@@ -187,9 +171,9 @@ static void copyselectedsolution(int selected)
 
 /* Calculate the locations and positions of the various elements that
  * make up the list display: The banner on top, the quit button in one
- * corner and the help button in ther other, the list near the middle
- * with its associated header text and buttons, and the score area to
- * the right of the list.
+ * corner and the help button in the other, the list near the middle
+ * with its associated header text and button controls, the play
+ * button under the list, and the score area to the right of the list.
  */
 static SDL_Point setlayout(SDL_Point display)
 {
@@ -214,10 +198,12 @@ static SDL_Point setlayout(SDL_Point display)
     area.y = bannerrect.y + bannerrect.h + _graph.margin;
     area.h = display.y - area.y - _graph.margin;
 
+    rowheight = TTF_FontLineSkip(_graph.largefont);
     if (rowheight < markersize.y)
         rowheight = markersize.y;
     markeroffset = TTF_FontAscent(_graph.largefont) - markersize.y;
-    TTF_SizeUTF8(_graph.largefont, " 8888 ", &w, &rowheight);
+
+    TTF_SizeUTF8(_graph.largefont, " 8888 ", &w, NULL);
     TTF_SizeUTF8(_graph.largefont, " Game ", &size.x, NULL);
     if (w < size.x)
         w = size.x;
@@ -279,14 +265,15 @@ static SDL_Point setlayout(SDL_Point display)
 }
 
 /*
- * Rendering functions.
+ * Rendering the display.
  */
 
 /* Render the components of the score area. If the currently selected
  * game has a stored solution, then the score area is updated to show
  * the number of moves in the solution, and the smallest possible
- * solution. Otherwise, this space is used to display a bit of
- * instructional text.
+ * solution. If the user has no solutions, then it is assumed that
+ * they are new to the game, and some helpful text is shown in this
+ * space instead.
  */
 static void renderscorearea(int id)
 {
@@ -306,7 +293,6 @@ static void renderscorearea(int id)
     if (getsolutioncount() < 1) {
         for (i = 0 ; i < (int)(sizeof directions / sizeof *directions) ; ++i)
             drawsmalltext(directions[i], scorearea.x, scorearea.y + i * h, -1);
-        return;
     } else if (solution) {
         drawsmalltext("Your best solution:", scorelabel.x, scorelabel.y, +1);
         sprintf(buf, "%d", solution->size);
@@ -317,29 +303,59 @@ static void renderscorearea(int id)
     }
 }
 
-/* Put down a paler gray background to mark a selection.
+/* Render one entry in the list of games. ypos specifies the vertical
+ * offset from the top of the list.
  */
-static void drawrecthighlight(int x, int y, int w, int h)
+static void renderlistentry(int id, int ypos)
 {
+    solutioninfo const *solution;
     SDL_Rect rect;
+    char buf[8];
 
-    rect.x = x;
-    rect.y = y;
-    rect.w = w;
-    rect.h = h;
-    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.lightbkgndcolor));
-    SDL_RenderFillRect(_graph.renderer, &rect);
-    SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
+    rect.x = listrect.x;
+    rect.y = listrect.y + ypos;
+    rect.w = listrect.w;
+    rect.h = rowheight;
+
+    if (id == selection) {
+        SDL_SetRenderDrawColor(_graph.renderer,
+                               colors4(_graph.lightbkgndcolor));
+        SDL_RenderFillRect(_graph.renderer, &rect);
+        SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
+        settextcolor(_graph.highlightcolor);
+    } else {
+        settextcolor(_graph.defaultcolor);
+    }
+
+    sprintf(buf, "%04d", id);
+    drawlargetext(buf, rect.x + rect.w / 2, rect.y, 0);
+
+    solution = getsolutionfor(id);
+    if (solution && solution->size <= bestknownsolutionsize(id)) {
+        renderimage(IMAGE_STAR, rect.x, rect.y + markeroffset);
+        renderimage(IMAGE_STAR,
+                    rect.x + rect.w - markersize.x, rect.y + markeroffset);
+    } else if (solution) {
+        renderimage(IMAGE_CHECK, rect.x, rect.y + markeroffset);
+    }
 }
 
-/* Render the list of games.
+/* Render the list of games. First the entries are draw, then the
+ * header text and the top and bottom lines, and finally the scrollbar
+ * on the right.
  */
 static void rendergamelist(void)
 {
-    solutioninfo const *solution;
-    char buf[16];
-    int id, i, y;
+    int id, y;
 
+    SDL_RenderSetClipRect(_graph.renderer, &listrect);
+    id = scroll.value / rowheight;
+    y = -(scroll.value % rowheight);
+    for ( ; y < listrect.y + listrect.h ; ++id, y += rowheight)
+        renderlistentry(id, y);
+    SDL_RenderSetClipRect(_graph.renderer, NULL);
+
+    settextcolor(_graph.defaultcolor);
     drawlargetext("Game",
                   listrect.x + listrect.w / 2, listrect.y - rowheight - 2, 0);
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
@@ -348,34 +364,11 @@ static void rendergamelist(void)
     SDL_RenderDrawLine(_graph.renderer,
                        listrect.x, listrect.y + listrect.h + 1,
                        listrect.x + listrect.w, listrect.y + listrect.h + 1);
-
-    SDL_RenderSetClipRect(_graph.renderer, &listrect);
-    y = listrect.y - scroll.value % rowheight;
-    for (i = 0 ; y < listrect.y + listrect.h ; ++i, y += rowheight) {
-        id = scroll.value / rowheight + i;
-        if (id == selection) {
-            drawrecthighlight(listrect.x, y, listrect.w, rowheight);
-            settextcolor(_graph.highlightcolor);
-        } else {
-            settextcolor(_graph.defaultcolor);
-        }
-        sprintf(buf, "%04d", id);
-        drawlargetext(buf, listrect.x + listrect.w / 2, y, 0);
-        solution = getsolutionfor(id);
-        if (solution && solution->size <= bestknownsolutionsize(id)) {
-            renderimage(IMAGE_STAR, listrect.x, y + markeroffset);
-            renderimage(IMAGE_STAR, listrect.x + listrect.w - markersize.x,
-                        y + markeroffset);
-        } else if (solution) {
-            renderimage(IMAGE_CHECK, listrect.x, y + markeroffset);
-        }
-    }
-    settextcolor(_graph.defaultcolor);
-    SDL_RenderSetClipRect(_graph.renderer, NULL);
     scrollrender(&scroll);
 }
 
-/* Render all components of the of the list display.
+/* Render all components of the of the display: the banner, the game
+ * list, and the score area.
  */
 static void render(void)
 {
@@ -385,6 +378,46 @@ static void render(void)
     SDL_RenderCopy(_graph.renderer, headlinetexture, NULL, &headlinerect);
     rendergamelist();
     renderscorearea(selection);
+}
+
+/*
+ * UI element callback functions.
+ */
+
+/* Move the current selection to the previous unsolved game.
+ */
+static void selectbackward(int down)
+{
+    (void)down;
+    setselection(findnextunsolved(selection, -1));
+}
+
+/* Move the current selection to the next unsolved game.
+ */
+static void selectforward(int down)
+{
+    (void)down;
+    setselection(findnextunsolved(selection, +1));
+}
+
+/* Move the current selection to a random unsolved game.
+ */
+static void selectrandom(int down)
+{
+    (void)down;
+    setselection(pickrandomunsolved());
+}
+
+/* Copy the text of the selected game's solution to the clipboard.
+ */
+static void copyselectedsolution(int down)
+{
+    solutioninfo const *solution;
+
+    (void)down;
+    solution = getsolutionfor(selection);
+    if (solution)
+        SDL_SetClipboardText(solution->text);
 }
 
 /*
@@ -398,30 +431,6 @@ static command_t moveselection(int delta)
     return setselection(selection + delta);
 }
 
-/* Move the current selection to the previous unsolved game.
- */
-static void selectbackward(int selected)
-{
-    (void)selected;
-    setselection(findnextunsolved(selection, -1));
-}
-
-/* Move the current selection to the next unsolved game.
- */
-static void selectforward(int selected)
-{
-    (void)selected;
-    setselection(findnextunsolved(selection, +1));
-}
-
-/* Move the current selection to a random unsolved game.
- */
-static void selectrandom(int selected)
-{
-    (void)selected;
-    setselection(pickrandomunsolved());
-}
-
 /* Map keyboard input events to user commands.
  */
 static command_t handlekeyevent(SDL_Keysym key)
@@ -430,10 +439,13 @@ static command_t handlekeyevent(SDL_Keysym key)
         return cmd_none;
 
     if (key.mod & KMOD_CTRL) {
-        if (key.sym == SDLK_r)
-            return setselection(pickrandomunsolved());
-        if (key.sym == SDLK_c)
-            copyselectedsolution(TRUE);
+        if (key.sym == SDLK_r) {
+            selectrandom(0);
+            return cmd_redraw;
+        } else if (key.sym == SDLK_c) {
+            copyselectedsolution(0);
+            return cmd_redraw;
+        }
         return cmd_none;
     }
 
@@ -448,9 +460,9 @@ static command_t handlekeyevent(SDL_Keysym key)
       case SDLK_KP_ENTER: return cmd_select;
       case SDLK_TAB:
         if (key.mod & KMOD_SHIFT)
-            selectbackward(TRUE);
+            selectbackward(0);
         else
-            selectforward(TRUE);
+            selectforward(0);
         return cmd_redraw;
     }
     return cmd_none;
@@ -459,8 +471,9 @@ static command_t handlekeyevent(SDL_Keysym key)
 /* The list display mainly listens for events that interact with the
  * scrolling list of games. The return value is the command to return
  * to the calling code, or zero if the command was not handled by this
- * code. A return value of cmd_select indicates that the currently
- * selected game should be entered.
+ * code. A return value of cmd_select is handled by the selectgame()
+ * function, and indicates that the currently selected game should be
+ * initiated.
  */
 static command_t eventhandler(SDL_Event *event)
 {
@@ -506,7 +519,8 @@ int getselection(void)
     return selection;
 }
 
-/* Change the list selection to the given game ID.
+/* Change the list selection to the given game ID. This is typically
+ * called just before the list display is made active.
  */
 void initlistselection(int id)
 {
@@ -555,13 +569,12 @@ displaymap initlistdisplay(void)
     clipbutton.action = copyselectedsolution;
     addbutton(&clipbutton);
 
-    markersize.x = getimagewidth(IMAGE_STAR);
-    markersize.y = getimageheight(IMAGE_STAR);
-
     loadsplashgraphics(&bannertexture, &headlinetexture);
     SDL_QueryTexture(bannertexture, NULL, NULL, &bannerrect.w, &bannerrect.h);
     SDL_QueryTexture(headlinetexture, NULL, NULL,
                      &headlinerect.w, &headlinerect.h);
+    markersize.x = getimagewidth(IMAGE_STAR);
+    markersize.y = getimageheight(IMAGE_STAR);
 
     display.setlayout = setlayout;
     display.render = render;

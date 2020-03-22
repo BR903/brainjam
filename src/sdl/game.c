@@ -16,7 +16,7 @@
 #include "images.h"
 #include "button.h"
 
-/* Macro to encapsulate the process of changing a bit flag.
+/* Macro to encapsulate the process of changing bit values.
  */
 #define setbitflag(v, m, f) ((v) = ((f) ? (v) | (m) : (v) & ~(m)))
 
@@ -32,8 +32,8 @@ typedef struct overlayinfo {
     int         alpha;          /* opacity of object on display */
 } overlayinfo;
 
-/* Data set to permit an overlay object to be freed in an animation
- * callback, before chaining to the real callback function.
+/* The data needed to free an overlay object in an animation callback,
+ * before chaining to the real callback function.
  */
 typedef struct animcleanupparams {
     overlayinfo *overlay;       /* overlay to be freed */
@@ -43,7 +43,7 @@ typedef struct animcleanupparams {
 
 /* A neutral yet not-gray background for the game display.
  */
-static SDL_Color const tablecolor = { 175, 191, 239, 0 };
+static SDL_Color const tablecolor = { 175, 191, 239, 255 };
 
 /* Pushbuttons that are found in the game display.
  */
@@ -53,7 +53,7 @@ static button helpbutton, backbutton, optionsbutton;
  */
 static button keyschkbox, animchkbox, autochkbox, redochkbox;
 
-/* The locations of the components of the game display.
+/* The locations of the game display elements.
  */
 static SDL_Rect foundations;            /* location of the four foundations */
 static SDL_Rect reserves;               /* location of the four reserves */
@@ -62,23 +62,23 @@ static SDL_Rect sidebar;                /* location of the sidebar info */
 static SDL_Rect saveiconpos;            /* location of the write indicator */
 static SDL_Rect dialog;                 /* location of the options popup */
 static SDL_Point dialogoutline[6];      /* outline around the options popup */
-static SDL_Point status;                /* position of the stuck/done images */
-static SDL_Point bookmark;              /* position of the bookmark image */
+static SDL_Point status;                /* position of the stuck/done alerts */
+static SDL_Point bookmark;              /* position of the bookmark alert */
 static SDL_Point movecount;             /* position of the move count */
 static SDL_Point bettercount;           /* position of the better indicator */
 static SDL_Point bestcount;             /* position of the best move count */
 static SDL_Point bestknowncount;        /* position of the lowest count */
 
-/* An array holding the location of each place in the display.
+/* An array holding the location of each place in the layout.
  */
-static SDL_Rect placeloc[NPLACES];
+static SDL_Rect placelocs[NPLACES];
 
 /* Image of a dot (made via the bullet character), and its size.
  */
 static SDL_Texture *dot;
 static SDL_Point dotsize;
 
-/* Image of an equal sign and its size.
+/* Image of an equal sign, and its size.
  */
 static SDL_Texture *equal;
 static SDL_Point equalsize;
@@ -122,10 +122,10 @@ static int optionsopen = FALSE;
 
 /* Calculate the locations and positions of the various elements that
  * make up the game display: The eight single-card places, the eight
- * stacks of the tableau, the right-hand column and its various
- * counters and indicators, the options popup dialog and its
- * checkboxes, and the back button and help button. This function also
- * fills in the values for the placeloc array.
+ * stacks of the tableau, the alert images, the various counters in
+ * the right-hand column, the options popup dialog and its checkboxes,
+ * and the back button and help button. This function also fills in
+ * the values for the placelocs array.
  */
 static SDL_Point setlayout(SDL_Point display)
 {
@@ -240,27 +240,28 @@ static SDL_Point setlayout(SDL_Point display)
     helpbutton.pos.y = backbutton.pos.y - helpbutton.pos.h - _graph.margin;
 
     for (i = 0 ; i < TABLEAU_PLACE_COUNT ; ++i) {
-        placeloc[i].x = tableau.x + i * (_graph.cardsize.x + spacing.x);
-        placeloc[i].y = tableau.y;
+        placelocs[tableauplace(i)].x = tableau.x +
+                                        i * (_graph.cardsize.x + spacing.x);
+        placelocs[tableauplace(i)].y = tableau.y;
     }
     for (i = 0 ; i < RESERVE_PLACE_COUNT ; ++i) {
-        placeloc[reserveplace(i)].x = reserves.x +
-                                      i * (_graph.cardsize.x + spacing.x);
-        placeloc[reserveplace(i)].y = reserves.y;
+        placelocs[reserveplace(i)].x = reserves.x +
+                                        i * (_graph.cardsize.x + spacing.x);
+        placelocs[reserveplace(i)].y = reserves.y;
     }
     for (i = 0 ; i < FOUNDATION_PLACE_COUNT ; ++i) {
-        placeloc[foundationplace(i)].x = foundations.x +
-                                         i * (_graph.cardsize.x + spacing.x);
-        placeloc[foundationplace(i)].y = foundations.y;
+        placelocs[foundationplace(i)].x = foundations.x +
+                                        i * (_graph.cardsize.x + spacing.x);
+        placelocs[foundationplace(i)].y = foundations.y;
     }
     for (i = 0 ; i < NPLACES ; ++i) {
-        placeloc[i].w = _graph.cardsize.x;
-        placeloc[i].h = _graph.cardsize.y;
+        placelocs[i].w = _graph.cardsize.x;
+        placelocs[i].h = _graph.cardsize.y;
     }
 
     size.x = sidebar.x + sidebar.w + spacing.x;
-    size.y = tableau.y + _graph.cardsize.y + 7 * _graph.dropheight;
-    size.y += 2 * spacing.y;
+    size.y = tableau.y + _graph.cardsize.y + 2 * spacing.y +
+                                             7 * _graph.dropheight;
     return size;
 }
 
@@ -270,7 +271,7 @@ static SDL_Point setlayout(SDL_Point display)
 
 /* Return a currently-unused overlay.
  */
-static overlayinfo *newoverlayinfo(void)
+static overlayinfo *getoverlayinfo(void)
 {
     static int lastindex = 0;
     int i;
@@ -283,8 +284,10 @@ static overlayinfo *newoverlayinfo(void)
             overlays[i].inuse = TRUE;
             return overlays + i;
         }
-        if (i == lastindex)
+        if (i == lastindex) {
+            warn("internal error: too many overlays!");
             return NULL;
+        }
     }
 }
 
@@ -301,8 +304,8 @@ static void freeoverlay(overlayinfo *overlay)
     overlay->inuse = FALSE;
 }
 
-/* Callback invoked when an overlay animation completes. The overlay
- * is freed and then the real callback is invoked.
+/* Callback invoked when an overlay animation completes. The real
+ * callback is invoked, and then the overlay is freed.
  */
 static void animcleanup(void *data, int done)
 {
@@ -321,12 +324,12 @@ static void animcleanup(void *data, int done)
  */
 static void setoptionsdisplay(int visible)
 {
-    setbitflag(optionsbutton.state, BSTATE_SELECT, visible);
     keyschkbox.visible = visible;
     animchkbox.visible = visible;
     autochkbox.visible = visible;
     redochkbox.visible = visible;
     optionsopen = visible;
+    setbitflag(optionsbutton.state, BSTATE_SELECT, visible);
 }
 
 /*
@@ -334,8 +337,8 @@ static void setoptionsdisplay(int visible)
  */
 
 /* Generate an animation to show a number at the location of the
- * user's best solution size, having the number slowly rise and
- * simultaneously fade out.
+ * user's best solution size, and then have the number slowly fade out
+ * as it rises.
  */
 static void createreplacementanimation(int value)
 {
@@ -345,9 +348,9 @@ static void createreplacementanimation(int value)
     SDL_Surface *image;
     char buf[8];
 
-    overlay = newoverlayinfo();
     sprintf(buf, "%d", value);
     image = TTF_RenderUTF8_Blended(_graph.largefont, buf, _graph.defaultcolor);
+    overlay = getoverlayinfo();
     overlay->icon = 0;
     overlay->card = 0;
     overlay->texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
@@ -382,7 +385,7 @@ static void createsaveanimation(void)
     overlayinfo *overlay;
     animcleanupparams *params;
 
-    overlay = newoverlayinfo();
+    overlay = getoverlayinfo();
     overlay->icon = IMAGE_WRITE;
     overlay->card = 0;
     overlay->texture = NULL;
@@ -404,10 +407,11 @@ static void createsaveanimation(void)
 }
 
 /* Animate a card moving across the layout, with from and to
- * specifying the starting and ending points. First an overlay is
- * created to render the card at its starting position, then an
- * animation is created to move the overlay to its ending position. A
- * callback is attached to the animation, to be invoked once it ends.
+ * specifying the starting and ending points. An overlay is created to
+ * render the card at the starting position, and an animation is used
+ * to move the overlay to its ending position. A callback can be
+ * attached to the animation, to be invoked once the card has arrived
+ * at its destination.
  */
 static int createcardanimation(gameplayinfo const *gameplay,
                                card_t card, place_t from, place_t to,
@@ -418,16 +422,15 @@ static int createcardanimation(gameplayinfo const *gameplay,
     animcleanupparams *params;
     SDL_Rect rect;
 
-    rect = placeloc[from];
+    rect = placelocs[from];
     if (istableauplace(from))
         rect.y += gameplay->depth[from] * _graph.dropheight;
 
-    overlay = newoverlayinfo();
+    overlay = getoverlayinfo();
     overlay->icon = 0;
     overlay->card = card;
     overlay->texture = NULL;
     overlay->pos = rect;
-    overlay->alpha = SDL_ALPHA_OPAQUE;
 
     params = allocate(sizeof *params);
     params->overlay = overlay;
@@ -438,8 +441,8 @@ static int createcardanimation(gameplayinfo const *gameplay,
     anim->steps = 16;
     anim->pval1 = &overlay->pos.x;
     anim->pval2 = &overlay->pos.y;
-    anim->destval1 = placeloc[to].x;
-    anim->destval2 = placeloc[to].y;
+    anim->destval1 = placelocs[to].x;
+    anim->destval2 = placelocs[to].y;
     if (istableauplace(to))
         anim->destval2 += gameplay->depth[to] * _graph.dropheight;
     anim->callback = animcleanup;
@@ -450,16 +453,32 @@ static int createcardanimation(gameplayinfo const *gameplay,
 }
 
 /*
- *
+ * Rendering the game display.
  */
 
-/* Create a texture containing graphics of the keys for each place.
+/* Return true if there are no empty slots in the current layout,
+ * indicating that it would be helpful to mark which cards have a
+ * legal move available.
+ */
+static int shouldmarkmoveable(gameplayinfo const *gameplay)
+{
+    int i;
+
+    for (i = MOVEABLE_PLACE_1ST ; i < MOVEABLE_PLACE_END ; ++i)
+        if (gameplay->depth[i] == 0)
+            return FALSE;
+    return TRUE;
+}
+
+/* Create a texture containing images of the keys to use for each
+ * place's move command. The images are arranged in a 4x3 square in
+ * the texture. (The "alternate" move command is used because keycaps
+ * typically have uppercase letters.)
  */
 static void makekeyguides(void)
 {
-    static SDL_Color const keytextcolor = { 175, 175, 191, 0 };
-    static SDL_Color const keycolor = { 0, 0, 0, 0 };
-
+    SDL_Color const keytextcolor = { 175, 175, 191, 0 };
+    SDL_Color const keycolor = { 0, 0, 0, 0 };
     SDL_Surface *letters[MOVEABLE_PLACE_COUNT];
     SDL_Surface *image;
     SDL_Rect rect;
@@ -468,7 +487,7 @@ static void makekeyguides(void)
     lettersize = 0;
     for (i = 0 ; i < MOVEABLE_PLACE_COUNT ; ++i) {
         letters[i] = TTF_RenderGlyph_Shaded(_graph.largefont,
-                                            placetomovecmd2(i),
+                                            placetomovecmd2(indextoplace(i)),
                                             keytextcolor, keycolor);
         if (lettersize < letters[i]->h)
             lettersize = letters[i]->h;
@@ -495,20 +514,32 @@ static void makekeyguides(void)
         SDL_FreeSurface(letters[i]);
     }
     keyguidetexture = SDL_CreateTextureFromSurface(_graph.renderer, image);
-    /*SDL_SetTextureAlphaMod(keyguidetexture, 128);*/
     SDL_FreeSurface(image);
 }
-    
-static void setkeyguides(int enable)
+
+/* Render all active overlays to the display.
+ */
+static void renderoverlays(void)
 {
-    setbitflag(keyschkbox.state, BSTATE_SELECT, enable);
+    int i;
+
+    for (i = 0 ; i < (int)(sizeof overlays / sizeof *overlays) ; ++i) {
+        if (!overlays[i].inuse)
+            continue;
+        if (overlays[i].card) {
+            rendercard(overlays[i].card, overlays[i].pos.x, overlays[i].pos.y);
+        } else if (overlays[i].icon) {
+            renderalphaimage(overlays[i].icon, overlays[i].alpha,
+                             overlays[i].pos.x, overlays[i].pos.y);
+        } else if (overlays[i].texture) {
+            SDL_SetTextureAlphaMod(overlays[i].texture, overlays[i].alpha);
+            SDL_RenderCopy(_graph.renderer, overlays[i].texture, NULL,
+                           &overlays[i].pos);
+        }
+    }
 }
 
-/*
- * Rendering the game display.
- */
-
-/* Draw the background of the options dialog. (The contents of the
+/* Render the background of the options dialog. (The contents of the
  * dialog are all buttons, so they are rendered automatically when
  * visible.)
  */
@@ -517,29 +548,16 @@ static void renderoptions(void)
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.bkgndcolor));
     SDL_RenderFillRect(_graph.renderer, &dialog);
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.defaultcolor));
-    SDL_RenderDrawLines(_graph.renderer, dialogoutline, 6);
+    SDL_RenderDrawLines(_graph.renderer, dialogoutline,
+                        sizeof dialogoutline / sizeof *dialogoutline);
 }
 
-/* Return true if there are no empty slots in the current layout,
- * indicating that it would be helpful to mark which cards have a
- * legal move available.
- */
-static int shouldmarkmoveable(gameplayinfo const *gameplay)
-{
-    int i;
-
-    for (i = MOVEABLE_PLACE_1ST ; i < MOVEABLE_PLACE_END ; ++i)
-        if (gameplay->depth[i] == 0)
-            return FALSE;
-    return TRUE;
-}
-
-/* Output indicators showing redoable moves from the given place, if
+/* Render indicators showing redoable moves from the given place, if
  * any. The indicators take the form of either the redoable move's
- * command, or, if the move is part of a complete solution, the size
- * of the solution it is part of. Additionally, if the card at this
- * place has a legal move, and showmoveable is true, then a dot is
- * drawn between the two indicators.
+ * letter command, or, if the move is part of a complete solution, the
+ * size of the solution it is part of. Additionally, if the card at
+ * this place has a legal move, and showmoveable is true, then a dot
+ * is drawn between the two indicators.
  */
 static void rendernavinfo(gameplayinfo const *gameplay,
                           redo_position const *position,
@@ -564,10 +582,9 @@ static void rendernavinfo(gameplayinfo const *gameplay,
             secondpos = branch->p;
     }
 
-    y = placeloc[place].y + yoffset + _graph.cardsize.y;
     spacing = dotsize.x / 2;
-
-    x = placeloc[place].x + spacing;
+    x = placelocs[place].x + spacing;
+    y = placelocs[place].y + yoffset + _graph.cardsize.y;
     if (firstpos) {
         if (firstpos->solutionsize) {
             drawsmallnumber(firstpos->solutionsize, x, y, -1);
@@ -577,14 +594,7 @@ static void rendernavinfo(gameplayinfo const *gameplay,
             drawsmalltext(buf, x, y, -1);
         }
     }
-    if (showmoveable && gameplay->moveable & (1 << place)) {
-        rect.x = placeloc[place].x + (_graph.cardsize.x - dotsize.x) / 2;
-        rect.y = y;
-        rect.w = dotsize.x;
-        rect.h = dotsize.y;
-        SDL_RenderCopy(_graph.renderer, dot, NULL, &rect);
-    }
-    x = placeloc[place].x + _graph.cardsize.x - spacing;
+    x = placelocs[place].x + _graph.cardsize.x - spacing;
     if (secondpos) {
         if (secondpos->solutionsize) {
             drawsmallnumber(secondpos->solutionsize, x, y, +1);
@@ -593,6 +603,14 @@ static void rendernavinfo(gameplayinfo const *gameplay,
             buf[1] = '\0';
             drawsmalltext(buf, x, y, +1);
         }
+    }
+
+    if (showmoveable && gameplay->moveable & (1 << place)) {
+        rect.x = placelocs[place].x + (_graph.cardsize.x - dotsize.x) / 2;
+        rect.y = y;
+        rect.w = dotsize.x;
+        rect.h = dotsize.y;
+        SDL_RenderCopy(_graph.renderer, dot, NULL, &rect);
     }
 }
 
@@ -620,19 +638,17 @@ static void renderbetterinfo(redo_position const *position)
     if (!isbetter)
         return;
 
-    if (!bp->solutionsize)
-        settextcolor(_graph.dimmedcolor);
+    settextcolor(bp->solutionsize ? _graph.defaultcolor : _graph.dimmedcolor);
     rect.x = bettercount.x - 2 * equalsize.x;
     rect.y = bettercount.y;
     rect.w = equalsize.x;
     rect.h = equalsize.y;
     rect.x -= drawsmallnumber(bp->movecount, bettercount.x, bettercount.y, +1);
     SDL_RenderCopy(_graph.renderer, equal, NULL, &rect);
-    if (!bp->solutionsize)
-        settextcolor(_graph.defaultcolor);
+    settextcolor(_graph.defaultcolor);
 }
 
-/* Output the image of keys at the head of each place's location.
+/* Render keycap images at the head of each place's location.
  */
 static void renderkeyguides(void)
 {
@@ -646,43 +662,40 @@ static void renderkeyguides(void)
         src.y = (i / 4) * keyguidesize;
         src.w = keyguidesize;
         src.h = keyguidesize;
-        dest.x = placeloc[i].x + 3 * (placeloc[i].w - keyguidesize) / 4;
-        dest.y = placeloc[i].y - keyguidesize / 2;
+        dest.x = placelocs[i].x + 3 * (placelocs[i].w - keyguidesize) / 4;
+        dest.y = placelocs[i].y - keyguidesize / 2;
         dest.w = keyguidesize;
         dest.h = keyguidesize;
         SDL_RenderCopy(_graph.renderer, keyguidetexture, &src, &dest);
     }
 }
 
-/* Render all the components of the game display.
+/* Render all the elements of the game's layout. The tableau stacks
+ * require extra logic, since their sequence is stored from front to
+ * back, but they need to be rendered back to front.
  */
-static void render(void)
+static void renderlayout(void)
 {
     card_t stack[42], card;
     int showmoveable, i, n;
 
-    SDL_SetRenderDrawColor(_graph.renderer, colors4(tablecolor));
-    SDL_RenderClear(_graph.renderer);
-    if (!gameplay)
-        return;
-
     showmoveable = shouldmarkmoveable(gameplay);
 
     for (i = FOUNDATION_PLACE_1ST ; i < FOUNDATION_PLACE_END ; ++i)
-        rendercard(gameplay->cardat[i], placeloc[i].x, placeloc[i].y);
+        rendercard(gameplay->cardat[i], placelocs[i].x, placelocs[i].y);
 
     for (i = RESERVE_PLACE_1ST ; i < RESERVE_PLACE_END ; ++i) {
         if (!gameplay->depth[i]) {
-            rendercard(EMPTY_PLACE, placeloc[i].x, placeloc[i].y);
+            rendercard(EMPTY_PLACE, placelocs[i].x, placelocs[i].y);
             continue;
         }
-        rendercard(gameplay->cardat[i], placeloc[i].x, placeloc[i].y);
+        rendercard(gameplay->cardat[i], placelocs[i].x, placelocs[i].y);
         rendernavinfo(gameplay, position, i, 0, showmoveable);
     }
 
     for (i = TABLEAU_PLACE_1ST ; i < TABLEAU_PLACE_END ; ++i) {
         if (!gameplay->depth[i]) {
-            rendercard(EMPTY_PLACE, placeloc[i].x, placeloc[i].y);
+            rendercard(EMPTY_PLACE, placelocs[i].x, placelocs[i].y);
             continue;
         }
         card = gameplay->cardat[i];
@@ -693,46 +706,46 @@ static void render(void)
         }
         for (n = 0 ; n < gameplay->depth[i] ; ++n)
             rendercard(stack[n],
-                       placeloc[i].x, placeloc[i].y + n * _graph.dropheight);
-        rendernavinfo(gameplay, position, i,
-                      (gameplay->depth[i] - 1) * _graph.dropheight,
+                       placelocs[i].x, placelocs[i].y + n * _graph.dropheight);
+        rendernavinfo(gameplay, position, i, (n - 1) * _graph.dropheight,
                       showmoveable);
     }
+}
 
-    if (keyschkbox.state & BSTATE_SELECT)
-        renderkeyguides();
-
+/* Render the counters and indicators of the sidebar. This includes
+ * the "stuck" and "done" alerts, even though they appear outside of
+ * the sidebar area.
+ */
+static void rendersidebar(void)
+{
     drawlargenumber(position->movecount, movecount.x, movecount.y, +1);
     renderbetterinfo(position);
-
     if (gameplay->bestsolution) {
         drawlargenumber(gameplay->bestsolution, bestcount.x, bestcount.y, +1);
         drawlargenumber(bestknownsolutionsize(gameplay->gameid),
                         bestknowncount.x, bestknowncount.y, +1);
     }
-
     if (gameplay->endpoint)
         renderimage(IMAGE_DONE, status.x, status.y);
     else if (!gameplay->moveable)
         renderimage(IMAGE_STUCK, status.x, status.y);
     if (bookmarkflag)
         renderimage(IMAGE_BOOKMARK, bookmark.x, bookmark.y);
+}
 
-    for (i = 0 ; i < (int)(sizeof overlays / sizeof *overlays) ; ++i) {
-        if (!overlays[i].inuse)
-            continue;
-        if (overlays[i].card) {
-            rendercard(overlays[i].card, overlays[i].pos.x, overlays[i].pos.y);
-        } else if (overlays[i].icon) {
-            renderalphaimage(overlays[i].icon, overlays[i].alpha,
-                             overlays[i].pos.x, overlays[i].pos.y);
-        } else if (overlays[i].texture) {
-            SDL_SetTextureAlphaMod(overlays[i].texture, overlays[i].alpha);
-            SDL_RenderCopy(_graph.renderer, overlays[i].texture, NULL,
-                           &overlays[i].pos);
-        }
-    }
-
+/* Render the complete game display, back to front.
+ */
+static void render(void)
+{
+    SDL_SetRenderDrawColor(_graph.renderer, colors4(tablecolor));
+    SDL_RenderClear(_graph.renderer);
+    if (!gameplay)
+        return;
+    renderlayout();
+    if (keyschkbox.state & BSTATE_SELECT)
+        renderkeyguides();
+    rendersidebar();
+    renderoverlays();
     if (optionsopen)
         renderoptions();
 }
@@ -763,6 +776,7 @@ static command_t handlekeyevent(SDL_Keysym key)
         }
     } else {
         switch (key.sym) {
+          case SDLK_SPACE:      return cmd_autoplay;
           case SDLK_LEFT:       return cmd_undo;
           case SDLK_RIGHT:      return cmd_redo;
           case SDLK_PAGEUP:     return cmd_undo10;
@@ -779,9 +793,8 @@ static command_t handlekeyevent(SDL_Keysym key)
 }
 
 /* Map ASCII characters to user commands. The commands handled here
- * are ones for characters that can't safely be detected as key
- * events, because keyboards differ as to how the character is
- * generated.
+ * are ones for actual characters, and so cannot be detected as key
+ * events since keyboards can differ as to how a character is typed.
  */
 static command_t handletextevent(char const *text)
 {
@@ -791,7 +804,6 @@ static command_t handletextevent(char const *text)
         if (ismovecmd(text[i]))
             return text[i];
         switch (text[i]) {
-          case ' ':             return cmd_autoplay;
           case '=':             return cmd_switchtobetter;
           case '-':             return cmd_switchtoprevious;
           case '!':             return cmd_setminimalpath;
@@ -816,12 +828,12 @@ static command_t handlemouseevent(SDL_Event const *event)
 
     if (event->button.y >= tableau.y) {
         for (p = TABLEAU_PLACE_1ST ; p < TABLEAU_PLACE_END ; ++p)
-            if (event->button.x >= placeloc[p].x &&
-                        event->button.x < placeloc[p].x + placeloc[p].w)
+            if (event->button.x >= placelocs[p].x &&
+                        event->button.x < placelocs[p].x + placelocs[p].w)
                 return usefirst ? placetomovecmd1(p) : placetomovecmd2(p);
     } else {
         for (p = RESERVE_PLACE_1ST ; p < RESERVE_PLACE_END ; ++p)
-            if (rectcontains(&placeloc[p], event->button.x, event->button.y))
+            if (rectcontains(&placelocs[p], event->button.x, event->button.y))
                 return usefirst ? placetomovecmd1(p) : placetomovecmd2(p);
     }
 
@@ -855,7 +867,8 @@ static command_t eventhandler(SDL_Event *event)
  */
 
 /* Function called when the game display is about to become the active
- * display. Any data lingering from a prior game is reset.
+ * display. Any settings that might be lingering from a prior game are
+ * reset.
  */
 void resetgamedisplay(void)
 {
@@ -864,7 +877,7 @@ void resetgamedisplay(void)
         setoptionsdisplay(FALSE);
 }
 
-/* Store the latest information controlling the game's appearance.
+/* Store the latest parameters describing the game state.
  */
 void updategamestate(gameplayinfo const *newgameplay,
                      redo_position const *newposition, int newbookmarkflag)
@@ -876,9 +889,10 @@ void updategamestate(gameplayinfo const *newgameplay,
         prevbestsolutionsize = gameplay->bestsolution;
 }
 
-/* If display is true, show the options dialog, updating the buttons
- * to match the current settings. If display is false, hide the
- * options dialog, updating the settings to match the buttons.
+/* If display is true, show the options dialog and update the
+ * checkboxes to match the current settings. If display is false, hide
+ * the options dialog and update the current settings to match the
+ * checkboxes.
  */
 void showoptions(settingsinfo *settings, int display)
 {
@@ -939,7 +953,6 @@ displaymap initgamedisplay(void)
     keyschkbox.cmd = cmd_none;
     keyschkbox.display = DISPLAY_GAME;
     keyschkbox.visible = 0;
-    keyschkbox.action = setkeyguides;
     addbutton(&keyschkbox);
 
     makecheckbox(&animchkbox, "Animate cards");
@@ -970,7 +983,7 @@ displaymap initgamedisplay(void)
  * API functions.
  */
 
-/* Change the key guide setting, updating the checkbox as necessary.
+/* Change the key guide checkbox setting.
  */
 int sdl_setshowkeyguidesflag(int flag)
 {
@@ -978,7 +991,7 @@ int sdl_setshowkeyguidesflag(int flag)
     return flag;
 }
 
-/* Change the animation setting, updating the checkbox as necessary.
+/* Change the animation setting, including the checkbox.
  */
 int sdl_setcardanimationflag(int flag)
 {
