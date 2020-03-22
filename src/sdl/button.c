@@ -10,21 +10,19 @@
 
 /*
  * Since a button can be in a limited set of states at any given time,
- * each state is accompanied by a separate image. These images are all
- * stored in a single texture, with the state value used as an offset
- * within it. The button creation functions therefore generate each
- * image during initialization and return the generated texture. The
- * button-handling code can then simply blit the appropriate image for
- * the current state.
+ * each state is accompanied by a different image. These images are
+ * all stored in a single texture, with the state value used as an
+ * offset within it. The button creation functions generate all such
+ * images upon initialization. The button-handling code can then
+ * simply render the appropriate image for the current state.
  */
 
-/* A line one pixel wide is assumed to be visible. Change this if
- * lines need to be thicker to be comfortably clear.
+/* A line one pixel wide is assumed to be clearly visible.
  */
 #define linesize 1
 
 /*
- * Rendering functions.
+ * Basic rendering functions.
  */
 
 /* Draw the outline of a rectangle in a solid color on a surface.
@@ -49,10 +47,10 @@ static void drawrect(SDL_Surface *image, Uint32 color,
     SDL_FillRect(image, &rect, color);
 }
 
-/* Draw the outline of a rectangle, minus the left-hand side.
+/* Draw the outline of a rectangle open on the left-hand side.
  */
-static void drawopenrect(SDL_Surface *image, Uint32 color,
-                         SDL_Rect const *frame)
+static void drawopenleftrect(SDL_Surface *image, Uint32 color,
+                             SDL_Rect const *frame)
 {
     SDL_Rect rect;
 
@@ -74,7 +72,7 @@ static void drawopenrect(SDL_Surface *image, Uint32 color,
  * gradient suggesting a convex surface. shadowdepth indicates how
  * much of a grayscale difference to move through.
  */
-static SDL_Surface *makeshadedsurface(int w, int h, int shadowdepth)
+static SDL_Surface *makeroundedsurface(int w, int h, int shadowdepth)
 {
     SDL_Color shading[256];
     SDL_Surface *surface;
@@ -98,82 +96,313 @@ static SDL_Surface *makeshadedsurface(int w, int h, int shadowdepth)
     return surface;
 }
 
-/* Initialize a pushbutton with the given image as its face. Graphics
- * for all of the different states of the button are rendered onto a
- * single texture.
+/*
+ * Pushbutton rendering functions.
  */
-static void makegraphicbutton(button *pushbutton, SDL_Surface *graphic)
+
+/* Create a column of four pushbutton backgrounds with the given
+ * dimensions. The first three backgrounds are for pushbuttons that
+ * are not pressed, so the background is one with convex shading. The
+ * fourth is for a pressed button, and so has a flat background.
+ */
+static SDL_Surface *makepushbuttonbkgndset(int w, int h)
 {
-    int const mods[] = { 160, 192, 160, 255 };
+    int const shading = 72;
     SDL_Surface *image, *bkgnd;
     SDL_Rect rect;
     Uint32 color;
     int i;
 
-    pushbutton->pos.x = 0;
-    pushbutton->pos.y = 0;
-    pushbutton->pos.w = graphic->w + _graph.margin;
-    pushbutton->pos.h = graphic->h + _graph.margin;
-    image = SDL_CreateRGBSurface(0,
-                                 pushbutton->pos.w, 4 * pushbutton->pos.h, 32,
+    image = SDL_CreateRGBSurface(0, w, 4 * h, 32,
                                  0x000000FF, 0x0000FF00,
                                  0x00FF0000, 0x00000000);
-    bkgnd = makeshadedsurface(pushbutton->pos.w, pushbutton->pos.h, 72);
+    color = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
+    SDL_FillRect(image, NULL, color);
+
+    bkgnd = makeroundedsurface(w, h, shading);
     rect.x = 0;
     rect.y = 0;
-    rect.w = pushbutton->pos.w;
-    rect.h = pushbutton->pos.h;
-    SDL_BlitSurface(bkgnd, NULL, image, &rect);
-    rect.y += pushbutton->pos.h;
-    SDL_BlitSurface(bkgnd, NULL, image, &rect);
-    rect.y += pushbutton->pos.h;
-    SDL_BlitSurface(bkgnd, NULL, image, &rect);
-    rect.y += pushbutton->pos.h;
-    SDL_FreeSurface(bkgnd);
-    color = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
-    SDL_FillRect(image, &rect, color);
+    rect.w = w;
+    rect.h = h;
     color = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
+    for (i = 0 ; i < 4 ; ++i) {
+        if ((i & (BSTATE_DOWN | BSTATE_SELECT)) == 0)
+            SDL_BlitSurface(bkgnd, NULL, image, &rect);
+        drawrect(image, color, rect.x, rect.y, rect.w, rect.h);
+        rect.y += h;
+    }
+    SDL_FreeSurface(bkgnd);
+
+    return image;
+}
+
+/* Create a column of eight popup button backgrounds with the given
+ * dimensions. The first four backgrounds are the same as for normal
+ * pushbutton. The next four are for the selected state, and are all
+ * drawn with flat backgrounds and no border on the left-hand side.
+ */
+static SDL_Surface *makeopenleftbkgndset(int w, int h)
+{
+    int const shading = 96;
+    SDL_Surface *image, *bkgnd;
+    SDL_Rect rect;
+    Uint32 color;
+    int i;
+
+    image = SDL_CreateRGBSurface(0, w, 8 * h, 32,
+                                 0x000000FF, 0x0000FF00,
+                                 0x00FF0000, 0x00000000);
+    color = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
+    SDL_FillRect(image, NULL, color);
+
+    bkgnd = makeroundedsurface(w, h, shading);
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = w;
+    rect.h = h;
+    color = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
+    for (i = 0 ; i < 8 ; ++i) {
+        if ((i & (BSTATE_DOWN | BSTATE_SELECT)) == 0)
+            SDL_BlitSurface(bkgnd, NULL, image, &rect);
+        if (i & BSTATE_SELECT)
+            drawopenleftrect(image, color, &rect);
+        else
+            drawrect(image, color, rect.x, rect.y, rect.w, rect.h);
+        rect.y += h;
+    }
+    SDL_FreeSurface(bkgnd);
+
+    return image;
+}
+
+/* Create a column of pushbutton labels for four different pushbutton
+ * states. The four states are: normal (enabled but not in use),
+ * hovered (the mouse is over the button but not pressing it),
+ * disabled, and pushed. The returned image repeats the graphic
+ * vertically, with different coloration appropriate for each state.
+ */
+static SDL_Surface *makepushbuttonlabelset(SDL_Surface *label, int w, int h)
+{
+    int const mods[] = { 160, 192, 160, 255 };
+    SDL_Surface *image;
+    SDL_Rect rect;
+    int i;
+
+    image = SDL_CreateRGBSurface(0, w, 4 * h, 32,
+                                 0x000000FF, 0x0000FF00,
+                                 0x00FF0000, 0xFF000000);
+    rect.x = (w - label->w) / 2;
+    rect.y = (h - label->h) / 2;
+    rect.w = label->w;
+    rect.h = label->h;
+    for (i = 0 ; i < 4 ; ++i) {
+        SDL_SetSurfaceColorMod(label, mods[i], mods[i], mods[i]);
+        SDL_SetSurfaceAlphaMod(label, i == BSTATE_DISABLED ? 128 : 255);
+        SDL_BlitSurface(label, NULL, image, &rect);
+        rect.y += h;
+    }
+    return image;
+}
+
+/*
+ * Checkbox rendering functions.
+ */
+
+/* Determine the dimensions and placement of a checkbox, based on the
+ * font used to render the accompanying text. In addition to filling
+ * in the rectangle coordinates, the function's return value gives the
+ * horizontal offset at which the text should be placed.
+ */
+static int placecheckbox(TTF_Font *font, SDL_Rect *box)
+{
+    int baseline, boxsize, margin;
+
+    margin = TTF_FontLineSkip(font);
+    baseline = TTF_FontAscent(font);
+    TTF_GlyphMetrics(font, 't', NULL, NULL, NULL, &boxsize, NULL);
+    if (boxsize < 10 * linesize)
+        boxsize = 10 * linesize;
+    if (margin < boxsize + 2 * linesize)
+        margin = boxsize + 2 * linesize;
+
+    box->x = linesize;
+    box->y = baseline - boxsize;
+    box->w = boxsize;
+    box->h = boxsize;
+
+    return margin;
+}
+
+/* Create the basic image of a checkbox button, with text displayed to
+ * the right of a square. The returned image has a transparent
+ * background. In addition to supplying an image, the function fills
+ * in the coordinates of two rectangles. The first is the rectangle
+ * for filling the square with a mark (when the button is selected).
+ * The second is a rectangle around the inside of the square, to show
+ * a highlight (when the button is down or hovered).
+ */
+static SDL_Surface *makecheckboxbaseimage(char const *str,
+                                          SDL_Rect *mark, SDL_Rect *boxinner)
+{
+    SDL_Surface *label, *image;
+    SDL_Rect rect;
+    Uint32 color;
+    int offset;
+
+    offset = placecheckbox(_graph.smallfont, &rect);
+    boxinner->x = rect.x + 1 * linesize;
+    boxinner->y = rect.y + 1 * linesize;
+    boxinner->w = rect.w - 2 * linesize;
+    boxinner->h = rect.h - 2 * linesize;
+    mark->x = rect.x + 3 * linesize;
+    mark->y = rect.y + 3 * linesize;
+    mark->w = rect.w - 6 * linesize;
+    mark->h = rect.h - 6 * linesize;
+
+    label = TTF_RenderUTF8_Blended(_graph.smallfont, str, _graph.defaultcolor);
+    image = SDL_CreateRGBSurface(0, offset + label->w, label->h, 32,
+                                 0x000000FF, 0x0000FF00,
+                                 0x00FF0000, 0xFF000000);
+
+    color = SDL_MapRGBA(image->format, colors4(_graph.defaultcolor));
     drawrect(image, color, rect.x, rect.y, rect.w, rect.h);
 
-    rect.x = (pushbutton->pos.w - graphic->w) / 2;
-    rect.y = (pushbutton->pos.h - graphic->h) / 2;
+    rect.x = offset;
+    rect.y = 0;
+    rect.w = label->w;
+    rect.h = label->h;
+    SDL_BlitSurface(label, NULL, image, &rect);
+    SDL_FreeSurface(label);
+
+    return image;
+}
+
+/* Create a columnn of eight checkbox images, one for each possible
+ * button state. The first four are the various active/enable states
+ * with the checkbox empty, and then the second half are the same set
+ * of states with the checkbox marked.
+ */
+static SDL_Surface *makecheckboxset(char const *text)
+{
+    SDL_Surface *graphic, *image;
+    SDL_Rect rect, mark, highlight;
+    Uint32 textval, dimval;
+    int i, j;
+
+    graphic = makecheckboxbaseimage(text, &mark, &highlight);
+
+    textval = SDL_MapRGBA(graphic->format, colors4(_graph.defaultcolor));
+    dimval = SDL_MapRGBA(graphic->format, colors4(_graph.dimmedcolor));
+
+    image = SDL_CreateRGBSurface(0, graphic->w, 8 * graphic->h, 32,
+                                 0x000000FF, 0x0000FF00,
+                                 0x00FF0000, 0x00000000);
+    SDL_FillRect(image, NULL,
+                 SDL_MapRGB(image->format, colors3(_graph.bkgndcolor)));
+
+    rect.x = 0;
+    rect.y = 0;
     rect.w = graphic->w;
     rect.h = graphic->h;
-    for (i = 0 ; i < 4 ; ++i) {
-        SDL_SetSurfaceColorMod(graphic, mods[i], mods[i], mods[i]);
-        SDL_SetSurfaceAlphaMod(graphic,
-                               i == BSTATE_DISABLED ? 128 : SDL_ALPHA_OPAQUE);
-        SDL_BlitSurface(graphic, NULL, image, &rect);
-        rect.y += pushbutton->pos.h;
+    for (j = 0 ; j < 2 ; ++j) {
+        for (i = 0 ; i < 4 ; ++i) {
+            SDL_SetSurfaceAlphaMod(graphic, i == BSTATE_DISABLED ? 128 : 255);
+            SDL_BlitSurface(graphic, NULL, image, &rect);
+            if (i & BSTATE_HOVER)
+                drawrect(image, i & BSTATE_DOWN ? textval : dimval,
+                         highlight.x, highlight.y, highlight.w, highlight.h);
+            rect.y += rect.h;
+            highlight.y += rect.h;
+        }
+        SDL_FillRect(graphic, &mark, textval);
     }
 
-    pushbutton->texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
-    SDL_FreeSurface(image);
-    pushbutton->state = BSTATE_NORMAL;
-    pushbutton->visible = 1;
-    pushbutton->action = 0;
-    pushbutton->rects = allocate(8 * sizeof(SDL_Rect));
-    for (i = 0 ; i < 8 ; ++i) {
-        pushbutton->rects[i].x = 0;
-        pushbutton->rects[i].y = (i % 4) * pushbutton->pos.h;
-        pushbutton->rects[i].w = pushbutton->pos.w;
-        pushbutton->rects[i].h = pushbutton->pos.h;
-    }
+    SDL_FreeSurface(graphic);
+    return image;
 }
 
 /*
  * Internal functions.
  */
 
-/* Initialize a pushbutton with an icon image.
+/* Initialize a pushbutton labeled with an image. Images for the
+ * different states of the button are rendered onto a texture. For a
+ * simple pushbutton there is no selection state, so the basic images
+ * are simply used twice.
  */
-void makeimagebutton(button *pushbutton, int iconid)
+void makeimagebutton(button *push, int iconid)
 {
-    SDL_Surface *image;
+    SDL_Surface *graphic, *image, *labels;
+    int i;
 
-    image = getbuttonlabel(iconid);
-    makegraphicbutton(pushbutton, image);
+    graphic = getbuttonlabel(iconid);
+    push->pos.x = 0;
+    push->pos.y = 0;
+    push->pos.w = graphic->w + _graph.margin;
+    push->pos.h = graphic->h + _graph.margin;
+
+    image = makepushbuttonbkgndset(push->pos.w, push->pos.h);
+    labels = makepushbuttonlabelset(graphic, push->pos.w, push->pos.h);
+    SDL_BlitSurface(labels, NULL, image, NULL);
+    push->texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
+    SDL_FreeSurface(graphic);
+    SDL_FreeSurface(labels);
     SDL_FreeSurface(image);
+
+    push->state = BSTATE_NORMAL;
+    push->visible = 1;
+    push->action = 0;
+    push->rects = allocate(8 * sizeof *push->rects);
+    for (i = 0 ; i < 8 ; ++i) {
+        push->rects[i].x = 0;
+        push->rects[i].y = (i % 4) * push->pos.h;
+        push->rects[i].w = push->pos.w;
+        push->rects[i].h = push->pos.h;
+    }
+}
+
+/* Initialize a pushbutton that controls the display of a popup
+ * "window", adjacent to the button's left-hand side. The popup window
+ * is displayed when the button is selected, and hidden otherwise. The
+ * button object does not draw the popup itself, but simply leaves an
+ * opening on the left edge of the button for the popup to merge with.
+ */
+void makepopupbutton(button *popup, int iconid)
+{
+    SDL_Surface *graphic, *image, *labels;
+    SDL_Rect rect;
+    int i;
+
+    graphic = getbuttonlabel(iconid);
+    popup->pos.x = 0;
+    popup->pos.y = 0;
+    popup->pos.w = graphic->w + _graph.margin;
+    popup->pos.h = graphic->h + _graph.margin;
+
+    image = makeopenleftbkgndset(popup->pos.w, popup->pos.h);
+    labels = makepushbuttonlabelset(graphic, popup->pos.w, popup->pos.h);
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = labels->w;
+    rect.h = labels->h;
+    SDL_BlitSurface(labels, NULL, image, &rect);
+    rect.y += rect.h;
+    SDL_BlitSurface(labels, NULL, image, &rect);
+    popup->texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
+    SDL_FreeSurface(graphic);
+    SDL_FreeSurface(labels);
+    SDL_FreeSurface(image);
+
+    popup->state = BSTATE_NORMAL;
+    popup->visible = 1;
+    popup->action = 0;
+    popup->rects = allocate(8 * sizeof *popup->rects);
+    for (i = 0 ; i < 8 ; ++i) {
+        popup->rects[i].x = 0;
+        popup->rects[i].y = i * popup->pos.h;
+        popup->rects[i].w = popup->pos.w;
+        popup->rects[i].h = popup->pos.h;
+    }
 }
 
 /* Create a checkbox button, with the checkbox square drawn to the
@@ -182,162 +411,27 @@ void makeimagebutton(button *pushbutton, int iconid)
  */
 void makecheckbox(button *chkbox, char const *str)
 {
-    SDL_Surface *textimage, *image;
-    SDL_Rect srcrect, destrect;
-    Uint32 textval, bkgndval, dimtextval;
-    int baseline, boxsize, i;
+    SDL_Surface *image;
+    int i;
 
-    baseline = TTF_FontAscent(_graph.smallfont);
-    TTF_GlyphMetrics(_graph.smallfont, 't', NULL, NULL, NULL, &boxsize, NULL);
-    if (boxsize < 10 * linesize)
-        boxsize = 10 * linesize;
-    textimage = TTF_RenderUTF8_Blended(_graph.smallfont, str,
-                                       _graph.defaultcolor);
+    image = makecheckboxset(str);
+
     chkbox->pos.x = 0;
     chkbox->pos.y = 0;
-    chkbox->pos.w = textimage->w + textimage->h;
-    chkbox->pos.h = textimage->h;
-
-    image = SDL_CreateRGBSurface(0, chkbox->pos.w, 8 * chkbox->pos.h,
-                                 textimage->format->BitsPerPixel,
-                                 textimage->format->Rmask,
-                                 textimage->format->Gmask,
-                                 textimage->format->Bmask,
-                                 textimage->format->Amask);
-    bkgndval = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
-    textval = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
-    dimtextval = SDL_MapRGB(image->format, colors3(_graph.dimmedcolor));
-    SDL_FillRect(image, NULL, bkgndval);
-    destrect.x = image->w - textimage->w;
-    destrect.y = 0;
-    SDL_BlitSurface(textimage, NULL, image, &destrect);
-    SDL_FreeSurface(textimage);
-    drawrect(image, textval, linesize, baseline - boxsize, boxsize, boxsize);
-    srcrect.x = 0;
-    srcrect.y = 0;
-    srcrect.w = chkbox->pos.w;
-    srcrect.h = chkbox->pos.h;
-    destrect = srcrect;
-    destrect.y += destrect.h;
-    SDL_BlitSurface(image, &srcrect, image, &destrect);
-    drawrect(image, dimtextval,
-             2 * linesize, destrect.y + baseline - boxsize + linesize,
-             boxsize - 2 * linesize, boxsize - 2 * linesize);
-    destrect.y += 2 * destrect.h;
-    SDL_BlitSurface(image, &srcrect, image, &destrect);
-    drawrect(image, textval,
-             2 * linesize, destrect.y + baseline - boxsize + linesize,
-             boxsize - 2 * linesize, boxsize - 2 * linesize);
-    srcrect.h *= 4;
-    destrect.y = srcrect.h;
-    SDL_BlitSurface(image, &srcrect, image, &destrect);
-    destrect.x = 4 * linesize;
-    destrect.y += baseline - boxsize + 3 * linesize;
-    destrect.w = boxsize - 6 * linesize;
-    destrect.h = boxsize - 6 * linesize;
-    SDL_FillRect(image, &destrect, textval);
-    destrect.y += chkbox->pos.h;
-    SDL_FillRect(image, &destrect, textval);
-    destrect.y += 2 * chkbox->pos.h;
-    SDL_FillRect(image, &destrect, textval);
-
-    SDL_SetSurfaceBlendMode(image, SDL_BLENDMODE_BLEND);
-    SDL_SetSurfaceAlphaMod(image, 128);
-    srcrect.x = 0;
-    srcrect.y = 0;
-    srcrect.w = chkbox->pos.w;
-    srcrect.h = chkbox->pos.h;
-    destrect.x = 0;
-    destrect.y = 2 * chkbox->pos.h;
-    destrect.w = chkbox->pos.w;
-    destrect.h = chkbox->pos.h;
-    SDL_BlitSurface(image, &srcrect, image, &destrect);
-    srcrect.y += 4 * chkbox->pos.h;
-    destrect.y += 4 * chkbox->pos.h;
-    SDL_BlitSurface(image, &srcrect, image, &destrect);
-    SDL_SetSurfaceAlphaMod(image, SDL_ALPHA_OPAQUE);
-    SDL_SetSurfaceBlendMode(image, SDL_BLENDMODE_NONE);
+    chkbox->pos.w = image->w;
+    chkbox->pos.h = image->h / 8;
 
     chkbox->texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
     SDL_FreeSurface(image);
-    chkbox->state = 0;
-    chkbox->visible = 0;
+
+    chkbox->state = BSTATE_NORMAL;
+    chkbox->visible = 1;
     chkbox->action = 0;
-    chkbox->rects = allocate(8 * sizeof(SDL_Rect));
+    chkbox->rects = allocate(8 * sizeof *chkbox->rects);
     for (i = 0 ; i < 8 ; ++i) {
         chkbox->rects[i].x = 0;
         chkbox->rects[i].y = i * chkbox->pos.h;
         chkbox->rects[i].w = chkbox->pos.w;
         chkbox->rects[i].h = chkbox->pos.h;
-    }
-}
-
-/* Create a pushbutton that controls the display of a popup "window",
- * adjacent to the button's left-hand side. The button object does not
- * draw the popup itself, but simply leaves an opening on the left
- * edge of the button for the popup to merge with.
- */
-void makepopupbutton(button *popup, int iconid)
-{
-    int const mods[] = { 160, 192, 160, 255 };
-    SDL_Surface *graphic, *image, *bkgnd;
-    SDL_Rect rect;
-    Uint32 bkgndval, textval;
-    int i;
-
-    graphic = getbuttonlabel(iconid);
-    popup->pos.x = 0;
-    popup->pos.y = 0;
-    popup->pos.w = graphic->w + _graph.margin;
-    popup->pos.h = graphic->h + _graph.margin;
-    image = SDL_CreateRGBSurface(0, popup->pos.w, 8 * popup->pos.h, 32,
-                                 0x000000FF, 0x0000FF00,
-                                 0x00FF0000, 0x00000000);
-    bkgnd = makeshadedsurface(popup->pos.w, popup->pos.h, 96);
-    rect.x = 0;
-    rect.y = 0;
-    rect.w = popup->pos.w;
-    rect.h = popup->pos.h;
-    SDL_BlitSurface(bkgnd, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_BlitSurface(bkgnd, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_BlitSurface(bkgnd, NULL, image, &rect);
-    rect.y += popup->pos.h;
-    SDL_FreeSurface(bkgnd);
-    bkgndval = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
-    textval = SDL_MapRGB(image->format, colors3(_graph.defaultcolor));
-    SDL_FillRect(image, &rect, bkgndval);
-    drawrect(image, textval, rect.x, rect.y, rect.w, rect.h);
-    for (i = 0 ; i < 4 ; ++i) {
-        rect.y += popup->pos.h;
-        SDL_FillRect(image, &rect, bkgndval);
-        drawopenrect(image, textval, &rect);
-    }
-
-    rect.x = (popup->pos.w - graphic->w) / 2;
-    rect.y = (popup->pos.h - graphic->h) / 2;
-    rect.w = graphic->w;
-    rect.h = graphic->h;
-    for (i = 0 ; i < 8 ; ++i) {
-        SDL_SetSurfaceColorMod(graphic, mods[i % 4], mods[i % 4], mods[i % 4]);
-        SDL_SetSurfaceAlphaMod(graphic,
-                            i % 4 == BSTATE_DISABLED ? 128 : SDL_ALPHA_OPAQUE);
-        SDL_BlitSurface(graphic, NULL, image, &rect);
-        rect.y += popup->pos.h;
-    }
-    SDL_FreeSurface(graphic);
-
-    popup->texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
-    SDL_FreeSurface(image);
-    popup->state = BSTATE_NORMAL;
-    popup->visible = 1;
-    popup->action = 0;
-    popup->rects = allocate(8 * sizeof(SDL_Rect));
-    for (i = 0 ; i < 8 ; ++i) {
-        popup->rects[i].x = 0;
-        popup->rects[i].y = i * popup->pos.h;
-        popup->rects[i].w = popup->pos.w;
-        popup->rects[i].h = popup->pos.h;
     }
 }
