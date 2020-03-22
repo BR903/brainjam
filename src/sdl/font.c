@@ -17,21 +17,28 @@ struct fontrefinfo {
     size_t      bufsize;        /* the size of the data buffer */
 };
 
-/* This file contains multiple implementations of font lookup code.
+/*
+ * Platform-specific font lookup.
+ *
+ * This file contains multiple implementations of font lookup code.
  * Which one will be included in the program will depend on the
- * user's configuration.
+ * target platform (and potentially the configuration).
+ */
+
+/* Use the fontname field of the fontref to identify an installed font
+ * on the system with that name, and fill in either the filename field
+ * or the databuf and bufsize fields, so that getfontfromref() can
+ * use it to retrieve the font.
  */
 static int lookupfont(fontrefinfo *fontref);
 
-#if _WITH_FONTCONFIG  /* using the fontconfig library */
+#if _WITH_FONTCONFIG
 
 #include <fontconfig/fontconfig.h>
 
 /* Use the fontconfig API to look up the filename of a font that the
  * program can use. The font is chosen by the given family/face name,
- * along with a requirement for various glyphs that appear in the UI
- * and help text. The caller retains ownership of the returned string
- * buffer.
+ * along with a requirement for various glyphs that appear in the UI.
  */
 static int lookupfont(fontrefinfo *fontref)
 {
@@ -96,14 +103,13 @@ static int lookupfont(fontrefinfo *fontref)
     return result;
 }
 
-#elif _WIN32  /* using the Windows API */
+#elif _WIN32
 
 #include <windows.h>
 
 /* Use the Windows system API to look up a font by name. Unfortunately
  * the object that Windows returns cannot be turned into a filename.
- * Instead a pointer to the font data is obtained instead and copied
- * into a private buffer.
+ * Instead the actual font data must be copied into a private buffer.
  */
 static int lookupfont(fontrefinfo *fontref)
 {
@@ -155,17 +161,17 @@ static int lookupfont(fontrefinfo *fontref)
     return result;
 }
 
-#else  /* without help */
+#else
 
 /* As a last ditch effort, this variable can be modified to point to a
- * preferred font on the local machine. This is not a great font, but
- * it is fairly common on Debian-based Linux distros.
+ * preferred font on the local machine. Replace this with the path of
+ * your favorite font if you want to build without libfontconfig.
  */
 static char const *defaultfontfilename =
-    "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf";
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
 
 /* Without an external service to locate system fonts, all that can be
- * done is offer up a popular location for a usable font to be found,
+ * done is offer up a likely path where a usable font might be found,
  * and hope for the best.
  */
 static int lookupfont(fontrefinfo *fontref)
@@ -182,7 +188,9 @@ static int lookupfont(fontrefinfo *fontref)
 
 /* Use the given name to look up a font. If the argument is a valid
  * filename, it is returned directly. Otherwise, the argument is
- * assumed to be the name of an installed font.
+ * assumed to be the name of an installed font. If the argument
+ * doesn't match an available font, then a generic font will be
+ * selected instead.
  */
 fontrefinfo *findnamedfont(char const *fontname)
 {
@@ -198,7 +206,8 @@ fontrefinfo *findnamedfont(char const *fontname)
     fp = fopen(fontname, "rb");
     if (fp) {
         fclose(fp);
-        fontref->filename = strallocate(fontname);
+        fontref->filename = fontref->fontname;
+        fontref->fontname = NULL;
         return fontref;
     }
 
@@ -209,8 +218,7 @@ fontrefinfo *findnamedfont(char const *fontname)
     return NULL;
 }
 
-/* Use an existing font reference with the SDL_ttf library to create a
- * usable font object.
+/* Use an existing font reference to create a usable font object.
  */
 TTF_Font *getfontfromref(fontrefinfo const *fontref, int size)
 {

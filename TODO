@@ -1,9 +1,5 @@
 Before 1.0:
 
-* BUG: The code to emulate non-branching redo is broken. Undoing moves
-  and then going off in a different direction leaves the session tree
-  in a broken state.
-
 * Work on the layout for the opening screen. Seems like it could be
   improved.
 

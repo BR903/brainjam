@@ -11,7 +11,7 @@
  * usability and aesthetics, the thumb's height is constrained to
  * never be shorter than twice its width.
  */
-static void getthumb(scrollbar const *scroll, SDL_Rect *rect)
+static void getthumbrect(scrollbar const *scroll, SDL_Rect *rect)
 {
     int n;
 
@@ -38,7 +38,7 @@ static int scaleoffset(scrollbar const *scroll, int yoffset)
 
     if (scroll->pos.h <= 0)
         return 0;
-    getthumb(scroll, &rect);
+    getthumbrect(scroll, &rect);
     if (rect.h <= 0)
         return 0;
     return (scroll->range * yoffset) / (scroll->pos.h - rect.h);
@@ -69,15 +69,16 @@ void scrollrender(scrollbar const *scroll)
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.bkgndcolor));
     SDL_RenderFillRect(_graph.renderer, &scroll->pos);
     SDL_SetRenderDrawColor(_graph.renderer, colors4(_graph.dimmedcolor));
-    getthumb(scroll, &rect);
+    getthumbrect(scroll, &rect);
     SDL_RenderFillRect(_graph.renderer, &rect);
     SDL_SetRenderDrawColor(_graph.renderer, r, g, b, a);
 }
 
 /* Identify and manage any mouse events that involve manipulation of
  * the given scroll bar. Mouse clicks on the scrollbar cause the thumb
- * to jump to that position, while clicks on the thumb itself allow it
- * to be vertically dragged.
+ * to jump to that position. Clicks on the thumb itself allow it to be
+ * vertically dragged, requiring the function to track relative mouse
+ * movement until the button is released.
  */
 int scrolleventhandler(SDL_Event *event, scrollbar *scroll)
 {
@@ -91,7 +92,7 @@ int scrolleventhandler(SDL_Event *event, scrollbar *scroll)
         if (dragging == scroll)
             dragging = NULL;
         if (rectcontains(&scroll->pos, event->button.x, event->button.y)) {
-            getthumb(scroll, &rect);
+            getthumbrect(scroll, &rect);
             if (rectcontains(&rect, event->button.x, event->button.y)) {
                 dragging = scroll;
                 fromy = event->button.y;

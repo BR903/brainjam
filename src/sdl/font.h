@@ -6,15 +6,17 @@
 
 #include <SDL_ttf.h>
 
-/* A reference to the data of a truetype font.
+/* An opaque reference to the data of a truetype font.
  */
 typedef struct fontrefinfo fontrefinfo;
 
 /* Return a reference to an appropriate font for the program to use.
- * If the argument is not NULL, it provides a reference to a preferred
- * font. If fontname is a valid filename, it will be used directly;
- * otherwise the operating system will be queried to find a font with
- * that name.
+ * If the argument is not NULL, it provides the identifer of a
+ * preferred font. If fontname is a valid filename, it will be used
+ * directly; otherwise the operating system will be queried to find a
+ * font with that name. If the name doesn't match a known font, the
+ * system will select a general-purpose font to return instead. The
+ * return value is NULL only in the case that no fonts could be found.
  */
 extern fontrefinfo *findnamedfont(char const *fontname);
 

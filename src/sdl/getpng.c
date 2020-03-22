@@ -1,4 +1,4 @@
-/* sdl/getpng.c: reading PNGs file data.
+/* sdl/getpng.c: reading PNG file data.
  */
 
 #include <stdlib.h>
@@ -7,7 +7,7 @@
 #include "./gen.h"
 #include "getpng.h"
 
-/* The data that we keep on hand when reading a PNG file.
+/* The data that we need to retain while reading a PNG.
  */
 typedef struct pnginfo {
     png_struct *png;
@@ -17,7 +17,7 @@ typedef struct pnginfo {
     png_byte **rows;
 } pnginfo;
 
-/* A memory buffer being treated as a stream needs to track its own
+/* A memory buffer being treated as a stream needs to track its
  * offset.
  */
 typedef struct memstreaminfo {
@@ -25,7 +25,8 @@ typedef struct memstreaminfo {
     off_t offset;
 } memstreaminfo;
 
-/* Callback for feeding data to libpng.
+/* The callback for feeding data to libpng simply copies bytes from
+ * one buffer to another.
  */
 static void readcallback(png_struct *png, png_byte *outbuf, png_size_t size)
 {
@@ -37,9 +38,11 @@ static void readcallback(png_struct *png, png_byte *outbuf, png_size_t size)
 }
 
 /* Import PNG data into the given pnginfo struct. False is returned if
- * the image could not be read.
+ * the image could not be read. (Since all of our program's images
+ * require transparency, no attempt is made to support formats other
+ * than RGBA.)
  */
-static int readpng(void const *filedata, pnginfo *png)
+static int openpng(void const *filedata, pnginfo *png)
 {
     int const sigsize = 8;
     memstreaminfo stream;
@@ -88,7 +91,7 @@ static void freepng(pnginfo *png)
     png_destroy_read_struct(&png->png, &png->info, NULL);
 }
 
-/* Return an RGBA surface.
+/* Return a 32-bit RGBA surface, appropriate for the platform.
  */
 static SDL_Surface *makesurface(int width, int height)
 {
@@ -104,24 +107,6 @@ static SDL_Surface *makesurface(int width, int height)
                                 rmask, gmask, bmask, amask);
 }
 
-/* Copy decoded pixel data to an SDL surface.
- */
-static void rowstosurface(SDL_Surface *surface, pnginfo const *png)
-{
-    char *p;
-    int j;
-
-    if (SDL_MUSTLOCK(surface))
-        SDL_LockSurface(surface);
-    p = surface->pixels;
-    for (j = 0 ; j < png->height ; ++j) {
-        memcpy(p, png->rows[j], 4 * png->width);
-        p += surface->pitch;
-    }
-    if (SDL_MUSTLOCK(surface))
-        SDL_UnlockSurface(surface);
-}
-
 /*
  * Internal function.
  */
@@ -133,11 +118,23 @@ SDL_Surface *pngtosurface(void const *pngdata)
 {
     SDL_Surface *surface;
     pnginfo image;
+    char *p;
+    int j;
 
-    if (!readpng(pngdata, &image))
+    if (!openpng(pngdata, &image))
         return NULL;
+
     surface = makesurface(image.width, image.height);
-    rowstosurface(surface, &image);
+    if (SDL_MUSTLOCK(surface))
+        SDL_LockSurface(surface);
+    p = surface->pixels;
+    for (j = 0 ; j < image.height ; ++j) {
+        memcpy(p, image.rows[j], 4 * image.width);
+        p += surface->pitch;
+    }
+    if (SDL_MUSTLOCK(surface))
+        SDL_UnlockSurface(surface);
+
     freepng(&image);
     return surface;
 }

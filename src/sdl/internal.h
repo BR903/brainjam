@@ -8,6 +8,7 @@
 #include <SDL_ttf.h>
 #include "./types.h"
 #include "redo/redo.h"
+#include "sdltypes.h"
 
 /* SDL is not entirely consistent about using the SDL_Color struct;
  * very often its API calls for separate integer arguments. These
@@ -19,27 +20,21 @@
 
 /* The list of displays that the game provides.
  */
-#define DISPLAY_NONE    0       /* no active display */
-#define DISPLAY_LIST    1       /* the game list and splash screen */
-#define DISPLAY_GAME    2       /* the game proper */
-#define DISPLAY_HELP    3       /* the help screens */
-#define DISPLAY_COUNT   4
-
-/* Forward declaration of a struct defined in button.h. (There must be
- * a nicer way to handle this, short of having to merge button.h with
- * this file.)
- */
-struct button;
+#define DISPLAY_NONE   0        /* no active display */
+#define DISPLAY_LIST   1        /* the game list and splash screen */
+#define DISPLAY_GAME   2        /* the game proper */
+#define DISPLAY_HELP   3        /* the help screens */
+#define DISPLAY_COUNT  4
 
 /* Data describing moving (or otherwise changing) display values. An
  * animation is one or two integer values that are periodically
  * modified until they reach their destination values. (An animation
  * that only has one changing value should set the other integer
  * pointer to NULL.) An optional callback can be provided, which will
- * be invoked after the animation completes but before the animinfo is
- * freed.
+ * be invoked after the animation completes but before the animinfo
+ * struct is deallocated.
  */
-typedef struct animinfo {
+struct animinfo {
     int         inuse;          /* true while the struct is being used */
     int         steps;          /* how many ticks the change should take */
     int        *pval1;          /* first changing value */
@@ -48,13 +43,13 @@ typedef struct animinfo {
     int         destval2;       /* second value to end on */
     void      (*callback)(void*,int); /* callback to invoke at end */
     void       *data;           /* argument to pass to the callback */
-} animinfo;
+};
 
 /* The set of three callbacks that provide the functionality of one of
  * the game's displays. These callbacks are invoked from the event loop
  * at the appropriate times.
  */
-typedef struct displaymap {
+struct displaymap {
 
     /* Determine the layout of the display's elements. size provides
      * the size of the window. The return value should specify the
@@ -63,7 +58,7 @@ typedef struct displaymap {
      * the current size, the window may be grown to accommodate this
      * minimum. As such, this function can be called multiple times
      * during a window resize, so its cost should be kept light. Note
-     * that this function, unlike the others, can be called when this
+     * that this function, unlike the others, can be called when the
      * display is not active.
      */
     SDL_Point (*setlayout)(SDL_Point size);
@@ -82,18 +77,18 @@ typedef struct displaymap {
      * was fully processed by this function, and the return value is
      * passed back up from the current getinput() API call. (A return
      * value of cmd_redraw can be used as a command that does not
-     * trigger further state changes but still causes the display to
-     * be udpated.)
+     * trigger further state changes but still ensures that the
+     * display will be udpated.)
      */
     command_t (*eventhandler)(SDL_Event *event);
 
-} displaymap;
+};
 
 /* Shared objects and data used throughout this module.
  */
 typedef struct graphicinfo {
 
-    /* The SDL renderer, which providess access to the actual display.
+    /* The SDL renderer, which provides access to the actual display.
      * Most SDL rendering functions require this as the first
      * parameter.
      */
@@ -105,8 +100,8 @@ typedef struct graphicinfo {
     TTF_Font *largefont;
 
     /* The set of colors used for rendering text: regular text, dimmed
-     * text, bolded and highlighted text, and finally text background
-     * and highlighted text background.
+     * text, bolded and highlighted text, and finally colors for the
+     * default background and a highlighted background.
      */
     SDL_Color defaultcolor;
     SDL_Color dimmedcolor;
@@ -148,7 +143,7 @@ extern int rectcontains(SDL_Rect const *rect, int x, int y);
  * mouse events involving the button will be manged and generate user
  * commands or action callbacks as appropriate.
  */
-extern void addbutton(struct button *btn);
+extern void addbutton(button *btn);
 
 /* Render a string of text using the given font and position. The
  * align parameter should be positive to render the text to the right

@@ -216,6 +216,7 @@ SDL_Surface *getbuttonlabel(int id)
                                  labelsurface->format->Bmask,
                                  labelsurface->format->Amask);
     SDL_BlitSurface(labelsurface, &labelrects[id], image, NULL);
+    SDL_SetSurfaceBlendMode(image, SDL_BLENDMODE_NONE);
     return image;
 }
 

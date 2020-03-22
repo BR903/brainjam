@@ -13,14 +13,6 @@
 #include "button.h"
 #include "scroll.h"
 
-/* Identifying one (renderable) line of a multi-line string.
- */
-typedef struct lineinfo {
-    int         offset;         /* offset of this line in the string */
-    int         len;            /* length of this line in the string */
-    int         w;              /* width in pixels of this line */
-} lineinfo;
-
 /* The data comprising each section of help.
  */
 typedef struct sectioninfo {
@@ -32,6 +24,14 @@ typedef struct sectioninfo {
     SDL_Texture *texture;       /* the texture holding the full text */
     SDL_Texture *titletexture;  /* the texture holding the title */
 } sectioninfo;
+
+/* A substring making up one (renderable) line of a multi-line string.
+ */
+typedef struct lineinfo {
+    int         offset;         /* offset of this line in the string */
+    int         len;            /* length of this line in the string */
+    int         w;              /* width in pixels of this line */
+} lineinfo;
 
 /* The complete list of sections making up the display.
  */
@@ -105,11 +105,13 @@ static void updatehelpsection(int index, char const *text)
 
 /* Add a new section to the array, with the given title and text body.
  * If first is true, the section is placed before the others,
- * otherwise it is added to the end.
+ * otherwise it is added to the end. The title texture is rendered
+ * without color, so that color can be added dynamically. The body
+ * text is not rendered to a texture until it is actually displayed.
  */
 static void inserthelpsection(char const *title, char const *text, int first)
 {
-    SDL_Color const white = { 255, 255, 255, 0 };
+    SDL_Color const white = { 255, 255, 255, 255 };
     SDL_Surface *image;
     int n;
 
@@ -242,7 +244,7 @@ static int updatelistwidth(void)
  */
 static char *getbuffer(int size)
 {
-    static char *buffer;
+    static char *buffer = NULL;
     static int buffersize = 0;
 
     if (size >= buffersize) {
@@ -256,13 +258,17 @@ static char *getbuffer(int size)
 }
 
 /* Given a section and a display width, apply word-wrapping to the
- * section's text using that width and return an array of line breaks.
- * The function iteratively copies a substring into a separate buffer
- * and measures its pixel width. If a substring exceeds the given
- * display width, the previous substring measured is stored as one
+ * section's text using that width. The return value is an array
+ * pointing to each substring making up one line of text. The size of
+ * the array is returned through plinecount. The caller assumes
+ * responsibility for freeing the returned array.
+ *
+ * The function iteratively copies words from a substring into a
+ * separate buffer and measures its pixel width. If a substring
+ * exceeds maxwidth, the previous substring measured is stored as one
  * line of display, and the function resumes scanning at the first
- * non-blank character following. If a line exceeds the display width
- * before the first blank character is found, the line will be broken
+ * non-space character following. If a line exceeds the display width
+ * before the first space character is found, the line will be broken
  * mid-word; otherwise, lines are always broken at spaces or line
  * breaks.
  */
@@ -334,10 +340,15 @@ static lineinfo *wraptext(sectioninfo const *section, int maxwidth,
 /* Given a section that is formatted as a table, with newlines
  * separating rows and tabs separating columns, return an array of
  * substrings for each entry in the table, as well as an array giving
- * the necessary width in pixels of each column. The returned array of
- * substrings is organized into columns instead of rows, so that the
- * first elements of the array list the entries in the leftmost
- * column, followed by the entries that make up the next column, etc.
+ * the required width in pixels of each column. The latter array is
+ * returned through pwidths, and the size of the array is returned
+ * through pcolumncount.
+ *
+ * The return value is an array of substrings and is organized into
+ * columns instead of rows, so that the first elements of the array
+ * list the entries in the leftmost column, followed by the entries
+ * that make up the next column, etc. The caller assumes
+ * responsibility for freeing both returned arrays.
  */
 static lineinfo *tabulatetext(sectioninfo const *section, int **pwidths,
                               int *plinecount, int *pcolumncount)
@@ -398,7 +409,7 @@ static lineinfo *tabulatetext(sectioninfo const *section, int **pwidths,
 }
 
 /*
- * Rendering the text.
+ * Rendering text.
  */
 
 /* Render the contents of a section into a texture, formatted as
@@ -412,7 +423,7 @@ static void makeparagraphtexture(sectioninfo *section)
     lineinfo *lines;
     char *text;
     SDL_Rect rect;
-    Uint32 cv;
+    Uint32 color;
     int count, i;
 
     lines = wraptext(section, textrect.w, &count);
@@ -433,8 +444,8 @@ static void makeparagraphtexture(sectioninfo *section)
                                          lineimage->format->Gmask,
                                          lineimage->format->Bmask,
                                          lineimage->format->Amask);
-            cv = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
-            SDL_FillRect(image, NULL, cv);
+            color = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
+            SDL_FillRect(image, NULL, color);
         }
         rect.x = 0;
         rect.y = i * lineheight;
@@ -465,7 +476,7 @@ static void maketabletexture(sectioninfo *section)
     int *widths;
     char *text;
     SDL_Rect rect;
-    Uint32 cv;
+    Uint32 color;
     int linecount, columncount, i;
 
     lines = tabulatetext(section, &widths, &linecount, &columncount);
@@ -486,8 +497,8 @@ static void maketabletexture(sectioninfo *section)
                                          lineimage->format->Gmask,
                                          lineimage->format->Bmask,
                                          lineimage->format->Amask);
-            cv = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
-            SDL_FillRect(image, NULL, cv);
+            color = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
+            SDL_FillRect(image, NULL, color);
         }
         rect.w = lineimage->w;
         rect.h = lineimage->h;
@@ -572,8 +583,8 @@ static void render(void)
                        sections[currentsection].texture, NULL, &rect);
     } else {
         rect.x = 0;
-        rect.w = textrect.w;
         rect.y = scroll.value;
+        rect.w = textrect.w;
         rect.h = textrect.h;
         SDL_RenderCopy(_graph.renderer,
                        sections[currentsection].texture, &rect, &textrect);

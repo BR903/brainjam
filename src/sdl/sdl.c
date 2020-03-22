@@ -16,6 +16,7 @@
 #include "game/game.h"
 #include "sdl/sdl.h"
 #include "internal.h"
+#include "sdltypes.h"
 #include "images.h"
 #include "button.h"
 #include "font.h"
@@ -59,7 +60,7 @@ typedef struct numbercacheinfo {
  * This is only used if the user doesn't specify a name in the
  * initialization file.
  */
-static char const *defaultfontname = "freeserif";
+static char const *defaultfontname = "sans";
 
 /* The help text for the initial list display. (Since this might be
  * the first instructions that the user sees, it tries to be a little

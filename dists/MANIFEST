@@ -75,6 +75,7 @@ src/sdl/scroll.c
 src/sdl/scroll.h
 src/sdl/sdl.c
 src/sdl/sdl.h
+src/sdl/sdltypes.h
 src/sdl/stub.c
 src/sdl/alerts.png
 src/sdl/banner.png

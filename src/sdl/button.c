@@ -113,9 +113,8 @@ static SDL_Surface *makepushbuttonbkgndset(int w, int h)
     Uint32 color;
     int i;
 
-    image = SDL_CreateRGBSurface(0, w, 4 * h, 32,
-                                 0x000000FF, 0x0000FF00,
-                                 0x00FF0000, 0x00000000);
+    image = SDL_CreateRGBSurface(0, w, 4 * h, 32, 0x000000FF, 0x0000FF00,
+                                                  0x00FF0000, 0x00000000);
     color = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
     SDL_FillRect(image, NULL, color);
 
@@ -149,9 +148,8 @@ static SDL_Surface *makeopenleftbkgndset(int w, int h)
     Uint32 color;
     int i;
 
-    image = SDL_CreateRGBSurface(0, w, 8 * h, 32,
-                                 0x000000FF, 0x0000FF00,
-                                 0x00FF0000, 0x00000000);
+    image = SDL_CreateRGBSurface(0, w, 8 * h, 32, 0x000000FF, 0x0000FF00,
+                                                  0x00FF0000, 0x00000000);
     color = SDL_MapRGB(image->format, colors3(_graph.bkgndcolor));
     SDL_FillRect(image, NULL, color);
 
@@ -188,9 +186,8 @@ static SDL_Surface *makepushbuttonlabelset(SDL_Surface *label, int w, int h)
     SDL_Rect rect;
     int i;
 
-    image = SDL_CreateRGBSurface(0, w, 4 * h, 32,
-                                 0x000000FF, 0x0000FF00,
-                                 0x00FF0000, 0xFF000000);
+    image = SDL_CreateRGBSurface(0, w, 4 * h, 32, 0x000000FF, 0x0000FF00,
+                                                  0x00FF0000, 0xFF000000);
     rect.x = (w - label->w) / 2;
     rect.y = (h - label->h) / 2;
     rect.w = label->w;
