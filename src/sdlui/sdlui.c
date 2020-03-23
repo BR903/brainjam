@@ -86,7 +86,7 @@ static char const *listcommandshelptext =
     "\n"
     "Games that you have already solved are marked in the list with a check"
     " mark. (Stars mark games for which you have found the smallest possible"
-    " solution.)\n"
+    " answer.)\n"
     "\n"
     "To the left of the list are up and down buttons. These buttons move the"
     " current selection up and down, but skip over games that you have already"
@@ -95,8 +95,8 @@ static char const *listcommandshelptext =
     " move the selection up and down, and ctrl-R to select a random game.)\n"
     "\n"
     "The clipboard button to the right will be enabled when you select a game"
-    " that you have solved. Pressing it will copy your solution to the"
-    " clipboard. The solution is represented as a series of A-L letters, each"
+    " that you have solved. Pressing it will copy your answer to the"
+    " clipboard. The answer is represented as a series of A-L letters, each"
     " letter representing a move.";
 
 /* The help text for basic game play.
@@ -133,14 +133,14 @@ static char const *gameplayhelptext =
     " and you will need to use undo in order to find a different set of moves."
     " When you complete a game, a checkered-flag icon will appear instead."
     " (You can also use undo in this situation, if you wish to try to improve"
-    " your solution. Otherwise, just use the back button in the bottom right"
+    " your answer. Otherwise, just use the back button in the bottom right"
     " corner to return to the game selection display.)\n"
     "\n"
     "If you are playing a game that you have already solved, then the number"
-    " of moves in your solution will be displayed at bottom right, so you can"
+    " of moves in your answer will be displayed at bottom right, so you can"
     " see what you are trying to improve. Directly below that will be the"
-    " number of moves in the shortest possible solution, so you can see how"
-    " much room there is for improvement.\n"
+    " number of moves in the shortest possible answer, so you can see how much"
+    " room there is for improvement.\n"
     "\n"
     "The button with the gear icon will open a popup box that will allow you"
     " to change some of the game's settings. You can turn card movement on or"
@@ -175,7 +175,7 @@ static char const *redocommandshelptext =
     "Redo next 10 moves\tPgDn\n"
     "Undo backward to previous branch point\t" GLYPH_UPARROW "\n"
     "Redo forward to next branch point\t" GLYPH_DOWNARROW "\n"
-    "Set redo moves to shortest solution\t!\n"
+    "Set redo moves to shortest answer\t!\n"
     "Switch to \"better\" position\t=\n"
     "Bookmark the current position\tshift-M\n"
     "Forget the last bookmarked position\tshift-P\n"
@@ -450,7 +450,7 @@ static int createdisplays(void)
     setcolor(_graph.lightbkgndcolor, 213, 213, 213);
     settextcolor(_graph.defaultcolor);
 
-    if (!createfonts(lookuprcsetting("font")))
+    if (!createfonts(lookupinitsetting("font")))
         return FALSE;
 
     _graph.margin = TTF_FontLineSkip(_graph.smallfont);
@@ -460,8 +460,8 @@ static int createdisplays(void)
     displays[DISPLAY_GAME] = initgamedisplay(DISPLAY_GAME);
     displays[DISPLAY_HELP] = inithelpdisplay(DISPLAY_HELP);
 
-    ws = lookuprcsetting("windowwidth");
-    hs = lookuprcsetting("windowheight");
+    ws = lookupinitsetting("windowwidth");
+    hs = lookupinitsetting("windowheight");
     if (!ws || sscanf(ws, "%u", &displaysize.x) != 1)
         displaysize.x = 1;
     if (!hs || sscanf(hs, "%u", &displaysize.y) != 1)
@@ -484,9 +484,9 @@ static void recordwindowsize(SDL_Point size)
     char buf[16];
 
     sprintf(buf, "%u", size.x);
-    storercsetting("windowwidth", buf);
+    storeinitsetting("windowwidth", buf);
     sprintf(buf, "%u", size.y);
-    storercsetting("windowheight", buf);
+    storeinitsetting("windowheight", buf);
 }
 
 /*
@@ -1190,7 +1190,7 @@ uimap sdlui_initializeui(void)
     ui.setshowkeyguidesflag = sdlui_setshowkeyguidesflag;
     ui.setcardanimationflag = sdlui_setcardanimationflag;
     ui.ding = sdlui_ding;
-    ui.showsolutionwrite = sdlui_showsolutionwrite;
+    ui.showwriteindicator = sdlui_showwriteindicator;
     ui.movecard = sdlui_movecard;
     ui.changesettings = sdlui_changesettings;
     ui.selectgame = sdlui_selectgame;

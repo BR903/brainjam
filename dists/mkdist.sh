@@ -109,9 +109,9 @@ mkinstaller ()
   fi
   unzip -d dists "dists/$zipfile"
   dir=dists/$PROG
-  cp dists/installer.nsi $dir/
-  ${MAKENSIS:-makensis} -DVER=$VER $dir/installer.nsi
-  mv $dir/installer.exe dists/install-${PROG}-win${bits}.exe
+  cp dists/install.nsi $dir/
+  ${MAKENSIS:-makensis} -DVER=$VER $dir/install.nsi
+  mv $dir/install.exe dists/install-${PROG}-win${bits}.exe
   rm -r $dir
 }
 

@@ -8,7 +8,7 @@
 #include "./decls.h"
 #include "./decks.h"
 #include "redo/redo.h"
-#include "solutions/solutions.h"
+#include "answers/answers.h"
 #include "game/game.h"
 #include "internal.h"
 
@@ -233,32 +233,32 @@ void restoresavedstate(gameplayinfo *gameplay, redo_position const *position)
     recalcmoveable(gameplay);
 }
 
-/* Re-enact a solution, recreating the game state for each move and
- * recording the solution in the redo session. The game state is
+/* Re-enact an answer, recreating the game state for each move and
+ * recording the answer in the redo session. The game state is
  * restored to the starting position upon return.
  */
-int replaysolution(gameplayinfo *gameplay, redo_session *session)
+int replayanswer(gameplayinfo *gameplay, redo_session *session)
 {
-    solutioninfo const *solution;
+    answerinfo const *answer;
     redo_position *position;
     int moveid, i;
 
-    solution = getsolutionfor(gameplay->gameid);
-    if (!solution)
+    answer = getanswerfor(gameplay->gameid);
+    if (!answer)
         return FALSE;
 
     position = redo_getfirstposition(session);
-    for (i = 0 ; i < solution->size ; ++i) {
-        if (!ismovecmd(solution->text[i])) {
-            warn("game %d: move %d: illegal character \"%c\" in solution",
-                 gameplay->gameid, i, solution->text[i]);
+    for (i = 0 ; i < answer->size ; ++i) {
+        if (!ismovecmd(answer->text[i])) {
+            warn("game %d: move %d: illegal character \"%c\" in answer",
+                 gameplay->gameid, i, answer->text[i]);
             break;
         }
-        moveid = mkmoveid(gameplay->cardat[movecmdtoplace(solution->text[i])],
-                          ismovecmd2(solution->text[i]));
-        if (!applymove(gameplay, solution->text[i])) {
-            warn("game %d: move %d: unable to apply move \"%c\" in solution",
-                 gameplay->gameid, i, solution->text[i]);
+        moveid = mkmoveid(gameplay->cardat[movecmdtoplace(answer->text[i])],
+                          ismovecmd2(answer->text[i]));
+        if (!applymove(gameplay, answer->text[i])) {
+            warn("game %d: move %d: unable to apply move \"%c\" in answer",
+                 gameplay->gameid, i, answer->text[i]);
             break;
         }
         position = recordgamestate(gameplay, session, position,
@@ -266,7 +266,7 @@ int replaysolution(gameplayinfo *gameplay, redo_session *session)
     }
 
     if (!gameplay->endpoint)
-        warn("game %04d: saved solution is not a solution", gameplay->gameid);
+        warn("game %04d: saved answer is incomplete", gameplay->gameid);
     restoresavedstate(gameplay, redo_getfirstposition(session));
     return TRUE;
 }

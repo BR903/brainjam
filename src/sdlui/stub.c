@@ -15,7 +15,7 @@ uimap sdlui_initializeui(void)
     ui.ungetinput = NULL;
     ui.setcardanimationflag = NULL;
     ui.ding = NULL;
-    ui.showsolutionwrite = NULL;
+    ui.showwriteindicator = NULL;
     ui.movecard = NULL;
     ui.changesettings = NULL;
     ui.selectgame = NULL;

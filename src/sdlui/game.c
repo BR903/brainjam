@@ -97,12 +97,12 @@ static gameplayinfo const *gameplay;    /* current game state */
 static redo_position const *position;   /* current redo position */
 static int bookmarkflag;                /* true if a bookmark exists */
 
-/* Size of the user's most recent best solution for the current game.
- * A negative value indicates that this variable has not yet been
+/* Size of the user's most recent best answer for the current game. A
+ * negative value indicates that this variable has not yet been
  * initialized. A zero value indicates that the user has yet to create
- * a solution.
+ * an answer.
  */
-static int prevbestsolutionsize = -1;
+static int prevbestanswersize = -1;
 
 /* A pool of temporary animation objects.
  */
@@ -337,7 +337,7 @@ static void setoptionsdisplay(int visible)
  */
 
 /* Generate an animation to show a number at the location of the
- * user's best solution size, and then have the number slowly fade out
+ * user's best answer size, and then have the number slowly fade out
  * as it rises.
  */
 static void createreplacementanimation(int value)
@@ -554,8 +554,8 @@ static void renderoptions(void)
 
 /* Render indicators showing redoable moves from the given place, if
  * any. The indicators take the form of either the redoable move's
- * letter command, or, if the move is part of a complete solution, the
- * size of the solution it is part of. Additionally, if the card at
+ * letter command, or, if the move is part of a complete answer, the
+ * size of the answer it is part of. Additionally, if the card at
  * this place has a legal move, and showmoveable is true, then a dot
  * is drawn between the two indicators.
  */
@@ -720,9 +720,10 @@ static void rendersidebar(void)
 {
     drawlargenumber(position->movecount, movecount.x, movecount.y, -1);
     renderbetterinfo(position);
-    if (gameplay->bestsolution) {
-        drawlargenumber(gameplay->bestsolution, bestcount.x, bestcount.y, -1);
-        drawlargenumber(bestknownsolutionsize(gameplay->gameid),
+    if (gameplay->bestanswersize) {
+        drawlargenumber(gameplay->bestanswersize,
+                        bestcount.x, bestcount.y, -1);
+        drawlargenumber(bestknownanswersize(gameplay->gameid),
                         bestknowncount.x, bestknowncount.y, -1);
     }
     if (gameplay->endpoint)
@@ -872,7 +873,7 @@ static command_t eventhandler(SDL_Event *event)
  */
 void resetgamedisplay(void)
 {
-    prevbestsolutionsize = -1;
+    prevbestanswersize = -1;
     if (optionsopen)
         setoptionsdisplay(FALSE);
 }
@@ -885,8 +886,8 @@ void updategamestate(gameplayinfo const *newgameplay,
     gameplay = newgameplay;
     position = newposition;
     bookmarkflag = newbookmarkflag;
-    if (prevbestsolutionsize < 0)
-        prevbestsolutionsize = gameplay->bestsolution;
+    if (prevbestanswersize < 0)
+        prevbestanswersize = gameplay->bestanswersize;
 }
 
 /* If display is true, show the options dialog and update the
@@ -1016,9 +1017,9 @@ void sdlui_movecard(gameplayinfo const *gameplay, card_t card,
 
 /* Temporarily display the save icon.
  */
-void sdlui_showsolutionwrite(void)
+void sdlui_showwriteindicator(void)
 {
     createsaveanimation();
-    if (prevbestsolutionsize)
-        createreplacementanimation(prevbestsolutionsize);
+    if (prevbestanswersize)
+        createreplacementanimation(prevbestanswersize);
 }

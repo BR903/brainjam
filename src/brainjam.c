@@ -98,9 +98,9 @@ static char const *rulestext =
     " the options menu.\n"
     "\n"
     "At any time, you can leave a game and return to the initial display of"
-    " the list of available games. Your move history (and solution, if any)"
-    " will be remembered, and if you return to the game at a later time you"
-    " can use redo to pick up where you left off.";
+    " the list of available games. Your move history (and answer, if any) will"
+    " be remembered, and if you return to the game at a later time you can use"
+    " redo to pick up where you left off.";
 
 /* A description of the game's branching redo feature.
  */
@@ -122,14 +122,14 @@ static char const *branchingredotext =
     " the other path by specifying the other move directly.\n"
     "\n"
     "The branching redo feature is most useful after you have solved a game"
-    " and you wish to improve upon your solution. It allows you to revisit"
-    " your moves and experiment with changes at any point, while still keeping"
-    " your working solution intact.\n"
+    " and you wish to improve upon your answer. It allows you to revisit your"
+    " moves and experiment with changes at any point, while still keeping your"
+    " working answer intact.\n"
     "\n"
-    "When you are revisiting a solved game, the moves that are part of a"
-    " solution are displayed differently: instead of a letter, the move is"
-    " represented by the total number of moves in the solution. This allows"
-    " you to more easily see which moves are part of shorter solutions.\n"
+    "When you are revisiting a solved game, the moves that are part of an"
+    " answer are displayed differently: instead of a letter, the move is"
+    " represented by the total number of moves in the answer. This allows"
+    " you to more easily see which moves are part of shorter answers.\n"
     "\n"
     "Sometimes while trying a new sequence of moves, you will return to a"
     " state you had already visited via a different path. In that case, an"
@@ -138,8 +138,8 @@ static char const *branchingredotext =
     " switch over to that path if you choose. If, on the other hand, your"
     " newer path is the shorter one, then the game will automatically update"
     " your history to prefer this newer path. If you have already solved this"
-    " game, and this change creates a new, shorter solution, then it will"
-    " immediately be saved as your current best solution.\n"
+    " game, and this change creates a new, shorter answer, then it will"
+    " immediately be saved as your current best answer.\n"
     "\n"
     "In addition to the above commands, the program also allows you to"
     " bookmark a state, so that you can more easily return to it again. When a"
@@ -160,7 +160,7 @@ static void savesettings(void)
 
     settings = getcurrentsettings();
     if (settings)
-        savercfile(settings);
+        saveinitfile(settings);
 }
 
 /*
@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
 
     settings = getcurrentsettings();
     readcmdline(argc, argv, settings);
-    loadrcfile(settings);
+    loadinitfile(settings);
     setdefaultsettings();
 
     if (settings->forcetextmode || !initializeui(UI_SDL)) {

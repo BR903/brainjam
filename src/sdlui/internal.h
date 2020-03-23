@@ -246,7 +246,7 @@ extern int sdlui_setcardanimationflag(int flag);
 extern void sdlui_movecard(gameplayinfo const *gameplay, card_t card,
                            place_t from, place_t to,
                            void (*callback)(void*), void *data);
-extern void sdlui_showsolutionwrite(void);
+extern void sdlui_showwriteindicator(void);
 
 /* Defined in help.c.
  */

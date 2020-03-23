@@ -11,7 +11,7 @@
 #include "./settings.h"
 #include "./ui.h"
 #include "redo/redo.h"
-#include "solutions/solutions.h"
+#include "answers/answers.h"
 #include "game/game.h"
 #include "internal.h"
 
@@ -180,15 +180,15 @@ static command_t unbuffercommand(void)
 }
 
 /*
- * Solutions.
+ * Answers.
  */
 
 /* Return a buffer containing the sequence of moves commands
- * representing the user's current solution. The user is responsible
+ * representing the user's current answer. The user is responsible
  * for freeing the returned buffer. The return value is NULL if the
- * solution could not be retrieved.
+ * answer could not be retrieved.
  */
-static char *createsolutionstring(gameplayinfo *gameplay,
+static char *createanswerstring(gameplayinfo *gameplay,
                                   redo_session *session)
 {
     redo_position const *position;
@@ -206,7 +206,7 @@ static char *createsolutionstring(gameplayinfo *gameplay,
             if (branch->p->solutionsize == size)
                 break;
         if (!branch) {
-            warn("failed to create solution: no correct move at %d", i + 1);
+            warn("failed to create answer: no correct move at %d", i + 1);
             failed = TRUE;
             break;
         }
@@ -230,7 +230,7 @@ static char *createsolutionstring(gameplayinfo *gameplay,
 /* Delete a game position. In addition to removing it from the session
  * history, the position might also need to be removed from the stack
  * of saved positions, and its removal might require updating the
- * user's best solution size. The return value is the previous
+ * user's best answer size. The return value is the previous
  * position in the history, or NULL if the position could not be
  * deleted.
  */
@@ -244,7 +244,7 @@ static redo_position *forgetposition(gameplayinfo *gameplay,
     if (pos == position)
         return NULL;
 
-    gameplay->bestsolution = redo_getfirstposition(session)->solutionsize;
+    gameplay->bestanswersize = redo_getfirstposition(session)->solutionsize;
     stackdelete(position);
     if (currentposition == position)
         currentposition = pos;
@@ -305,7 +305,7 @@ static movecmd_t findfoundationmove(gameplayinfo const *gameplay)
 
 /* Finish the process of a moving a card, as started by handlemove().
  * Game state is updated, and the move is added to the redo session.
- * If the move created a new and shorter solution, it is saved to
+ * If the move created a new and shorter answer, it is saved to
  * disk. Finally, if autoplay is enabled, a scan for foundation moves
  * is scheduled.
  */
@@ -343,15 +343,15 @@ static void handlemove_callback(void *data)
         updategrafted(gameplay, session, currentposition);
 
     pos = redo_getfirstposition(session);
-    if (pos->solutionsize != gameplay->bestsolution) {
-        if (!gameplay->bestsolution ||
-                        gameplay->bestsolution > pos->solutionsize) {
-            buf = createsolutionstring(gameplay, session);
+    if (pos->solutionsize != gameplay->bestanswersize) {
+        if (!gameplay->bestanswersize ||
+                        gameplay->bestanswersize > pos->solutionsize) {
+            buf = createanswerstring(gameplay, session);
             if (buf) {
-                savesolution(gameplay->gameid, buf);
+                saveanswer(gameplay->gameid, buf);
                 deallocate(buf);
-                gameplay->bestsolution = pos->solutionsize;
-                showsolutionwrite();
+                gameplay->bestanswersize = pos->solutionsize;
+                showwriteindicator();
             }
         }
     }
@@ -420,7 +420,7 @@ static void moveposition(gameplayinfo *gameplay, redo_position *pos)
 }
 
 /* Set the default redo moves forward from this position to those of
- * the shortest solution.
+ * the shortest answer.
  */
 static void setminimalpath(redo_position *pos)
 {
@@ -617,7 +617,7 @@ int gameplayloop(gameplayinfo *gameplay, redo_session *session)
     command_t cmd;
 
     currentposition = redo_getfirstposition(session);
-    gameplay->bestsolution = currentposition->solutionsize;
+    gameplay->bestanswersize = currentposition->solutionsize;
     gameplay->locked = 0;
     backone = currentposition;
 

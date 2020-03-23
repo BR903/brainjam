@@ -60,7 +60,7 @@ extern int cursesui_setcardanimationflag(int flag);
 extern void cursesui_movecard(gameplayinfo const *gameplay, card_t card,
                               place_t from, place_t to,
                               void (*callback)(void*), void *data);
-extern void cursesui_showsolutionwrite(void);
+extern void cursesui_showwriteindicator(void);
 
 /* Defined in list.c.
  */

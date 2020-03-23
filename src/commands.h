@@ -32,7 +32,7 @@ enum {
     cmd_popbookmark,            /* restore the last pushed position */
     cmd_swapbookmark,           /* swap the current and the pushed position */
     cmd_dropbookmark,           /* forget the last pushed position */
-    cmd_setminimalpath,         /* make the best solution the redo default */
+    cmd_setminimalpath,         /* make the best answer the redo default */
     cmd_changesettings,         /* display the options settings */
     cmd_select,                 /* select a game (list display) */
     cmd_showhelp,               /* display the online help */

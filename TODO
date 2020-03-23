@@ -15,8 +15,8 @@ After 1.0:
 
 * Add feature to generate a new layout, random but guaranteed to be
   solvable. Such games would not have a configuration ID and would not
-  generate saved solutions. These differences might require changes in
-  a few different areas of the existing code. However, such a feature
+  generate saved answers. These differences might require changes in a
+  few different areas of the existing code. However, such a feature
   would allow users to play the game more than 1500 times. This will
   require finding an algorithm that reliably generates a new,
   solvable, not boring game. I've managed to do first two easily

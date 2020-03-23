@@ -1,4 +1,4 @@
-/* files/sessionio.c: reading and writing the session files.
+/* files/session.c: reading and writing the session files.
  */
 
 #include <stdio.h>

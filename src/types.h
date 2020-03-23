@@ -32,8 +32,8 @@ typedef unsigned char command_t;
 
 /* The following structs are fully defined elsewhere.
  */
+typedef struct answerinfo answerinfo;
 typedef struct gameplayinfo gameplayinfo;
-typedef struct solutioninfo solutioninfo;
 typedef struct settingsinfo settingsinfo;
 typedef struct renderparams renderparams;
 

@@ -70,9 +70,9 @@ typedef struct uimap {
      */
     void (*ding)(void);
 
-    /* Notify the user that a new solution has been saved.
+    /* Notify the user that a new answer has been saved.
      */
-    void (*showsolutionwrite)(void);
+    void (*showwriteindicator)(void);
 
     /* Animate a card, having it slide across the display from place
      * from to place to, and then invoking the given callback after
@@ -121,7 +121,7 @@ extern uimap _ui;
 #define setshowkeyguidesflag(f)          (_ui.setshowkeyguidesflag(f))
 #define setcardanimationflag(f)          (_ui.setcardanimationflag(f))
 #define ding()                           (_ui.ding())
-#define showsolutionwrite()              (_ui.showsolutionwrite())
+#define showwriteindicator()             (_ui.showwriteindicator())
 #define movecard(gp, cd, fr, to, cb, dt) (_ui.movecard(gp, cd, fr, to, cb, dt))
 #define changesettings(si)               (_ui.changesettings(si))
 #define selectgame(id)                   (_ui.selectgame(id))

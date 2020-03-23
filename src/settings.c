@@ -91,5 +91,5 @@ void applysettings(int write)
     if (settings->readonly >= 0)
         setreadonly(settings->readonly);
     if (write)
-        savercfile(settings);
+        saveinitfile(settings);
 }

@@ -100,9 +100,9 @@ static int outputdeckseq(FILE *outfile, char const *deck)
 /* Parse an input line and translate it to a sequence to output. Each
  * line of input consists of three items separated by spaces: a game
  * ID number, a sequence of cards encoded as 52 letters, and the size
- * of the best possible solution for that game. The solution size is
+ * of the best possible answer for that game. The answer size is
  * output to the bit stream as a seven-bit value (minus 52, since no
- * solution can be shorter than 52 moves), followed by the sequence of
+ * answer can be shorter than 52 moves), followed by the sequence of
  * cards in the deck. Each game configuration thus takes up 128 bits
  * (or 32 bytes) in the bit stream output.
  */

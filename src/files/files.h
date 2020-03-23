@@ -2,8 +2,8 @@
  *
  * The game uses a few different files for storing information. All
  * file access is done through the functions in this module. The
- * initialization file stores the user's settings. The solutions file
- * stores all the user's solutions. Finally, there are the session
+ * initialization file stores the user's settings. The answers file
+ * stores all the user's answers. Finally, there are the session
  * files, one for each game that the user has played. These store the
  * history of the user's moves in that game.
  *
@@ -70,11 +70,11 @@ extern void setreadonly(int flag);
  * occurred. (Note that a nonexistent file is treated the same as a
  * file that is empty.)
  */
-extern int loadrcfile(settingsinfo *settings);
+extern int loadinitfile(settingsinfo *settings);
 
 /* Update the initialization file to reflect the current settings.
  */
-extern int savercfile(settingsinfo const *settings);
+extern int saveinitfile(settingsinfo const *settings);
 
 /* Look up an "extra" entry in the initialization file, one not
  * captured in the fields of the settingsinfo struct. The return value
@@ -82,7 +82,7 @@ extern int savercfile(settingsinfo const *settings);
  * present in the initialization file. The returned pointer is owned
  * by this module, and the caller should not retain a copy of it.
  */
-extern char const *lookuprcsetting(char const *key);
+extern char const *lookupinitsetting(char const *key);
 
 /* Change the value of a setting, creating the setting if it doesn't
  * already exist. This entry will be written out to the initialization
@@ -90,23 +90,23 @@ extern char const *lookuprcsetting(char const *key);
  * function to change the value of one of the standard settings
  * captured in the fields of the settingsinfo struct.)
  */
-extern void storercsetting(char const *key, char const *value);
+extern void storeinitsetting(char const *key, char const *value);
 
 /*
- * The solutions file.
+ * The answers file.
  */
 
-/* Read the solution file and return the array of solutions through
- * the provided pointer. The return value is the size of the array on
- * success, or -1 if the solution file cannot be read. The caller is
+/* Read the answers file and return the array of answers through the
+ * provided pointer. The return value is the size of the array on
+ * success, or -1 if the answers file cannot be read. The caller is
  * responsible for freeing the array.
  */
-extern int loadsolutionfile(solutioninfo **psolutions);
+extern int loadanswerfile(answerinfo **panswers);
 
-/* Write the given array of solutions to the solution file. The return
+/* Write the given array of answers to the answers file. The return
  * value is false if an error occurs.
  */
-extern int savesolutionfile(solutioninfo const *solutions, int count);
+extern int saveanswerfile(answerinfo const *answers, int count);
 
 /*
  * The session files.

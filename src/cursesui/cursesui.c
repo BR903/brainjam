@@ -44,13 +44,13 @@ static char const *gameplayhelptext =
     " appear below the move count, and you will need to use undo in order to"
     " proceed. When you complete a game, a \"DONE\" indicator will appear"
     " instead. In this situation you can also use undo if you wish to try to"
-    " improve on your solution.\n"
+    " improve on your answer.\n"
     "\n"
     "When you are playing a game that you have already solved, the number of"
-    " moves in your solution will be displayed at bottom right, so you can see"
+    " moves in your answer will be displayed at bottom right, so you can see"
     " what you are trying to improve upon. Directly below that will be the"
-    " number of moves in the shortest possible solution, so you can also see"
-    " how much room there is for improvement.";
+    " number of moves in the shortest possible answer, so you can also see how"
+    " much room there is for improvement.";
 
 /* The list of the basic game key commands.
  */
@@ -79,7 +79,7 @@ static char const *commandshelptext =
     "Redo next 10 moves                        PgDn\n"
     "Undo backward to previous branch point    " GLYPH_UPARROW " \n"
     "Redo forward to next branch point         " GLYPH_DOWNARROW " \n"
-    "Set redo moves to shortest solution       !\n"
+    "Set redo moves to shortest answer         !\n"
     "Switch to \"better\" position               =\n"
     "Bookmark the current position             shift-M\n"
     "Forget the last bookmarked position       shift-P\n"
@@ -361,7 +361,7 @@ uimap cursesui_initializeui(void)
     ui.setshowkeyguidesflag = cursesui_setshowkeyguidesflag;
     ui.setcardanimationflag = cursesui_setcardanimationflag;
     ui.ding = cursesui_ding;
-    ui.showsolutionwrite = cursesui_showsolutionwrite;
+    ui.showwriteindicator = cursesui_showwriteindicator;
     ui.movecard = cursesui_movecard;
     ui.changesettings = cursesui_changesettings;
     ui.selectgame = cursesui_selectgame;

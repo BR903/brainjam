@@ -1,4 +1,4 @@
-/* files/rcio.c: reading and writing the initialization file.
+/* files/init.c: reading and writing the initialization file.
  */
 
 #include <stdio.h>
@@ -53,7 +53,7 @@ static void clearextras(void)
  * return the stored value. The return value is NULL if the field
  * is not present in the file.
  */
-char const *lookuprcsetting(char const *key)
+char const *lookupinitsetting(char const *key)
 {
     int i;
 
@@ -66,7 +66,7 @@ char const *lookuprcsetting(char const *key)
 /* Insert a new key-value pair to the table of extra settings. If the
  * pair already exists in the table, it will be replaced.
  */
-void storercsetting(char const *key, char const *value)
+void storeinitsetting(char const *key, char const *value)
 {
     char *p;
     int keysize, valuesize, i;
@@ -96,7 +96,7 @@ void storercsetting(char const *key, char const *value)
  * be changed. Unrecognized fields will be stored in the table of
  * extra settings.
  */
-int loadrcfile(settingsinfo *settings)
+int loadinitfile(settingsinfo *settings)
 {
     FILE *fp;
     char buf[256];
@@ -161,7 +161,7 @@ int loadrcfile(settingsinfo *settings)
             if (settings->branching < 0)
                 settings->branching = strcmp(val, "0");
         } else {
-            storercsetting(buf, val);
+            storeinitsetting(buf, val);
         }
     }
     fclose(fp);
@@ -172,7 +172,7 @@ int loadrcfile(settingsinfo *settings)
 /* Store the current game ID and other settings to the initialization
  * file.
  */
-int savercfile(settingsinfo const *settings)
+int saveinitfile(settingsinfo const *settings)
 {
     FILE *fp;
     char *filename;

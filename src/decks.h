@@ -2,7 +2,7 @@
  *
  * Each game ID corresponds to a unique initial deck order, which is
  * what makes each game different. Stored with the deck order also is
- * the size of the shortest possible solution for that game.
+ * the size of the shortest possible answer for that game.
  */
 
 #ifndef _decks_h_
@@ -15,9 +15,9 @@
  */
 extern int getdeckcount(void);
 
-/* Return the size of the best known solution for a deck.
+/* Return the size of the best known answer for a deck.
  */
-extern int bestknownsolutionsize(int id);
+extern int bestknownanswersize(int id);
 
 /* Retrieve the deck of cards for the given ID. The cards are stored
  * in the given array, top card first.

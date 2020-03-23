@@ -6,20 +6,20 @@
 #include "./gen.h"
 #include "./decls.h"
 #include "redo/redo.h"
-#include "solutions/solutions.h"
+#include "answers/answers.h"
 #include "game/game.h"
 
-/* A solution object, used with getsolutionfor().
+/* An answer object, used with getanswerfor().
  */
-static solutioninfo thesolution;
+static answerinfo theanswer;
 
-/* This function is normally supplied by the solution module, but the
+/* This function is normally supplied by the answers module, but the
  * test program doesn't include that module. So, a replacement is
  * provided here.
  */
-solutioninfo const *getsolutionfor(int id)
+answerinfo const *getanswerfor(int id)
 {
-    return id == thesolution.id ? &thesolution : NULL;
+    return id == theanswer.id ? &theanswer : NULL;
 }
 
 /* Return a string representing a card suit.
@@ -324,18 +324,18 @@ static int validategamestate(gameplayinfo const *gameplay)
  * Test cases.
  */
 
-/* Initialize a sample game and run through all the moves in a
- * solution, verifying that the game state never enters an
- * inconsistent state. Then repeat the same checks when running
- * backwards through the saved solutions. Errors and inconsistencies
- * are reported on stderr to the user. The return value is the number
- * of errors seen throughout the entire test.
+/* Initialize a sample game and run through all the moves in an
+ * answer, verifying that the game state never becomes inconsistent.
+ * Then repeat the same checks when running backwards through the
+ * saved answers. Errors and inconsistencies are reported on stderr to
+ * the user. The return value is the number of errors seen throughout
+ * the entire test.
  */
 static int testgamestate(void)
 {
-    char const *prefix = "sample game solution test";
+    char const *prefix = "sample game answer test";
     int const gameid = 223;
-    char solutionstring[] =
+    char answerstring[] =
         "hcgggggckgfhhgjaaaaaeeeeelkifccccjggjkFFfkjccfkjgggkjFFfkjffaaaBBbbk"
         "jbbbfffibBjhhjihhlkcccckjiDDDDdddbbbbbbddddeeeijklcdaagggfffhhhhhhh";
     signed char startingdepths[] =
@@ -348,9 +348,9 @@ static int testgamestate(void)
     int errors;
     int i;
 
-    thesolution.id = gameid;
-    thesolution.text = solutionstring;
-    thesolution.size = sizeof solutionstring - 1;
+    theanswer.id = gameid;
+    theanswer.text = answerstring;
+    theanswer.size = sizeof answerstring - 1;
 
     errors = 0;
 
@@ -361,24 +361,24 @@ static int testgamestate(void)
         ++errors;
     }
 
-    allstates = allocate(thesolution.size * sizeof *allstates);
+    allstates = allocate(theanswer.size * sizeof *allstates);
     position = redo_getfirstposition(session);
 
-    for (i = 0 ; i < thesolution.size ; ++i) {
+    for (i = 0 ; i < theanswer.size ; ++i) {
         memcpy(&allstates[i], &thegame, sizeof thegame);
-        if (!applymove(&thegame, thesolution.text[i])) {
+        if (!applymove(&thegame, theanswer.text[i])) {
             warn("%s: move #%d (%c) could not be made in test game",
-                 prefix, i, thesolution.text[i]);
+                 prefix, i, theanswer.text[i]);
             ++errors;
             break;
         }
         position = recordgamestate(&thegame, session, position,
-                                   thesolution.text[i], redo_nocheck);
+                                   theanswer.text[i], redo_nocheck);
         errors += validategamestate(&thegame);
     }
 
     if (!thegame.endpoint) {
-        warn("%s: sample game solution finished without completing game",
+        warn("%s: sample game answer finished without completing game",
              prefix);
         ++errors;
     }
@@ -399,7 +399,7 @@ static int testgamestate(void)
     }
 
     if (position->prev) {
-        warn("%s: redo history longer than solution size", prefix);
+        warn("%s: redo history longer than answer size", prefix);
         ++errors;
     }
 

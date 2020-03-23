@@ -9,7 +9,7 @@
 #include "./types.h"
 #include "./commands.h"
 #include "./decks.h"
-#include "solutions/solutions.h"
+#include "answers/answers.h"
 #include "internal.h"
 #include "image.h"
 #include "button.h"
@@ -69,7 +69,7 @@ static int clampscrollpos(int n)
 static void changeselection(int id)
 {
     selection = id;
-    clipbutton.state = getsolutionfor(id) ? BSTATE_NORMAL : BSTATE_DISABLED;
+    clipbutton.state = getanswerfor(id) ? BSTATE_NORMAL : BSTATE_DISABLED;
 }
 
 /* Choose a scroll position for the list that ensures that the current
@@ -245,7 +245,7 @@ static SDL_Point setlayout(SDL_Point display)
     scorearea.w -= 2 * _graph.margin;
 
     textheight = TTF_FontLineSkip(_graph.smallfont);
-    TTF_SizeUTF8(_graph.smallfont, "Your best solution:", &w, NULL);
+    TTF_SizeUTF8(_graph.smallfont, "Your best answer:", &w, NULL);
     scorelabel.x = w;
     scorelabel.y = scorearea.y;
     TTF_SizeUTF8(_graph.smallfont, "Best possible:", &w, NULL);
@@ -269,9 +269,9 @@ static SDL_Point setlayout(SDL_Point display)
  */
 
 /* Render the components of the score area. If the currently selected
- * game has a stored solution, then the score area is updated to show
- * the number of moves in the solution, and the smallest possible
- * solution. If the user has no solutions, then it is assumed that
+ * game has a stored answer, then the score area is updated to show
+ * the number of moves in the answer, and the smallest possible
+ * answer. If the user has no answers, then it is assumed that
  * they are new to the game, and some helpful text is shown in this
  * space instead.
  */
@@ -283,20 +283,20 @@ static void renderscorearea(int id)
         "Or use the spin button",
         "to select a random game."
     };
-    solutioninfo const *solution;
+    answerinfo const *answer;
     int h, i;
 
-    solution = getsolutionfor(id);
+    answer = getanswerfor(id);
 
     h = TTF_FontLineSkip(_graph.smallfont);
-    if (getsolutioncount() < 1) {
+    if (getanswercount() < 1) {
         for (i = 0 ; i < (int)(sizeof directions / sizeof *directions) ; ++i)
             drawsmalltext(directions[i], scorearea.x, scorearea.y + i * h, +1);
-    } else if (solution) {
-        drawsmalltext("Your best solution:", scorelabel.x, scorelabel.y, -1);
+    } else if (answer) {
+        drawsmalltext("Your best answer:", scorelabel.x, scorelabel.y, -1);
         drawsmalltext("Best possible:", scorelabel.x, scorelabel.y + h, -1);
-        drawsmallnumber(solution->size, scorenumber.x, scorenumber.y, -1);
-        drawsmallnumber(bestknownsolutionsize(id),
+        drawsmallnumber(answer->size, scorenumber.x, scorenumber.y, -1);
+        drawsmallnumber(bestknownanswersize(id),
                         scorenumber.x, scorenumber.y + h, -1);
     }
 }
@@ -306,7 +306,7 @@ static void renderscorearea(int id)
  */
 static void renderlistentry(int id, int ypos)
 {
-    solutioninfo const *solution;
+    answerinfo const *answer;
     SDL_Rect rect;
 
     rect.x = listrect.x;
@@ -326,12 +326,12 @@ static void renderlistentry(int id, int ypos)
 
     drawlargenumber(id, rect.x + rect.w / 2, rect.y, 0);
 
-    solution = getsolutionfor(id);
-    if (solution && solution->size <= bestknownsolutionsize(id)) {
+    answer = getanswerfor(id);
+    if (answer && answer->size <= bestknownanswersize(id)) {
         renderimage(IMAGE_STAR, rect.x, rect.y + markeroffset);
         renderimage(IMAGE_STAR,
                     rect.x + rect.w - markersize.x, rect.y + markeroffset);
-    } else if (solution) {
+    } else if (answer) {
         renderimage(IMAGE_CHECK, rect.x, rect.y + markeroffset);
     }
 }
@@ -404,16 +404,16 @@ static void selectrandom(int down)
     setselection(pickrandomunsolved());
 }
 
-/* Copy the text of the selected game's solution to the clipboard.
+/* Copy the text of the selected game's answer to the clipboard.
  */
-static void copyselectedsolution(int down)
+static void copyselectedanswer(int down)
 {
-    solutioninfo const *solution;
+    answerinfo const *answer;
 
     (void)down;
-    solution = getsolutionfor(selection);
-    if (solution)
-        SDL_SetClipboardText(solution->text);
+    answer = getanswerfor(selection);
+    if (answer)
+        SDL_SetClipboardText(answer->text);
 }
 
 /*
@@ -439,7 +439,7 @@ static command_t handlekeyevent(SDL_Keysym key)
             selectrandom(0);
             return cmd_redraw;
         } else if (key.sym == SDLK_c) {
-            copyselectedsolution(0);
+            copyselectedanswer(0);
             return cmd_redraw;
         }
         return cmd_none;
@@ -562,7 +562,7 @@ displaymap initlistdisplay(int displayid)
 
     makeimagebutton(&clipbutton, IMAGE_CLIP);
     clipbutton.display = displayid;
-    clipbutton.action = copyselectedsolution;
+    clipbutton.action = copyselectedanswer;
     addbutton(&clipbutton);
 
     loadsplashgraphics(&bannertexture, &headlinetexture);

@@ -296,11 +296,11 @@ static void drawgamedisplay(gameplayinfo const *gameplay,
         else
             mvaddstr(bottomareay, rightcolumnx, "[save]");
     }
-    if (gameplay->bestsolution) {
+    if (gameplay->bestanswersize) {
         mvprintw(bottomareay + 1, rightcolumnx + 3, "%4d",
-                 gameplay->bestsolution);
+                 gameplay->bestanswersize);
         mvprintw(bottomareay + 2, rightcolumnx + 3, "%4d",
-                 bestknownsolutionsize(gameplay->gameid));
+                 bestknownanswersize(gameplay->gameid));
     }
     mvprintw(bottomareay + 4, rightcolumnx - 2,
              "Game %04d ", gameplay->gameid);
@@ -365,10 +365,10 @@ void cursesui_movecard(gameplayinfo const *gameplay, card_t card,
     callback(data);
 }
 
-/* Display a temporary indicator that the solution file has been
+/* Display a temporary indicator that the answer file is being
  * updated.
  */
-void cursesui_showsolutionwrite(void)
+void cursesui_showwriteindicator(void)
 {
     saveiconshown = time(NULL) + 2;
 }

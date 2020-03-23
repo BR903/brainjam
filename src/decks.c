@@ -33,10 +33,10 @@ int getdeckcount(void)
     return (gamedata_end - gamedata) / SIZE_GAMEDATA;
 }
 
-/* The best known solution size is stored in the first seven bits of
+/* The best known answer size is stored in the first seven bits of
  * the game data, biased by the number of cards in a deck.
  */
-int bestknownsolutionsize(int id)
+int bestknownanswersize(int id)
 {
     return NCARDS + (*(unsigned char const*)getgamedata(id) >> 1);
 }

@@ -1,4 +1,4 @@
-; installer.nsi: script for building the Brain Jam windows installer.
+; install.nsi: script defining the Brain Jam Windows install program.
 
 Unicode True
 RequestExecutionLevel user
@@ -9,7 +9,7 @@ RequestExecutionLevel user
 
 ; The name of the installer
 Name "Brain Jam"
-OutFile "installer.exe"
+OutFile "install.exe"
 
 ; The default installation directory
 InstallDir "$PROGRAMFILES\Brain Jam"

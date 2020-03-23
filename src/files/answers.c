@@ -1,4 +1,4 @@
-/* files/solutionio.c: reading and writing the solution file.
+/* files/answers.c: reading and writing the answer file.
  */
 
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include "./gen.h"
 #include "./types.h"
 #include "./decks.h"
-#include "solutions/solutions.h"
+#include "answers/answers.h"
 #include "files/files.h"
 #include "internal.h"
 
@@ -16,16 +16,16 @@
  * External functions.
  */
 
-/* Read the solution file, if it hasn't been read already, and return
- * the array of solutioninfo structs through psolutions. The caller
+/* Read the answer file, if it hasn't been read already, and return
+ * the array of answerinfo structs through panswers. The caller
  * inherits ownership of the array. (The unusual formatting of the
  * information in this file is inherited from the original Windows
  * program.)
  */
-int loadsolutionfile(solutioninfo **psolutions)
+int loadanswerfile(answerinfo **panswers)
 {
     char buf[512];
-    solutioninfo *solutions;
+    answerinfo *answers;
     FILE *fp;
     char *filename;
     int lineno, maxcount;
@@ -44,17 +44,17 @@ int loadsolutionfile(solutioninfo **psolutions)
         }
     }
     if (!fgets(buf, sizeof buf, fp) || memcmp(buf, "[Solutions]", 11)) {
-        fprintf(stderr, "%s: invalid solution file\n", filename);
+        fprintf(stderr, "%s: invalid answer file\n", filename);
         deallocate(filename);
         fclose(fp);
         return -1;
     }
     maxcount = getdeckcount();
-    solutions = allocate(maxcount * sizeof *solutions);
+    answers = allocate(maxcount * sizeof *answers);
     n = 0;
     for (lineno = 1 ; fgets(buf, sizeof buf, fp) ; ++lineno) {
         if (sscanf(buf, "%4d=000%*[A-La-l](%d)", &id, &size) != 2 || id < 0) {
-            fprintf(stderr, "%s:%d: invalid solution file entry\n",
+            fprintf(stderr, "%s:%d: invalid answer file entry\n",
                     filename, lineno);
             continue;
         }
@@ -62,23 +62,23 @@ int loadsolutionfile(solutioninfo **psolutions)
             fprintf(stderr, "%s:%d: invalid id: %d\n", filename, lineno, id);
             continue;
         }
-        solutions[n].id = id;
-        solutions[n].size = size;
-        solutions[n].text = allocate(size + 1);
-        memcpy(solutions[n].text, buf + 8, size);
-        solutions[n].text[size] = '\0';
+        answers[n].id = id;
+        answers[n].size = size;
+        answers[n].text = allocate(size + 1);
+        memcpy(answers[n].text, buf + 8, size);
+        answers[n].text[size] = '\0';
         ++n;
     }
     fclose(fp);
     deallocate(filename);
 
-    *psolutions = reallocate(solutions, n * sizeof *solutions);
+    *panswers = reallocate(answers, n * sizeof *answers);
     return n;
 }
 
-/* Store the given array of solutions to the solution file.
+/* Store the given array of answers to the answer file.
  */
-int savesolutionfile(solutioninfo const *solutions, int count)
+int saveanswerfile(answerinfo const *answers, int count)
 {
     FILE *fp;
     char *filename;
@@ -96,7 +96,7 @@ int savesolutionfile(solutioninfo const *solutions, int count)
     fputs("[Solutions]\n", fp);
     for (i = 0 ; i < count ; ++i)
         fprintf(fp, "%04d=000%s(%d)\n",
-                solutions[i].id, solutions[i].text, solutions[i].size);
+                answers[i].id, answers[i].text, answers[i].size);
     fclose(fp);
     deallocate(filename);
     return TRUE;

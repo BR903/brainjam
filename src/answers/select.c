@@ -1,4 +1,4 @@
-/* solutions/select.c: functions for selecting unsolved games.
+/* answers/select.c: functions for selecting unsolved games.
  */
 
 #include <stdlib.h>
@@ -6,12 +6,12 @@
 #include "./gen.h"
 #include "./types.h"
 #include "./decks.h"
-#include "solutions/solutions.h"
+#include "answers/answers.h"
 
-/* Macro to declare a loop over all solutions.
+/* Macro to declare a loop over all answers.
  */
-#define foreach_solution(s)  \
-    for ((s) = getnearestsolution(0) ; (s) ; (s) = getnextsolution(s))
+#define foreach_answer(s)  \
+    for ((s) = getnearestanswer(0) ; (s) ; (s) = getnextanswer(s))
 
 /* Return a random integer between 0 and size - 1. Since this is the
  * only piece of code that deals in random values, it takes care of
@@ -33,27 +33,27 @@ static int randomint(int size)
  */
 
 /* Return the ID of a randomly selected unsolved game. If all games
- * are solved, select a game with a non-minimal solution. If all games
- * have minimal solutions, select any game.
+ * are solved, select a game with a non-minimal answer. If all games
+ * have minimal answers, select any game.
  */
 int pickrandomunsolved(void)
 {
-    solutioninfo const *solution;
+    answerinfo const *answer;
     int *array;
     int total, size, n;
 
     total = getdeckcount();
     array = allocate(total * sizeof *array);
     size = 0;
-    if (getsolutioncount() == total) {
-        foreach_solution(solution)
-            if (solution->size > bestknownsolutionsize(solution->id))
-                array[size++] = solution->id;
+    if (getanswercount() == total) {
+        foreach_answer(answer)
+            if (answer->size > bestknownanswersize(answer->id))
+                array[size++] = answer->id;
     } else {
-        solution = getnearestsolution(0);
+        answer = getnearestanswer(0);
         for (n = 0 ; n < total ; ++n) {
-            if (solution && solution->id == n)
-                solution = getnextsolution(solution);
+            if (answer && answer->id == n)
+                answer = getnextanswer(answer);
             else
                 array[size++] = n;
         }
@@ -67,16 +67,16 @@ int pickrandomunsolved(void)
 
 /* Starting at startpos and moving either forward or backward,
  * depending on incr, find the next unsolved game. If the user already
- * a solution for every game, then the next game with a non-minimal
- * solution is returned instead.
+ * an answer for every game, then the next game with a non-minimal
+ * answer is returned instead.
  */
 int findnextunsolved(int startpos, int incr)
 {
-    solutioninfo const *solution;
+    answerinfo const *answer;
     int total, i;
 
     total = getdeckcount();
-    if (getsolutioncount() < total) {
+    if (getanswercount() < total) {
         i = startpos;
         for (;;) {
             i += incr;
@@ -84,8 +84,8 @@ int findnextunsolved(int startpos, int incr)
                 i += total;
             if (i >= total)
                 i -= total;
-            solution = getsolutionfor(i);
-            if (!solution || solution->size == 0)
+            answer = getanswerfor(i);
+            if (!answer || answer->size == 0)
                 return i;
             if (i == startpos)
                 break;
@@ -98,8 +98,8 @@ int findnextunsolved(int startpos, int incr)
                 i += total;
             if (i >= total)
                 i -= total;
-            solution = getsolutionfor(i);
-            if (solution->size > bestknownsolutionsize(i))
+            answer = getanswerfor(i);
+            if (answer->size > bestknownanswersize(i))
                 return i;
             if (i == startpos)
                 break;

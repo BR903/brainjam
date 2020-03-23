@@ -9,7 +9,7 @@ initial orderings, all of which are guaranteed to be solvable. Thus
 there is no luck factor in playing Brain Jam.
 
 Once you have solved a given configuration, you can then go back and
-work to find a new solution with fewer moves.
+work to find a new answer with fewer moves.
 
 
   * NOTE FOR WINDOWS USERS
@@ -48,7 +48,7 @@ to use the installed Times font. Alternately, you can provide a
 explicit path to a font file.
 
 The folder can also contains a file named "brainjam.sol", which holds
-your best solution for each game. If you played Brain Jam using the
+your best answer for each game. If you played Brain Jam using the
 original 16-bit Windows program, you can copy your old "brainjam.sol"
 file into this folder, and this program will then have a record of all
 of your previosly solved games.

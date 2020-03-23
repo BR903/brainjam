@@ -14,7 +14,7 @@
 # configuration ID begins the line, followed by 52 letters giving the
 # sequence of cards in the deck. The layout is constructed from the
 # deck by laying out cards from left to right, top to bottom. At the
-# end of each line is the size of the shortest possible solution for
+# end of each line is the size of the shortest possible answer for
 # that configuration.
 #
 # Each card in the deck is encoded by a single letter. The letters are

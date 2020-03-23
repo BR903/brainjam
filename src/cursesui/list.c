@@ -6,7 +6,7 @@
 #include "./gen.h"
 #include "./glyphs.h"
 #include "./decks.h"
-#include "solutions/solutions.h"
+#include "answers/answers.h"
 #include "game/game.h"
 #include "internal.h"
 
@@ -43,39 +43,39 @@ static int const pageheight = 21;       /* lines in the list, sans header */
 
 /* Render a subset of game IDs as a list, starting at first and
  * showing count entries, with selected indicating the ID to
- * highlight. For games that have a solution recorded, the size of the
- * solution is shown, along with the shortest solution size possible.
- * (If the user's solution size is already the shortest, then it is
- * rendered in dim text.)
+ * highlight. For games that have an answer recorded, the size of the
+ * answer is shown, along with the shortest answer size possible. (If
+ * the user's answer size is already the shortest, then it is rendered
+ * in dim text.)
  */
 static void drawgamelist(int first, int count, int selected)
 {
-    solutioninfo const *solution;
+    answerinfo const *answer;
     int id, best, i;
 
     move(gamelisty, gamelistx);
     textmode(MODEID_DARKER);
-    if (getsolutioncount() > 0)
+    if (getanswercount() > 0)
         addstr("Game    Moves    Best");
     else
         addstr("Select a Game");
     textmode(MODEID_NORMAL);
 
-    solution = getnearestsolution(first);
+    answer = getnearestanswer(first);
     for (i = 0 ; i < count ; ++i) {
         id = first + i;
         move(gamelisty + 1 + i, gamelistx);
         if (id == selected)
             textmode(MODEID_SELECTED);
-        if (solution) {
-            best = bestknownsolutionsize(id);
+        if (answer) {
+            best = bestknownanswersize(id);
             if (id != selected)
-                if (solution->id == id && solution->size == best)
+                if (answer->id == id && answer->size == best)
                     textmode(MODEID_DIMMED);
             printw("%04d", id);
-            if (solution->id == id) {
-                printw("%8d%9d", solution->size, best);
-                solution = getnextsolution(solution);
+            if (answer->id == id) {
+                printw("%8d%9d", answer->size, best);
+                answer = getnextanswer(answer);
             }
         } else {
             printw("%04d", id);
@@ -94,19 +94,19 @@ static void drawlisttext(void)
     textmode(MODEID_TITLE);
     addstr("B R A I N J A M");
     textmode(MODEID_NORMAL);
-    if (getsolutioncount() == 0) {
+    if (getanswercount() == 0) {
         mvaddstr(directionsy + 0, directionsx, "Welcome to Brain Jam.");
         mvaddstr(directionsy + 1, directionsx, "Select one of the games");
         mvaddstr(directionsy + 2, directionsx, "from the list and press Ret");
         mvaddstr(directionsy + 3, directionsx, "to begin playing.");
         mvaddstr(directionsy + 5, directionsx, "Press ? or F1 to view help.");
-    } else if (getsolutioncount() < 3) {
+    } else if (getanswercount() < 3) {
         mvaddstr(directionsy + 0, directionsx, "The middle column shows");
         mvaddstr(directionsy + 1, directionsx, "the number of moves in");
-        mvaddstr(directionsy + 2, directionsx, "your solution. The");
+        mvaddstr(directionsy + 2, directionsx, "your answer. The");
         mvaddstr(directionsy + 3, directionsx, "right column shows the");
         mvaddstr(directionsy + 4, directionsx, "number of moves in the");
-        mvaddstr(directionsy + 5, directionsx, "best possible solution.");
+        mvaddstr(directionsy + 5, directionsx, "best possible answer.");
     }
 }
 

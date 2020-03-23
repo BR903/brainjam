@@ -6,7 +6,7 @@
 #include "./ui.h"
 #include "./settings.h"
 #include "./decks.h"
-#include "solutions/solutions.h"
+#include "answers/answers.h"
 #include "redo/redo.h"
 #include "game/game.h"
 #include "files/files.h"
@@ -16,9 +16,9 @@
  */
 
 /* Set up a game and a redo session. Lay out the cards for the given
- * game, and load the previously saved session data and solution (if
- * any). If a solution exists separately from the session, then the
- * solution is "replayed" into the session data.
+ * game, and load the previously saved session data and answer (if
+ * any). If an answer exists separately from the session, then the
+ * answer is "replayed" into the session data.
  */
 static redo_session *setupgame(gameplayinfo *gameplay)
 {
@@ -33,7 +33,7 @@ static redo_session *setupgame(gameplayinfo *gameplay)
 
     redo_clearsessionchanged(session);
     if (!redo_getfirstposition(session)->solutionsize)
-        replaysolution(gameplay, session);
+        replayanswer(gameplay, session);
     return session;
 }
 
@@ -76,7 +76,7 @@ void gameselectionloop(void)
     settingsinfo *settings;
     int id, f;
 
-    initializesolutions();
+    initializeanswers();
     for (;;) {
         settings = getcurrentsettings();
         id = selectgame(settings->gameid);
@@ -95,11 +95,11 @@ void gameselectionloop(void)
  */
 void filevalidationloop(void)
 {
-    solutioninfo *solutions;
+    answerinfo *answers;
     gameplayinfo g;
 
-    loadrcfile(getcurrentsettings());
-    loadsolutionfile(&solutions);
+    loadinitfile(getcurrentsettings());
+    loadanswerfile(&answers);
     for (g.gameid = 0 ; g.gameid < getdeckcount() ; ++g.gameid)
         closesession(setupgame(&g));
 }
