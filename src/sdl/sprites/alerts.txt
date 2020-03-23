@@ -1,4 +1,4 @@
-# sdl/sprites/alerts.txt: layout of the alerts sprite sheet
+# sdl/sprites/alerts.txt: layout of the alerts sprite sheet.
 #
 # This data file lists the various small images that the program uses
 # as alerts, notifications of state changes, etcetera. This file

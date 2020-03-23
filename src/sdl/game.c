@@ -587,21 +587,21 @@ static void rendernavinfo(gameplayinfo const *gameplay,
     y = placelocs[place].y + yoffset + _graph.cardsize.y;
     if (firstpos) {
         if (firstpos->solutionsize) {
-            drawsmallnumber(firstpos->solutionsize, x, y, -1);
+            drawsmallnumber(firstpos->solutionsize, x, y, +1);
         } else {
             buf[0] = placetomovecmd1(place);
             buf[1] = '\0';
-            drawsmalltext(buf, x, y, -1);
+            drawsmalltext(buf, x, y, +1);
         }
     }
     x = placelocs[place].x + _graph.cardsize.x - spacing;
     if (secondpos) {
         if (secondpos->solutionsize) {
-            drawsmallnumber(secondpos->solutionsize, x, y, +1);
+            drawsmallnumber(secondpos->solutionsize, x, y, -1);
         } else {
             buf[0] = placetomovecmd2(place);
             buf[1] = '\0';
-            drawsmalltext(buf, x, y, +1);
+            drawsmalltext(buf, x, y, -1);
         }
     }
 
@@ -643,7 +643,7 @@ static void renderbetterinfo(redo_position const *position)
     rect.y = bettercount.y;
     rect.w = equalsize.x;
     rect.h = equalsize.y;
-    rect.x -= drawsmallnumber(bp->movecount, bettercount.x, bettercount.y, +1);
+    rect.x -= drawsmallnumber(bp->movecount, bettercount.x, bettercount.y, -1);
     SDL_RenderCopy(_graph.renderer, equal, NULL, &rect);
     settextcolor(_graph.defaultcolor);
 }
@@ -718,12 +718,12 @@ static void renderlayout(void)
  */
 static void rendersidebar(void)
 {
-    drawlargenumber(position->movecount, movecount.x, movecount.y, +1);
+    drawlargenumber(position->movecount, movecount.x, movecount.y, -1);
     renderbetterinfo(position);
     if (gameplay->bestsolution) {
-        drawlargenumber(gameplay->bestsolution, bestcount.x, bestcount.y, +1);
+        drawlargenumber(gameplay->bestsolution, bestcount.x, bestcount.y, -1);
         drawlargenumber(bestknownsolutionsize(gameplay->gameid),
-                        bestknowncount.x, bestknowncount.y, +1);
+                        bestknowncount.x, bestknowncount.y, -1);
     }
     if (gameplay->endpoint)
         renderimage(IMAGE_DONE, status.x, status.y);
@@ -955,7 +955,7 @@ displaymap initgamedisplay(void)
     keyschkbox.visible = 0;
     addbutton(&keyschkbox);
 
-    makecheckbox(&animchkbox, "Animate cards");
+    makecheckbox(&animchkbox, "Animate card movements");
     animchkbox.cmd = cmd_none;
     animchkbox.display = DISPLAY_GAME;
     animchkbox.visible = 0;

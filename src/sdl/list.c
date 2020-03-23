@@ -292,14 +292,14 @@ static void renderscorearea(int id)
     h = TTF_FontLineSkip(_graph.smallfont);
     if (getsolutioncount() < 1) {
         for (i = 0 ; i < (int)(sizeof directions / sizeof *directions) ; ++i)
-            drawsmalltext(directions[i], scorearea.x, scorearea.y + i * h, -1);
+            drawsmalltext(directions[i], scorearea.x, scorearea.y + i * h, +1);
     } else if (solution) {
-        drawsmalltext("Your best solution:", scorelabel.x, scorelabel.y, +1);
+        drawsmalltext("Your best solution:", scorelabel.x, scorelabel.y, -1);
         sprintf(buf, "%d", solution->size);
-        drawsmalltext(buf, scorenumber.x, scorenumber.y, +1);
-        drawsmalltext("Best possible:", scorelabel.x, scorelabel.y + h, +1);
+        drawsmalltext(buf, scorenumber.x, scorenumber.y, -1);
+        drawsmalltext("Best possible:", scorelabel.x, scorelabel.y + h, -1);
         sprintf(buf, "%d", bestknownsolutionsize(id));
-        drawsmalltext(buf, scorenumber.x, scorenumber.y + h, +1);
+        drawsmalltext(buf, scorenumber.x, scorenumber.y + h, -1);
     }
 }
 

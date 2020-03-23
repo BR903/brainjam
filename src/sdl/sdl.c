@@ -26,7 +26,7 @@
 #define setcolor(c, rr, gg, bb) \
     ((c).r = (rr), (c).g = (gg), (c).b = (bb), (c).a = SDL_ALPHA_OPAQUE)
 
-/* The set of available timer-initiated events.
+/* The types of timer-initiated events.
  */
 enum {
     event_none = 0,             /* no event, or event was already handled */
@@ -40,12 +40,12 @@ enum {
  */
 typedef struct timedeventinfo {
     int         type;           /* which type of event */
-    void       *data;           /* caller-defined pointer */
     SDL_TimerID timerid;        /* timer initiating events */
     int         interval;       /* interval for next event, or 0 to stop */
+    void       *data;           /* caller-defined pointer */
 } timedeventinfo;
 
-/* An entry in the cache of rendered numbers.
+/* An entry in the cache of rendered numbers, used by drawnumber().
  */
 typedef struct numbercacheinfo {
     int         number;         /* integer value rendered */
@@ -56,34 +56,33 @@ typedef struct numbercacheinfo {
     int         h;              /* height of cached texture */
 } numbercacheinfo;
 
-/* A generic font name that will hopefully identify an actual font.
- * This is only used if the user doesn't specify a name in the
- * initialization file.
+/* A generic font. This is used if the user doesn't specify the name
+ * of a preferred font.
  */
 static char const *defaultfontname = "sans";
 
-/* The help text for the initial list display. (Since this might be
- * the first instructions that the user sees, it tries to be a little
- * extra friendly.)
+/* The help text for the initial list display. Since this might be the
+ * first instructions that the user sees, it tries to be a little
+ * extra friendly.
  */
 static char const *listcommandshelptitle = "Selecting a Game";
 static char const *listcommandshelptext =
-    "Brain Jam contains hundreds of pre-dealt decks, each of which is"
-    " guaranteed to be solvable. Each deck is identified by a number, shown in"
+    "Brain Jam contains hundreds of pre-shuffled layouts, each of which is"
+    " guaranteed to be solvable. Each game is identified by a number, shown in"
     " the list in the center.\n"
     "\n"
     "Scroll through the list to select a game, and then press the play button"
     " to start playing that game.\n"
     "\n"
     "Games that you have already solved are marked in the list with a check"
-    " mark. (A star will mark games for which you have found the smallest"
-    " possible solution.)\n"
+    " mark. (Stars mark games for which you have found the smallest possible"
+    " solution.)\n"
     "\n"
     "To the left of the list are up and down buttons. These buttons move the"
     " current selection up and down, but skip over games that you have already"
-    " solved. (You can also use the Tab key to move the selection up and down"
-    " like this.) The middle button, marked with a spinner, will move the"
-    " selection to a random unsolved game.\n"
+    " solved. The middle button, marked with a spinner, will move the"
+    " selection to a random unsolved game. (You can also use the Tab key to"
+    " move the selection up and down, and ctrl-R to select a random game.)\n"
     "\n"
     "The clipboard button to the right will be enabled when you select a game"
     " that you have solved. Pressing it will copy your solution to the"
@@ -120,17 +119,23 @@ static char const *gameplayhelptext =
     "As you are playing, the current number of moves is displayed in the top"
     " right corner.\n"
     "\n"
-    "If at any time, no legal moves are available, a U-turn icon will appear"
-    " at right, below the move count, and you will need to use undo in order"
-    " to proceed. When you complete a game, a checkered-flag icon will appear"
-    " instead. In this situation you can also use undo if you wish to try to"
-    " improve on your solution.\n"
+    "If at any time no legal moves are available, a U-turn icon will appear,"
+    " and you will need to use undo in order to find a different set of moves."
+    " When you complete a game, a checkered-flag icon will appear instead."
+    " (You can also use undo in this situation, if you wish to try to improve"
+    " your solution. Otherwise, just use the back button in the bottom right"
+    " corner to return to the game selection display.)\n"
     "\n"
     "If you are playing a game that you have already solved, then the number"
     " of moves in your solution will be displayed at bottom right, so you can"
     " see what you are trying to improve. Directly below that will be the"
     " number of moves in the shortest possible solution, so you can see how"
-    " much room there is for improvement.";
+    " much room there is for improvement.\n"
+    "\n"
+    "The button with the gear icon will open a popup box that will allow you"
+    " to change some of the game's settings. You can turn card movement on or"
+    " off, and some other cosmetic features. You can also turn on the"
+    " branching redo feature from here.";
 
 /* The help text for the basic game key commands.
  */
@@ -146,7 +151,7 @@ static char const *gamecommandshelptext =
     "Return to the previously viewed position\t" GLYPH_DASH "\n"
     "Display the options menu\tctrl-O\n"
     "Display this help\t? or F1\n"
-    "Quit and select a new layout\tQ\n"
+    "Quit and select a new layout\tQ or Esc\n"
     "Quit and exit the program\tshift-Q";
 
 /* The help text for the branching redo key commands.
@@ -183,7 +188,7 @@ static int displayed = DISPLAY_NONE;
  */
 static int updatedisplay = TRUE;
 
-/* True if a ding event is pending.
+/* True if a ding is pending.
  */
 static int dinging = FALSE;
 
@@ -251,20 +256,21 @@ static int err(char const *title)
 }
 
 /* Display a bare-bones error message before closing the program. This
- * is used for assertion-level situations that should never happen.
+ * is reserved for assertion-level situations that should never happen.
  */
 static void panic(char const *message)
 {
+    warn("fatal error: %s", message);
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error",
                              message, window);
     exit(EXIT_FAILURE);
 }
 
 /* Store a texture to be destroyed at a later time. This deferral of
- * texture-freeing is done to work around a bug in SDL 2.0.10. The fix
- * for this bug has been committed, so when SDL 2.0.12 is released,
- * this function should be removed, and calls to it replaced by calls
- * to SDL_DestroyTexture().
+ * texture-freeing is done to work around a bug in SDL 2.0.10. This
+ * bug was fixed in SDL 2.0.12, so at some point this function could
+ * be removed, and calls to it replaced by direct calls to
+ * SDL_DestroyTexture().
  */
 static void releasetexture(SDL_Texture *texture)
 {
@@ -289,7 +295,7 @@ static void releasetexture(SDL_Texture *texture)
 }
 
 /* Proceed with the deferred texture cleanup. This should be invoked
- * just after calling SDL_RenderPresent().
+ * after calling SDL_RenderPresent().
  */
 #define garbagecollecttextures()  (releasetexture(NULL))
 
@@ -297,7 +303,8 @@ static void releasetexture(SDL_Texture *texture)
  * Initialization of resources.
  */
 
-/* Free resources stored in the global rendering object.
+/* Free resources stored in the global rendering object and close down
+ * the UI.
  */
 static void shutdown(void)
 {
@@ -313,19 +320,24 @@ static void shutdown(void)
         SDL_DestroyRenderer(_graph.renderer);
         _graph.renderer = NULL;
     }
+    if (TTF_WasInit())
+        TTF_Quit();
+    if (SDL_WasInit(SDL_INIT_VIDEO))
+        SDL_Quit();
 }
 
-/* Initialize the SDL libraries, create the window and renderer, and
- * create the program's textures.
+/* Initialize the SDL libraries. Create the window and renderer, and
+ * set the application's icon.
  */
 static int startup(void)
 {
+    SDL_Surface *image;
+
+    atexit(shutdown);
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))
         return err("SDL_Init");
-    atexit(SDL_Quit);
     if (TTF_Init())
         return err("TTF_Init");
-    atexit(TTF_Quit);
 
     window = SDL_CreateWindow("Brian Jam",
                               SDL_WINDOWPOS_UNDEFINED,
@@ -336,18 +348,14 @@ static int startup(void)
     _graph.renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!_graph.renderer)
         return err("SDL_CreateRenderer");
-    atexit(shutdown);
 
     timedeventid = SDL_RegisterEvents(1);
     SDL_StartTextInput();
 
     initializeimages();
-#if 0
-    SDL_Surface *image;
-    image = getimagesurface(IMAGE_OLDICON);
+    image = getbuttonlabel(IMAGE_ICON);
     SDL_SetWindowIcon(window, image);
     SDL_FreeSurface(image);
-#endif
     return TRUE;
 }
 
@@ -414,7 +422,9 @@ static int createfonts(char const *fontname)
  * fonts, which are used to size the layout grid for the displays.
  * After each display has initialized their own resources, they will
  * determine their own layouts, and from this the overall window size
- * is chosen and the window is made visible.
+ * is chosen and the window is made visible. (Note that if no initial
+ * size is stored in the initialization file, then the program will
+ * default to the minimum size, plus a little extra.)
  */
 static int createdisplays(void)
 {
@@ -566,7 +576,7 @@ static command_t handletextevent(char const *text)
  * coordinates, and update the buttons' hover states appropriately.
  * The return value is -1 if no (active) button exists at this point.
  */
-static int sethover(int x, int y)
+static int sethoverstates(int x, int y)
 {
     int which, i;
 
@@ -595,10 +605,10 @@ static int sethover(int x, int y)
 /* Handle all mouse events that interact with one of the buttons. Both
  * clicking and dragging events are dealt with here. If a button is
  * successfully selected (the mouse button changing from up to down
- * back to up while atop it), then the button's selection state will
- * be toggled and its action callback (if any) will be invoked. The
- * return value is the user command to return to the main program, or
- * cmd_none if the event did not produce a user command.
+ * and back to up while hovering), then the button's selection state
+ * will be toggled and its action callback (if any) will be invoked.
+ * The return value is the user command to return to the main program,
+ * or cmd_none if no user command was produced.
  */
 static command_t handlemouseevent(SDL_Event const *event)
 {
@@ -614,7 +624,7 @@ static command_t handlemouseevent(SDL_Event const *event)
             mousetrap = -1;
             updatedisplay = TRUE;
         }
-        n = sethover(event->button.x, event->button.y);
+        n = sethoverstates(event->button.x, event->button.y);
         if (n >= 0) {
             mousetrap = n;
             buttons[n]->state |= BSTATE_DOWN;
@@ -623,7 +633,7 @@ static command_t handlemouseevent(SDL_Event const *event)
         break;
       case SDL_MOUSEMOTION:
         if (mousetrap < 0) {
-            sethover(event->motion.x, event->motion.y);
+            sethoverstates(event->motion.x, event->motion.y);
             break;
         }
         if (rectcontains(&buttons[mousetrap]->pos,
@@ -642,7 +652,7 @@ static command_t handlemouseevent(SDL_Event const *event)
       case SDL_MOUSEBUTTONUP:
         if (event->button.button != SDL_BUTTON_LEFT)
             return cmd_none;
-        n = sethover(event->button.x, event->button.y);
+        n = sethoverstates(event->button.x, event->button.y);
         if (mousetrap >= 0) {
             updatedisplay = TRUE;
             buttons[mousetrap]->state &= ~BSTATE_DOWN;
@@ -667,25 +677,22 @@ static command_t handlemouseevent(SDL_Event const *event)
 static command_t handletimedevent(int type, timedeventinfo *timedevent)
 {
     animinfo *anim;
-    command_t cmd;
 
     if (timedevent->timerid == 0)
         return cmd_none;
+
     switch (type) {
       case event_none:
-        if (timedevent->timerid) {
-            SDL_RemoveTimer(timedevent->timerid);
-            timedevent->timerid = 0;
-            timedevent->interval = 0;
-        }
+        SDL_RemoveTimer(timedevent->timerid);
+        timedevent->timerid = 0;
+        timedevent->interval = 0;
         break;
       case event_redraw:
         timedevent->type = event_none;
         return cmd_redraw;
       case event_unget:
-        cmd = (command_t)(intptr_t)timedevent->data;
         timedevent->type = event_none;
-        return cmd;
+        return (command_t)(intptr_t)timedevent->data;
       case event_animate:
         anim = timedevent->data;
         if (anim->steps > 0) {
@@ -705,6 +712,7 @@ static command_t handletimedevent(int type, timedeventinfo *timedevent)
         }
         return cmd_redraw;
     }
+
     return cmd_none;
 }
 
@@ -753,7 +761,7 @@ static command_t handleevent(SDL_Event *event)
  * The program's event loop.
  */
 
-/* Forward declaration of (potentially) mutually-recursive function.
+/* Forward declaration of a mutually-recursive function.
  */
 static int runhelpdisplay(void);
 
@@ -763,9 +771,13 @@ static int runhelpdisplay(void);
  */
 static void flashdisplay(void)
 {
+    SDL_BlendMode mode;
+
+    SDL_GetRenderDrawBlendMode(_graph.renderer, &mode);
     SDL_SetRenderDrawBlendMode(_graph.renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(_graph.renderer, 255, 255, 255, 80);
     SDL_RenderFillRect(_graph.renderer, NULL);
+    SDL_SetRenderDrawBlendMode(_graph.renderer, mode);
     scheduletimedevent(event_redraw, 128, NULL);
 }
 
@@ -777,7 +789,6 @@ static void render(void)
 {
     int i;
 
-    SDL_RenderClear(_graph.renderer);
     displays[displayed].render();
 
     for (i = 0 ; i < buttoncount ; ++i)
@@ -849,14 +860,13 @@ static command_t eventloop(void)
 }
 
 /*
- * Contained event loops for displays other than the main game.
+ * Contained event loops for displays other than the main game display.
  */
 
 /* Bring up the options dialog, and run the event loop until the user
- * dismisses it. The return value is false if the user asked to leave
- * the program.
+ * dismisses it.
  */
-static int runoptionsdisplay(settingsinfo *settings)
+static void runoptionsdisplay(settingsinfo *settings)
 {
     showoptions(settings, TRUE);
     updatedisplay = TRUE;
@@ -864,14 +874,11 @@ static int runoptionsdisplay(settingsinfo *settings)
         switch (eventloop()) {
           case cmd_changesettings:
           case cmd_quit:
+          case cmd_quitprogram:
             showoptions(settings, FALSE);
             sdl_setcardanimationflag(settings->animation);
             updatedisplay = TRUE;
-            return TRUE;
-          case cmd_quitprogram:
-            showoptions(NULL, FALSE);
-            updatedisplay = TRUE;
-            return FALSE;
+            return;
         }
     }
 }
@@ -892,9 +899,6 @@ static int runlistdisplay(int gameid)
             displayed = DISPLAY_GAME;
             updatedisplay = TRUE;
             return getselection();
-          case cmd_redraw:
-            updatedisplay = TRUE;
-            break;
           case cmd_quit:
           case cmd_quitprogram:
             return -1;
@@ -915,9 +919,6 @@ static int runhelpdisplay(void)
     updatedisplay = TRUE;
     for (;;) {
         switch (eventloop()) {
-          case cmd_redraw:
-            updatedisplay = TRUE;
-            break;
           case cmd_showhelp:
           case cmd_quit:
             displayed = prevdisplayed;
@@ -960,9 +961,9 @@ void settextcolor(SDL_Color color)
 }
 
 /* Render a string of text in the given font and color. The align
- * parameter should be positive to render the text to the right of the
- * position, negative to render the text to the left of the position,
- * or zero to center the text at the position.
+ * parameter should be positive to left-align the text at the
+ * given position, negative to right-align the text, or zero to
+ * center the text on the position.
  */
 int drawtext(char const *string, int x, int y, int align, TTF_Font *font)
 {
@@ -974,7 +975,7 @@ int drawtext(char const *string, int x, int y, int align, TTF_Font *font)
         return 0;
     image = TTF_RenderUTF8_Blended(font, string, currentcolor);
     texture = SDL_CreateTextureFromSurface(_graph.renderer, image);
-    rect.x = align < 0 ? x : align > 0 ? x - image->w : x - image->w / 2;
+    rect.x = x - (align > 0 ? 0 : align < 0 ? image->w : image->w / 2);
     rect.y = y;
     rect.w = image->w;
     rect.h = image->h;
@@ -984,11 +985,11 @@ int drawtext(char const *string, int x, int y, int align, TTF_Font *font)
     return rect.w;
 }
 
-/* Numbers get rendered repeatedly in this program, so it helps to do
- * a little caching and reuse of the generated textures. If the
- * requested number to draw is not one that was recently rendered,
- * then the oldest cache entry is dropped and the current number is
- * added to the other end of the queue.
+/* Numbers get rendered repeatedly in this program, so it seems like a
+ * good idea to do a little caching and reuse of the generated
+ * textures. Each texture is cached, and if the same number is later
+ * displayed using the same color and font, the cached texture will be
+ * reused.
  */
 int drawnumber(int number, int x, int y, int align, TTF_Font *font)
 {
@@ -1023,7 +1024,7 @@ int drawnumber(int number, int x, int y, int align, TTF_Font *font)
 
     rect.w = cache[i].w;
     rect.h = cache[i].h;
-    rect.x = align < 0 ? x : align > 0 ? x - rect.w : x - rect.w / 2;
+    rect.x = x - (align > 0 ? 0 : align < 0 ? rect.w : rect.w / 2);
     rect.y = y;
     SDL_RenderCopy(_graph.renderer, cache[i].texture, NULL, &rect);
     return rect.w;
@@ -1064,7 +1065,7 @@ void startanimation(animinfo *anim, int msec)
 }
 
 /* End an animation immediately. All pointer fields are cleared out to
- * prevent them from being used again.
+ * prevent them from being altered further.
  */
 void stopanimation(animinfo *anim, int finish)
 {
@@ -1089,9 +1090,7 @@ void stopanimation(animinfo *anim, int finish)
  * API functions.
  */
 
-/* Draw the window. The basic window appearance is delegated to the
- * appropriate function, depending on which display is currently
- * active, and then the buttons are rendered atop that.
+/* Draw the window.
  */
 static void sdl_rendergame(renderparams const *params)
 {
@@ -1106,31 +1105,31 @@ static command_t sdl_getinput(void)
     return eventloop();
 }
 
-/* Record a move to be injected into the input stream after a delay.
+/* Record a command to be injected into the input stream after a delay.
  */
 static void sdl_ungetinput(command_t cmd, int msec)
 {
     scheduletimedevent(event_unget, msec, (void*)(intptr_t)cmd);
 }
 
-/* Indicate that a user action was invalid or otherwise rejected.
- * The actual indication is handled on the next sdl_render().
+/* Flash the display on the next redraw.
  */
 static void sdl_ding(void)
 {
     dinging = TRUE;
+    updatedisplay = TRUE;
 }
 
 /* Run the options display.
  */
 static int sdl_changesettings(settingsinfo *settings)
 {
-    return runoptionsdisplay(settings);
+    runoptionsdisplay(settings);
+    return TRUE;
 }
 
-/* Run the game selection UI and return the user's selection.
- * Within this function, the help section on the list display is
- * present.
+/* Run the list display and return the user's selection. Within this
+ * function, the help section on using the list display is added.
  */
 static int sdl_selectgame(int gameid)
 {
