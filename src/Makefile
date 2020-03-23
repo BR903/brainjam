@@ -49,7 +49,7 @@ endif
 
 # Each listed directory (including the top-level directory) is a
 # module that together make up the complete program.
-MODULES := . gamedata solutions files game redo curses sdl
+MODULES := . gamedata solutions files game redo cursesui sdlui
 
 # Source files in all modules are built from this directory.
 override CPPFLAGS += -I.

@@ -1,0 +1,18 @@
+# sdlui/gfx/labels.txt: layout of the button labels sprite sheet.
+#
+# This data file lists the various small images that appear on
+# pushbuttons, and defines their placement in a larger single image.
+# The application's icon is also here, since like the others it is
+# only needed during initalization.
+
+# IMAGE      X   Y   W   H
+quit         0   0  24  24
+back        24   0  24  24
+help        48   0  24  24
+options     72 	 0  24  24
+clip         0  24  24  24
+play        24  24  40  24
+prev        64  24  16  16
+random      64  40  16  16
+next        80  24  16  16
+icon        80  40  16  16
