@@ -526,42 +526,42 @@ void initlistselection(int id)
 
 /* Initialize resources and return the list display's displaymap.
  */
-displaymap initlistdisplay(void)
+displaymap initlistdisplay(int displayid)
 {
     displaymap display;
 
     makeimagebutton(&helpbutton, IMAGE_HELP);
-    helpbutton.display = DISPLAY_LIST;
+    helpbutton.display = displayid;
     helpbutton.cmd = cmd_showhelp;
     addbutton(&helpbutton);
 
     makeimagebutton(&quitbutton, IMAGE_QUIT);
-    quitbutton.display = DISPLAY_LIST;
+    quitbutton.display = displayid;
     quitbutton.cmd = cmd_quit;
     addbutton(&quitbutton);
 
     makeimagebutton(&prevbutton, IMAGE_PREV);
-    prevbutton.display = DISPLAY_LIST;
+    prevbutton.display = displayid;
     prevbutton.action = selectbackward;
     addbutton(&prevbutton);
 
     makeimagebutton(&randbutton, IMAGE_RANDOM);
-    randbutton.display = DISPLAY_LIST;
+    randbutton.display = displayid;
     randbutton.action = selectrandom;
     addbutton(&randbutton);
 
     makeimagebutton(&nextbutton, IMAGE_NEXT);
-    nextbutton.display = DISPLAY_LIST;
+    nextbutton.display = displayid;
     nextbutton.action = selectforward;
     addbutton(&nextbutton);
 
     makeimagebutton(&playbutton, IMAGE_PLAY);
-    playbutton.display = DISPLAY_LIST;
+    playbutton.display = displayid;
     playbutton.cmd = cmd_select;
     addbutton(&playbutton);
 
     makeimagebutton(&clipbutton, IMAGE_CLIP);
-    clipbutton.display = DISPLAY_LIST;
+    clipbutton.display = displayid;
     clipbutton.action = copyselectedsolution;
     addbutton(&clipbutton);
 

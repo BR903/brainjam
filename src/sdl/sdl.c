@@ -21,6 +21,16 @@
 #include "button.h"
 #include "font.h"
 
+/* The list of displays that the game provides. Each display is
+ * assigned an ID number, which it can use to control the display of
+ * its buttons.
+ */
+#define DISPLAY_NONE   0        /* no active display */
+#define DISPLAY_LIST   1        /* the game list and splash screen */
+#define DISPLAY_GAME   2        /* the game proper */
+#define DISPLAY_HELP   3        /* the help screens */
+#define DISPLAY_COUNT  4
+
 /* Convenience macro for initializing an SDL_Color struct.
  */
 #define setcolor(c, rr, gg, bb) \
@@ -232,10 +242,11 @@ static command_t none_eventhandler(SDL_Event *event)
     return cmd_none;
 }
 
-static displaymap initnonedisplay(void)
+static displaymap initnonedisplay(int id)
 {
     displaymap display;
 
+    (void)id;
     display.setlayout = none_setlayout;
     display.render = none_render;
     display.eventhandler = none_eventhandler;
@@ -444,10 +455,10 @@ static int createdisplays(void)
 
     _graph.margin = TTF_FontLineSkip(_graph.smallfont);
 
-    displays[DISPLAY_NONE] = initnonedisplay();
-    displays[DISPLAY_LIST] = initlistdisplay();
-    displays[DISPLAY_GAME] = initgamedisplay();
-    displays[DISPLAY_HELP] = inithelpdisplay();
+    displays[DISPLAY_NONE] = initnonedisplay(DISPLAY_NONE);
+    displays[DISPLAY_LIST] = initlistdisplay(DISPLAY_LIST);
+    displays[DISPLAY_GAME] = initgamedisplay(DISPLAY_GAME);
+    displays[DISPLAY_HELP] = inithelpdisplay(DISPLAY_HELP);
 
     ws = lookuprcsetting("windowwidth");
     hs = lookuprcsetting("windowheight");

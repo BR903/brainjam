@@ -725,12 +725,12 @@ static command_t eventhandler(SDL_Event *event)
 
 /* Initialize resources and return the help display's displaymap.
  */
-displaymap inithelpdisplay(void)
+displaymap inithelpdisplay(int displayid)
 {
     displaymap display;
 
     makeimagebutton(&backbutton, IMAGE_BACK);
-    backbutton.display = DISPLAY_HELP;
+    backbutton.display = displayid;
     backbutton.cmd = cmd_quit;
     addbutton(&backbutton);
 

@@ -914,7 +914,7 @@ void showoptions(settingsinfo *settings, int display)
 
 /* Initialize resources and return the game display's displaymap.
  */
-displaymap initgamedisplay(void)
+displaymap initgamedisplay(int displayid)
 {
     int const dotchar = 0x2022;
     displaymap display;
@@ -935,41 +935,41 @@ displaymap initgamedisplay(void)
     SDL_FreeSurface(image);
 
     makeimagebutton(&helpbutton, IMAGE_HELP);
-    helpbutton.display = DISPLAY_GAME;
+    helpbutton.display = displayid;
     helpbutton.cmd = cmd_showhelp;
     addbutton(&helpbutton);
 
     makeimagebutton(&backbutton, IMAGE_BACK);
-    backbutton.display = DISPLAY_GAME;
+    backbutton.display = displayid;
     backbutton.cmd = cmd_quit;
     addbutton(&backbutton);
 
     makepopupbutton(&optionsbutton, IMAGE_OPTIONS);
-    optionsbutton.display = DISPLAY_GAME;
+    optionsbutton.display = displayid;
     optionsbutton.cmd = cmd_changesettings;
     addbutton(&optionsbutton);
 
     makecheckbox(&keyschkbox, "Show move keys");
     keyschkbox.cmd = cmd_none;
-    keyschkbox.display = DISPLAY_GAME;
+    keyschkbox.display = displayid;
     keyschkbox.visible = 0;
     addbutton(&keyschkbox);
 
     makecheckbox(&animchkbox, "Animate card movements");
     animchkbox.cmd = cmd_none;
-    animchkbox.display = DISPLAY_GAME;
+    animchkbox.display = displayid;
     animchkbox.visible = 0;
     addbutton(&animchkbox);
 
     makecheckbox(&autochkbox, "Auto-play on foundations");
     autochkbox.cmd = cmd_none;
-    autochkbox.display = DISPLAY_GAME;
+    autochkbox.display = displayid;
     autochkbox.visible = 0;
     addbutton(&autochkbox);
 
     makecheckbox(&redochkbox, "Enable branching redo");
     redochkbox.cmd = cmd_none;
-    redochkbox.display = DISPLAY_GAME;
+    redochkbox.display = displayid;
     redochkbox.visible = 0;
     addbutton(&redochkbox);
 

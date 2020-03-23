@@ -18,14 +18,6 @@
 #define colors3(c)  (c).r, (c).g, (c).b
 #define colors4(c)  (c).r, (c).g, (c).b, (c).a
 
-/* The list of displays that the game provides.
- */
-#define DISPLAY_NONE   0        /* no active display */
-#define DISPLAY_LIST   1        /* the game list and splash screen */
-#define DISPLAY_GAME   2        /* the game proper */
-#define DISPLAY_HELP   3        /* the help screens */
-#define DISPLAY_COUNT  4
-
 /* Data describing moving (or otherwise changing) display values. An
  * animation is one or two integer values that are periodically
  * modified until they reach their destination values. (An animation
@@ -193,7 +185,7 @@ extern void stopanimation(animinfo *anim, int finish);
 
 /* Create the list display and return its displaymap.
  */
-extern displaymap initlistdisplay(void);
+extern displaymap initlistdisplay(int displayid);
 
 /* Set the list display to show the given game ID as the current
  * selection when it is next active.
@@ -210,7 +202,7 @@ extern int getselection(void);
 
 /* Create the game display and return its displaymap.
  */
-extern displaymap initgamedisplay(void);
+extern displaymap initgamedisplay(int displayid);
 
 /* Prepare the game display to become the active display. The displays
  * are not normally notified before being activated or deactivated.
@@ -240,7 +232,7 @@ extern void updategamestate(gameplayinfo const *gameplay,
 
 /* Create the help display and return its displaymap.
  */
-extern displaymap inithelpdisplay(void);
+extern displaymap inithelpdisplay(int displayid);
 
 /*
  * The API functions. (The API functions not declared here are defined
