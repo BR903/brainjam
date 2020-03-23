@@ -284,7 +284,6 @@ static void renderscorearea(int id)
         "to select a random game."
     };
     solutioninfo const *solution;
-    char buf[8];
     int h, i;
 
     solution = getsolutionfor(id);
@@ -295,11 +294,10 @@ static void renderscorearea(int id)
             drawsmalltext(directions[i], scorearea.x, scorearea.y + i * h, +1);
     } else if (solution) {
         drawsmalltext("Your best solution:", scorelabel.x, scorelabel.y, -1);
-        sprintf(buf, "%d", solution->size);
-        drawsmalltext(buf, scorenumber.x, scorenumber.y, -1);
         drawsmalltext("Best possible:", scorelabel.x, scorelabel.y + h, -1);
-        sprintf(buf, "%d", bestknownsolutionsize(id));
-        drawsmalltext(buf, scorenumber.x, scorenumber.y + h, -1);
+        drawsmallnumber(solution->size, scorenumber.x, scorenumber.y, -1);
+        drawsmallnumber(bestknownsolutionsize(id),
+                        scorenumber.x, scorenumber.y + h, -1);
     }
 }
 
@@ -310,7 +308,6 @@ static void renderlistentry(int id, int ypos)
 {
     solutioninfo const *solution;
     SDL_Rect rect;
-    char buf[8];
 
     rect.x = listrect.x;
     rect.y = listrect.y + ypos;
@@ -327,8 +324,7 @@ static void renderlistentry(int id, int ypos)
         settextcolor(_graph.defaultcolor);
     }
 
-    sprintf(buf, "%04d", id);
-    drawlargetext(buf, rect.x + rect.w / 2, rect.y, 0);
+    drawlargenumber(id, rect.x + rect.w / 2, rect.y, 0);
 
     solution = getsolutionfor(id);
     if (solution && solution->size <= bestknownsolutionsize(id)) {

@@ -999,18 +999,25 @@ int drawnumber(int number, int x, int y, int align, TTF_Font *font)
     SDL_Surface *img;
     SDL_Rect rect;
     char buf[16];
-    int i;
+    int free, i;
 
-    for (i = 0 ; i < cachesize ; ++i)
+    free = -1;
+    for (i = 0 ; i < cachesize ; ++i) {
         if (number == cache[i].number && font == cache[i].font &&
                     !memcmp(&currentcolor, &cache[i].color, sizeof(SDL_Color)))
             break;
+        if (!cache[i].texture)
+            free = i;
+    }
 
     if (i == cachesize) {
-        if (cache[0].texture)
+        if (free >= 0) {
+            i = free;
+        } else {
+            i = cachesize - 1;
             releasetexture(cache[0].texture);
-        i = cachesize - 1;
-        memmove(cache, cache + 1, i * sizeof *cache);
+            memmove(cache, cache + 1, i * sizeof *cache);
+        }
         sprintf(buf, "%d", number);
         img = TTF_RenderUTF8_Blended(font, buf, currentcolor);
         cache[i].number = number;
