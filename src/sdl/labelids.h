@@ -9,3 +9,4 @@
 #define IMAGE_PREV    7
 #define IMAGE_RANDOM  8
 #define IMAGE_NEXT    9
+#define IMAGE_ICON    10
