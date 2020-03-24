@@ -54,27 +54,32 @@ MODULES := . gamedata answers files game redo cursesui sdlui
 # Source files in all modules are built from this directory.
 override CPPFLAGS += -I.
 
-# The lists of source files and resource files, initially empty.
+# The list of source files, and object files, initially empty.
 SRC :=
+OBJ :=
+
+# The list of resource files that are not code (i.e. assets), and the
+# generated intermediate files that are created from them.
+RES :=
 GENRES :=
 
-# Every module provides an include file, called module.mk, which adds
-# their own files to these lists (and optionally specifies other
-# configuration info, such as adding to CFLAGS or defining special
-# build rules for generated resources).
+# Every module provides an include file, called module.mk, which must
+# add their own source files to the list in SRC. It may also
+# optionally specify other configuration info, such as adding to
+# CFLAGS, or defining special build rules for generated resources.
 include $(patsubst %,%/module.mk,$(MODULES))
-
-#
-# Dependency generation.
-#
-
-# The complete list of object files is generated from the source file list.
-OBJ := $(patsubst %.c,%.o,$(filter %.c,$(SRC)))
 
 # Extra tasks for making a windows build are kept here.
 ifdef ENABLE_WINDOWS
 include windows/windows.mk
 endif
+
+#
+# Dependency generation.
+#
+
+# The list of object files is generated from the source file list.
+OBJ += $(patsubst %.c,%.o,$(filter %.c,$(SRC)))
 
 # The dependency include files are built from the source files.
 %.d: %.c
@@ -86,8 +91,8 @@ endif
 
 # Special rule that places the version number in a C header file.
 GENRES += ./version.h
-./version.h: ./cfg.mk
-	sed -n 's/^VERSION := \(.*\)/#define VERSION_ID \"\1\"/p' $^ > $@
+./version.h:
+	echo '#define VERSION_ID "$(VERSION)"' > $@
 
 #
 # The top-level build rules.

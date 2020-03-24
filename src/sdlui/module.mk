@@ -4,8 +4,8 @@ ifdef WITH_SDL
 
 SRC += sdlui/sdlui.c sdlui/font.c sdlui/getpng.c sdlui/image.c
 SRC += sdlui/button.c sdlui/scroll.c sdlui/help.c sdlui/list.c sdlui/game.c
-SRCRES += sdlui/banner.png sdlui/cardset.png sdlui/headline.png
-SRCRES += sdlui/alerts.png sdlui/labels.png
+RES += sdlui/banner.png sdlui/cardset.png sdlui/headline.png
+RES += sdlui/alerts.png sdlui/labels.png
 
 override CFLAGS += $(shell pkg-config --cflags sdl2 SDL2_ttf libpng)
 override LDLIBS += $(shell pkg-config --libs sdl2 SDL2_ttf libpng)

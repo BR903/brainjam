@@ -6,8 +6,8 @@
 ifdef WINDRES
 
 OBJ += windows/appres.o
+RES += $(wildcard windows/icon*.png) sdlui/gfx/icon.png
 GENRES += windows/app.ico
-SRCREC += $(wildcard windows/icon*.png)
 
 windows/appres.o: windows/app.ico
 	echo "1 ICON $^" | $(WINDRES) -O coff -o $@

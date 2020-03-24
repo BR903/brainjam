@@ -1,7 +1,7 @@
 # gamedata/module.mk: build rules for the gamedata module.
 
+RES += gamedata/gamedata.txt gamedata/mkgames.c
 GENRES += gamedata/gamedata.bin gamedata/mkgames
-SRCRES += gamedata/gamedata.txt
 
 # mkgames creates a compressed binary representation of the full set
 # of available games. Since it is a standalone program and not part of
