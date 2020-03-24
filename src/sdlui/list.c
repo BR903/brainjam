@@ -308,6 +308,7 @@ static void renderlistentry(int id, int ypos)
 {
     answerinfo const *answer;
     SDL_Rect rect;
+    char buf[8];
 
     rect.x = listrect.x;
     rect.y = listrect.y + ypos;
@@ -324,7 +325,8 @@ static void renderlistentry(int id, int ypos)
         settextcolor(_graph.defaultcolor);
     }
 
-    drawlargenumber(id, rect.x + rect.w / 2, rect.y, 0);
+    sprintf(buf, "%04d", id);
+    drawlargetext(buf, rect.x + rect.w / 2, rect.y, 0);
 
     answer = getanswerfor(id);
     if (answer && answer->size <= bestknownanswersize(id)) {
