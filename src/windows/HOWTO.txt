@@ -31,10 +31,10 @@ executable on a Linux machine:
    well, namely "ppmtowinicon". I didn't use that since it is more
    cumbersome, requiring the source PNGs to first be broken out into
    PPM/PGM pairs. However the ImageMagick tools are probably more
-   ubiquitous, so that might be the better solution?)
+   ubiquitous, so that might be a more portable approach?)
 
 4. With all of that out of the way, you should be able to proceed
-   directly to building Brain Jam. Run the configuration tool via
+   directly to building the program. Run the configuration tool via
    cross-build.sh and specifying the "--enable-windows" flag:
 
        src/windows/cross-build.sh configure --enable-windows
@@ -44,11 +44,11 @@ executable on a Linux machine:
    place.) If the configure script fails because it can't find a build
    tool, you may need to explicitly provide variable definitions on
    the configure command line. (Ideally, that should all be taken care
-   of for you by cross-build.sh, but I haven't really tested it
-   widely.)
+   of for you by cross-build.sh, but I haven't tested it on a wide
+   variety of hosts.)
 
-5. Assuming the configure script produced a sensible makefile include,
-   use the cross-build.sh script again, this time to run make:
+5. Assuming the configure script produced a sensible config file, use
+   the cross-build.sh script again, this time to run make:
 
        src/windows/cross-build.sh make
 
@@ -63,4 +63,4 @@ depends on.
 
 (An alternative approach that would avoid some of this DLL-wrangling
 would be to statically link all of the third-party libraries.
-Something to look into.)
+This may be worth looking into.)

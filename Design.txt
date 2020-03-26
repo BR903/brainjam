@@ -4,7 +4,7 @@ large-scale changes to the program, or if you just want to understand
 how the code is organized, then this will hopefully be helpful.
 
 
-BASIC GOALS
+  * BASIC GOALS
 
 I had a few goals when I started writing this code:
 
@@ -32,7 +32,7 @@ external data files, means that the executable is self-contained, and
 doesn't require a special install process.
 
 
-MODULES
+  * MODULES
 
 The code base is broken up into modules. Each module has its own
 directory. The top-level directory is a module as well, called ".".
@@ -43,8 +43,8 @@ definitions, and they are available to be #included throughout the
 program. The remaining modules are required to declare all of their
 exported definitions and function declarations in a single header
 file, bearing the same name as the module proper. Any other header
-files with a subdirectory are purely for internal use within that
-module.
+files within a module subdirectory are purely for internal use within
+that module.
 
 (Thanks to C's limited namespace controls, "internal" declarations are
 in reality accessible program-wide. This rule -- that all
@@ -52,106 +52,101 @@ externally-facing symbols must be declared in a single header file --
 helps ensure that any accidental external use of an internal-only
 symbol will generate a compiler warning. Unfortunately, internal
 symbols still need to be globally unique. It is possible to build
-mechanisms to work around this, but for now at least it's not enough
-of a problem to be worth addressing.)
+mechanisms to work around this, but for now at least such mechanisms
+are more cumbersome than the issue they address.)
 
 
-BUILDING
+  * BUILDING
 
 Building is done entirely from the top-level directory, and so every
 file's containing directory is part of its name. Thus, for example,
 inside the "game" module is a source file named "game/play.c". It
-depends on a function defined in the "solutions" module, therefore it
-#includes "solutions/solutions.h". It also depends on header files in
-the top-level module, and they get #included as "./gen.h",
-"./types.h", and so on.
+depends on a function defined in the "answers" module, therefore it
+#includes "answers/answers.h". It also depends on header files in the
+top-level module, and they get #included as "./gen.h", "./types.h",
+and so on.
 
 A module's internal header files are never used outside of their own
 directory, so they are #included without a path -- thus e.g.
 game/play.c #includes "internal.h". (This pattern makes the
 distinction between internal and external inclusions easier to spot.)
 
-There is only one makefile for the entire project, which naturally can
-be found in the top-level directory. The makefile defines the usual
-variables, $(CFLAGS) and so on, as well as two empty variables $(SRC)
-and $(GENRES). The makefile then includes a file named "modules.mk"
-from every subdirectory. Each modules.mk then appends to these
-variables, creating a master list of source files and resource files,
-respectively. (The modules.mk file can also append more options to
-variables like $(CFLAGS), and/or define build rules that are unique to
-that module.) The top-level module uses a short shell script,
-"depend.sh", to automatically list out the full set of dependencies
-for the source code. (There is also a third shared variable, named
-$(SRCRES), which tracks the source files that resources are built
-from. However, this variable is currently unused.)
+There is only one makefile for the entire project (more or less),
+which naturally is found in the top-level directory. The makefile
+defines the usual variables, $(CFLAGS) and so on, as well as an
+variable $(SRC). The makefile then includes a file named "modules.mk"
+from every subdirectory. Each modules.mk then appends to the $(SRC)
+variable, creating a master list of source files. (These files can
+also append more options to variables like $(CFLAGS), and/or define
+build rules that are unique to that module.) The top-level module uses
+a short shell script, "depend.sh", to automatically list out the full
+set of dependencies for the source code.
+
+(There are also some other variables to track resource files, such as
+images, that also contribute to the final executable. See the comments
+in the makefile for details if you're curious.)
 
 
-THE LIST OF MODULES
+  * THE LIST OF MODULES
 
-There is no explicit hierarchy between the modules, beyond than that
-of being subdirectories within top-level module. They are all treated
-as peers, and each module may choose to be dependent on any of the
-others. That said, there are a few different types of modules, each
-with different expectations for how it is used.
+There is no explicity hierarchy between the modules after the
+top-level module. They are all treated as peers of each other, and
+each module may choose to be dependent on any of the others. That
+said, there are a few different types of modules, each with different
+expectations for how it is used.
 
 
-MODULES: THE USER INTERFACE MODULES
+  ** THE USER INTERFACE MODULES
 
 The program comes with not one but two separate user interfaces, each
-one in its own module. Both adhere to the same API, so that either one
-can be used without affecting the rest of the program. The choice is
-made during program initialization, depending on the system's
-functionality and the user's preferences.
+one in its own module. Both adhere to the same API, so the rest of the
+program is agnostic as to which one gets used. The choice is made
+during program initialization, depending on platform functionality and
+user preferences.
 
-The "sdl" module provides a user interface built upon the SDL2 library
-(plus SDL2_ttf to provide font rendering). This module includes, among
-other things, all of the program's graphical resources. For most
-people, this is the only user interface that they will ever see.
+The "sdlui" module provides a user interface built upon the SDL2
+library (plus SDL2_ttf and libpng). This module includes, among other
+things, all of the program's graphical resources. For most people,
+this is the only user interface that they will ever see.
 
-The "curses" module provides a second user interface that runs in a
-text terminal. It is much simpler in design than "sdl", but it
+The "cursesui" module provides a second user interface that runs in a
+text terminal. It is much simpler in design than "sdlui", but it
 nonetheless implements the same API and provides the equivalent
 functionality (within the limitations of the text terminal).
-
-All functionality that is specific to managing the user interface is
-contained entirely within these modules. All other modules should
-therefore be independent of UI details.
 
 The internal design of the user interface code is complex enough to
 warrant its own section; see below for details.
 
 
-MODULES: THE REDO LIBRARY
+  ** THE REDO LIBRARY
 
 Unlike other modules, the "redo" module is fully indepenent: it
 references no external code, not even in the top-level module. This
 module is actually designed to be a separate library -- but since it's
-not a library that anyone else uses (so far), it's just included
-directly for the sake of a simpler build process.
+a single C file and it's not a library that anyone else uses (so far),
+it's just included directly for the sake of a simpler build process.
 
-The "redo" module provides functionality for implementing the
-program's undo and redo commands. It is not documented here, but if
-you're curious to learn more about it, please see my "libredo" project
-at <http://www.muppetlabs.com/~breadbox/software/libredo.html>.
+Details about the "redo" module and its interaction with the "game"
+module are discussed in more detail below.
 
 
-MODULES: THE OWNERSHIP MODULES
+  ** THE OWNERSHIP MODULES
 
 There are two modules whose central task is just to be the owner of
 data that needs to be globally accessible.
 
-The "configs" module owns the list of 1500 unique configurations that
-make each game different. This module's job is simply to turn the
-compressed defintion of a given configuration into an initial game
-layout.
+The "answers" module owns the list of the user's answers for each
+game. This module provides functions to look up answers, and to find
+games with or without a recorded answer. It also ensures that the
+answers file on disk is updated whenever a change is made.
 
-The "solutions" module owns the list of the user's solutions to each
-game. This module provides functions to look up solutions, and to find
-games with or without a recorded solution. It also ensures that the
-solutions file on disk is updated whenever a change is made.
+The "gamedata" module owns the list of 1500 unique deck configurations
+that make each game different. Since this list is completely static,
+this module actually contains no code; it's just the data representing
+the decks.
 
 
-MODULES: THE FUNCTIONAL MODULES
+  ** THE FUNCTIONAL MODULES
 
 Finally, three more modules are responsible for providing some major
 subset of the program's functionality.
@@ -167,19 +162,18 @@ code that manipulates the game state is here.
 And lastly, the top-level "." module is responsible for the pre-UI
 startup code, as well as transitioning into and out of the program's
 main loop. This module is also used to hold some foundational parts
-that the rest of the program depends on: the most basic type
-definitions and some low-level functionality that isn't specific to
-any single module.
+that the rest of the program depends on -- basic type definitions and
+some low-level functionality that isn't specific to any single module.
 
 
-THE "SDL" MODULE: INTERNAL DESIGN
+  * THE "SDLUI" MODULE: INTERNAL DESIGN
 
-By far the largest module is the "sdl" module, which creates the
+By far the largest module is the "sdlui" module, which creates the
 graphical user interface. It is involved enough to warrant its own
-descriptive overview.
+descriptive section.
 
-(Note that while the "curses" module is similar in organization to the
-"sdl" module, it differs considerably at various points, mostly
+(Note that while the "cursesui" module is similar in organization to
+the "sdlui" module, it differs considerably at various points, mostly
 because it is also significantly simpler.)
 
 The SDL user interface has three main modes, or "displays": the game
@@ -191,80 +185,103 @@ allows much of the code to go into the central files, and work the
 same regardless of which display is currently active.
 
 (There is technically speaking a fourth display, namely the options
-menu display. However, it is simple enough that it is mostly folded
-into the main game display as a temporary mode.)
+menu display. However, it is simple enough that it is folded into the
+main game display as a temporary mode.)
 
-Each display, like much UI code, is structured around a central event
-loop. The display is rendered, and the program waits for an input
-event to occur. When it does, it is translated into a user command as
-appropriate (or ignored as a do-nothing event), the command is applied
-to the game state, and the loop iterates.
+Each display has to define three functions: a input event handler, a
+display rendering function, and a display layout function. The input
+event handler is called for each input event, allowing the display
+code to respond to events specific to its interface. The display
+rendering function is called every time the display needs to update
+its appearance. And the display layout function is called whenever the
+window size changes. This last function is typically the messiest one
+to deal with, since this is where each display determines the position
+and size of every element that make up their appearance. In a typical
+GUI system this code would be automatically generated (and, more
+importantly, hidden) by a graphical layout editor.
+
+This layout function is typically only called during startup (although
+it can be called several times while the user is resizing the window).
+Most of the display's work, as with most UI code, is done via a loop
+of rendering the display and responding to input events.
 
 However, there is a significant difference here between the main game
 display and the other two. The latter have their event loops handled
-entirely within the UI module, while the game display's event loop
-must necessarily exit to code outside the module (since the external
-code has all the logic for modifying game state). Every time a event
-occurs which translates into a user command, the main game display
-exits its event loop and returns to the external calling function.
+entirely within the UI module. But the event loop for the game display
+must exit to code outside the module, since the external code has all
+the logic for managing the game state. So every time a event occurs
+which translates into a user command, the main game display exits its
+event loop and returns to the external calling function.
 
-The button is a common enough UI object that the code to manage its
-interactions with the mouse are part of the general UI event loop,
+(In constrast, the rest of the program doesn't need to know when the
+user looks at the help text, and so the UI module can handle such
+activity entirely internally. This also means that each UI module can
+provide a completely different user experience for that display, if
+such is desirable.)
+
+Buttons are a common enough UI object that the code to manage their
+interactions with the mouse are part of the general UI code,
 independent of the individual displays. Once a button is created and
-registered, the standard event loop takes care of rendering it,
-tracking the mouse, and generating user commands. In addition to the
-more traditional pushbuttons, the check boxes in the options menu are
-also handled by the same code.
+registered, the default event handler takes care of rendering it,
+tracking the mouse, and generating user commands.
 
 The scroll bar that appears next to the game selection list and the
-help text is also managed by shared code, though for this object each
-display has to explicitly call the functions that manage the scroll
-bar.
+help text is also managed by shared code. Scroll bars are more complex
+objects than buttons, so each display that uses a scroll bar needs to
+explicitly call functions to display them and translate user
+interactions.
 
 The third common UI object is the animation handler. This isn't a
 visual object per se, but rather a standard way to access the timer in
-order to allow a value to change smoothly over time. Animation objects
-are used in conjunction with scroll bars to let them scroll smoothly,
-as well as animating the movement of the playing cards in the main
-game display.
+order to allow values to change over time. Animation objects are used
+in conjunction with scroll bars to let them scroll smoothly, as well
+as animating the movement of the playing cards in the main game
+display.
+
+There are several different images that go into the UI. Images are
+stored as PNG files, which are compiled directly into the program. The
+faces of the playing cards are stored in one image, the pushbutton
+graphics are stored in another, and so on. All image loading is
+handled in a single file, so that the rest of the code can remain
+ignorant of the details of PNG decoding.
 
 
-IMAGE FILES
+  * THE REDO MODULE AND THE GAME MODULE
 
-The "sdl" module's graphical UI, naturally, depends on a number of
-graphical images. There is one large image, namely the banner that
-appears at the top of the initial display. A second image holds the
-complete set of playing cards, arranged in a grid. The remaining
-graphics are concatenated into the third image, as a "sprite sheet".
+The "redo" module provides functionality for implementing the
+program's undo and redo commands, and specifically the advanced
+branching redo feature. Its job is to record game states in memory, so
+that previous game states can be easily restored when the user
+revisits them via these commands.
 
-All images are stored within the binary as Windows bitmaps compressed
-via gzip. This may seem to be an odd choice of formats, but this is
-done because bitmaps are the only image format that SDL2 supports
-natively. Using an image format like PNG would require adding another
-library dependency (or a significant amount of extra code).
+In addition, the "redo" module also tracks which moves led to which
+game states, so that even though it has no insight into the game
+logic, it can provide a history of how the player arrived at any given
+state. This fact is used e.g. to produce the saved answer when the
+user completes a game. This feature also comes into play when the user
+finds a new set of moves that lead to a previously seen state. The
+redo module can determine which path used the fewest number of moves,
+and, if applicable, can paste together disparate parts to produce a
+new, shorter answer.
 
-Bitmaps tend to be rather large, and this is why the images are
-compressed before adding them to the binary. Since the images are only
-used during initialization (when they are turned into textures), this
-costs little in performance. And, interestingly enough, a compressed
-bitmap is typically smaller than the equivalent PNG.
+In order for this to work, the "game" module maintains a gameplayinfo
+struct, which contains all the information needed to track the game
+state, and to render it via the UI. While this struct contains several
+fields, the "game" module keeps two byte arrays at the end of this
+struct. These two arrays have all the information that is necessary to
+define the state of the game. (The remaining fields can either be
+reconstructed from this data, or from external soruces.) When the
+"game" module creates a new game state in response to a user command,
+it passes a pointer to these two fields to the "redo" module.
 
-The only real downside of this choice is the handling of transparency.
-The Windows bitmap file format does include support for an alpha
-channel -- but such bitmaps are rare in practice, and as a result most
-programs do not recognize them. Gimp ignores the alpha channel of a
-bitmap file, and the Imagemagick tools reject them as invalid.
-(Thankfully, the SDL2 library does handle such bitmaps correctly.)
-Therefore, for ease of handling, images are stored as familiar PNGs in
-the source tree. At build time a python script manually converts each
-PNG into a transparent bitmap.
+These two fields are named "covers" and "cardat". The covers array is
+52 bytes, one byte per card, and for each card it identifies the card
+that it covers. The "cardat" array is 16 bytes, one byte per place in
+the layout, and for each place it identifies the card that is
+uppermost (and therefore playable). As their combined size is 68
+bytes, it is not very expensive to keep a complete history of visited
+game states in memory.
 
-
-DATA RESOURCES
-
-C does not have a way to directly import a data file into a program as
-a C object. So, in order to accomplish this, the program uses short
-bits of inline assembly, which take advantage of the .incbin assembler
-directive. A macro defined in ./incbin.h provides the boilerplate for
-including data files in this way, and for declaring the C variables
-that access the data.
+If you're curious to learn more about the redo library, see
+<http://www.muppetlabs.com/~breadbox/software/libredo.html> for the
+offical distribution and API documentation.

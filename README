@@ -5,26 +5,26 @@ Brain Jam is a solitaire card game. It is similar to soltaire games
 like Freecell in that the entire deck is dealt out face up at the
 start, so the player has full information. However, unlike many
 solitaire programs, Brain Jam comes with a large but finite number of
-initial orderings, all of which are guaranteed to be solvable. Thus
+pre-shuffled decks, all of which are guaranteed to be solvable. Thus
 there is no luck factor in playing Brain Jam.
 
-Once you have solved a given configuration, you can then go back and
-work to find a new answer with fewer moves.
+When you have solved a given configuration, you can also go back and
+try to find a new answer with fewer moves.
 
 
   * NOTE FOR WINDOWS USERS
 
 The Brain Jam installer should set up everything for you. If you
 didn't create a menu item or shortcut (or if you installed Brain Jam
-yourself via a zip file), then you can run brainjam.exe directly
+manually via a zip file), then you can run brainjam.exe directly
 from this folder to play the game.
 
 
   * HOW TO PLAY
 
-Within the program, you can press the question-mark button (or type
-"?" or "F1") at any time to see the rules of the game, the interface
-commands, etc. The rules of the game are very simple.
+Within the program, you can use the question-mark button (or on the
+keybaord, use "?" or "F1") at any time to see the rules of the game,
+the interface commands, etc. The rules of the game are very simple.
 
 
   * USER DATA
@@ -38,9 +38,9 @@ these files will be located in the following folder:
   Windows: $HOME\Application Data\brainjam\
 
 The file "brainjam.ini" in this folder holds your settings. You should
-not normally need to modify this file directly. However, if you choose
-you can use this file to change the font used by the program. To do
-this, edit the text file and add a line that reads (e.g.):
+not normally need to access this file directly. However, if you choose
+you can edit this file to change the font used by the program. To do
+this, add a line that reads (e.g.):
 
   font=times
 
@@ -105,7 +105,7 @@ The website for the original Brain Jam program is at:
   http://brainjam.ca/brainjam/
 
 From there you can obtain the original 16-bit Windows binary, as well
-as play a variant version that runs in the browser.
+as play a version that runs in the browser.
 
 
   * LICENSE
@@ -127,8 +127,8 @@ online at <http://gnu.org/licenses/gpl.html>.
 
 This program is written by Brian Raiter.
 
-The original game comes from a Windows program of the same name, which
-was written by Peter Liepa.
+This program is a re-implementation of a Windows program of the same
+name, which was written by Peter Liepa.
 
 The rules of Brain Jam are based on "Baker's Game", as described by
 Martin Gardner in the June 1968 issue of Scientific American.
@@ -136,9 +136,9 @@ Martin Gardner in the June 1968 issue of Scientific American.
 The deck configurations were created by Peter Liepa with assistance
 from Bert van Oortmarssen, and are used here with their permission.
 
-The graphics that appear in Brain Jam (with the exception of the
-original Brain Jam icon), are either taken from public domain sources,
-or have been explicitly placed in the public domain by their creators.
+The graphics that appear in Brain Jam are taken from public domain
+sources, and/or have been explicitly placed in the public domain by
+their creators.
 
 
   * CONTACT

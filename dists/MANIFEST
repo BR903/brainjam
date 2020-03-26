@@ -20,6 +20,8 @@ src/gen.c
 src/gen.h
 src/glyphs.h
 src/incbin.h
+src/mainloop.c
+src/mainloop.h
 src/settings.c
 src/settings.h
 src/types.h
@@ -51,6 +53,7 @@ src/game/game.h
 src/game/internal.h
 src/game/play.c
 src/game/state.c
+src/gamedata/module.mk
 src/gamedata/Makefile
 src/gamedata/gamedata.txt
 src/gamedata/mkgames.c
@@ -92,6 +95,7 @@ src/sdlui/gfx/check.png
 src/sdlui/gfx/clip.png
 src/sdlui/gfx/done.png
 src/sdlui/gfx/help.png
+src/sdlui/gfx/icon.png
 src/sdlui/gfx/next.png
 src/sdlui/gfx/options.png
 src/sdlui/gfx/play.png
