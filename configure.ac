@@ -31,28 +31,13 @@ with_sdl_default=check
 with_fontconfig_default=check
 
 
-dnl * The option --enable-debug creates a debug build.
-dnl *
-
-AC_ARG_ENABLE(debug,
-              AC_HELP_STRING([--enable-debug], [Build with debugging info]),
-	      [:], [enable_debug=no])
-if test $enable_debug = no ; then
-  DEBUG_LINE="#ENABLE_DEBUG=1"
-else
-  DEBUG_LINE="ENABLE_DEBUG=1"
-fi
-
-
 dnl * The option --enable-windows sets up a Windows build.
 dnl *
 
 AC_ARG_ENABLE(windows,
               AC_HELP_STRING([--enable-windows], [Cross-build for Windows]),
 	      [:], [enable_windows=no])
-if test $enable_windows = no ; then
-  WINDOWS_LINE="#ENABLE_WINDOWS=1"
-else
+if test "x$enable_windows" = "xyes" ; then
   WINDOWS_LINE="ENABLE_WINDOWS=1"
   with_sdl_default=yes
   with_ncurses_default=no
@@ -67,6 +52,33 @@ else
     AC_MSG_WARN([could not find the $WINDRES utility.])
     WINDRES=:
   fi
+else
+  WINDOWS_LINE="#ENABLE_WINDOWS=1"
+fi
+
+
+dnl * The option --enable-debug creates a debug build.
+dnl *
+
+AC_ARG_ENABLE(debug,
+              AC_HELP_STRING([--enable-debug], [Build with debugging info]))
+if test "x$enable_debug" = "xyes" ; then
+  DEBUG_LINE="ENABLE_DEBUG=1"
+else
+  DEBUG_LINE="#ENABLE_DEBUG=1"
+fi
+
+
+dnl * The option --disable-unicode creates a pure-ASCII program.
+dnl *
+
+AC_ARG_ENABLE(unicode,
+              AC_HELP_STRING([--disable-unicode],
+                             [Assume an ASCII-only character set]))
+if test "x$enable_unicode" = "xno" ; then
+  ASCII_LINE="ASCII_ONLY=1"
+else
+  ASCII_LINE="#ASCII_ONLY=1"
 fi
 
 
@@ -167,6 +179,7 @@ dnl *
 
 AC_CONFIG_FILES(src/cfg.mk:cfg.mk.in)
 
+AC_SUBST(ASCII_LINE)
 AC_SUBST(DEBUG_LINE)
 AC_SUBST(WINDOWS_LINE)
 AC_SUBST(NCURSES_LINE)

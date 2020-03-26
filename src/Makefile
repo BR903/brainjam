@@ -43,6 +43,11 @@ override CFLAGS += -O2
 override LDFLAGS += -s
 endif
 
+# Add a compiler flag if ASCII-only strings are requested.
+ifdef ASCII_ONLY
+override CFLAGS += -DASCII_ONLY=1
+endif
+
 #
 # Modules.
 #

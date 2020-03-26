@@ -13,7 +13,7 @@
 #ifndef _glyphs_h_
 #define _glyphs_h_
 
-#ifdef ASCIIONLY
+#if ASCII_ONLY
 
 #define GLYPH_COPYRIGHT  "(C)"
 #define GLYPH_DASH       "-"

@@ -21,6 +21,9 @@ VERSION := @PACKAGE_VERSION@
 # optimized binary.
 @DEBUG_LINE@
 
+# Define to replacing all non-ASCII characters with ASCII equivalents.
+@ASCII_LINE@
+
 # Defines used when cross-compiling for Windows.
 @WINDOWS_LINE@
 WINDRES := @WINDRES@

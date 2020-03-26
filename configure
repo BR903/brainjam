@@ -593,6 +593,7 @@ SDL_LINE
 NCURSES_LINE
 WINDOWS_LINE
 DEBUG_LINE
+ASCII_LINE
 check_prog
 EGREP
 GREP
@@ -647,6 +648,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_debug
+enable_unicode
 enable_windows
 with_ncurses
 with_sdl
@@ -1282,6 +1284,7 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          Build with debugging info
+  --disable-unicode       Assume an ASCII-only character set
   --enable-windows        Cross-build for Windows
 
 Optional Packages:
@@ -3140,7 +3143,7 @@ ac_fn_c_check_func "$LINENO" "getopt" "ac_cv_func_getopt"
 if test "x$ac_cv_func_getopt" = xyes; then :
 
 else
-  as_fn_error $? "could not find the getopt() library function." "$LINENO" 5
+  as_fn_error $? "the POSIX getopt() function was not found." "$LINENO" 5
 fi
 
 
@@ -3185,7 +3188,7 @@ fi
 
 
 if test "$check_prog" != "yes" ; then
-  as_fn_error $? "could not find the pkg-config utility." "$LINENO" 5
+  as_fn_error $? "could not find the pkg-config utility on your path." "$LINENO" 5
 fi
 
 
@@ -3198,15 +3201,26 @@ with_fontconfig_default=check
 
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then :
-  enableval=$enable_debug; :
-else
-  enable_debug=no
+  enableval=$enable_debug;
 fi
 
-if test $enable_debug = no ; then
-  DEBUG_LINE="#ENABLE_DEBUG=1"
-else
+if test "x$enable_debug" = "xyes" ; then
   DEBUG_LINE="ENABLE_DEBUG=1"
+else
+  DEBUG_LINE="#ENABLE_DEBUG=1"
+fi
+
+
+
+# Check whether --enable-unicode was given.
+if test "${enable_unicode+set}" = set; then :
+  enableval=$enable_unicode;
+fi
+
+if test "x$enable_unicode" = "xno" ; then
+  ASCII_LINE="ASCII_ONLY=1"
+else
+  ASCII_LINE="#ASCII_ONLY=1"
 fi
 
 
@@ -3218,9 +3232,7 @@ else
   enable_windows=no
 fi
 
-if test $enable_windows = no ; then
-  WINDOWS_LINE="#ENABLE_WINDOWS=1"
-else
+if test "x$enable_windows" = "xyes" ; then
   WINDOWS_LINE="ENABLE_WINDOWS=1"
   with_sdl_default=yes
   with_ncurses_default=no
@@ -3306,8 +3318,12 @@ fi
 
 
   if test "$check_prog" != "yes" ; then
-    as_fn_error $? "could not find the $WINDRES utility." "$LINENO" 5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: could not find the $WINDRES utility." >&5
+$as_echo "$as_me: WARNING: could not find the $WINDRES utility." >&2;}
+    WINDRES=:
   fi
+else
+  WINDOWS_LINE="#ENABLE_WINDOWS=1"
 fi
 
 
@@ -3501,9 +3517,9 @@ if test "$with_ncurses" = "yes" ; then
 fi
 
 if test "$with_sdl" = "yes" ; then
-  pkg-config sdl2 || as_fn_error $? "the SDL2 library could not be found." "$LINENO" 5
+  pkg-config sdl2 || as_fn_error $? "the SDL2 library was not found." "$LINENO" 5
   pkg-config SDL2_ttf || as_fn_error $? "the SDL2_ttf library was not found." "$LINENO" 5
-  pkg-config libpng || as_fn_error $? "libpng could not be found." "$LINENO" 5
+  pkg-config libpng || as_fn_error $? "libpng was not found." "$LINENO" 5
 fi
 
 if test "$with_fontconfig" = "yes" ; then
@@ -3533,6 +3549,7 @@ fi
 
 
 ac_config_files="$ac_config_files src/cfg.mk:cfg.mk.in"
+
 
 
 
