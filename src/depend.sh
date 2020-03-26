@@ -21,7 +21,10 @@ else
   shift 2
 fi
 
-printf '%s %s/' "$dep" "$dir" >"$dep"
-"$CC" -MM -MG "$@" "$src" | sed '$s/$/ \\/' >>"$dep"
-echo $(sed -n 's/^.*INCBIN[ \t]*([ \t]*\"\([^\"]*\)\".*$/\1/p' "$src") >>"$dep"
+trap "rm -f ${dep}~" EXIT
+printf '%s %s/' "$dep" "$dir" >"${dep}~"
+"$CC" -MM -MG "$@" "$src" | sed '$s/$/ \\/' >>"${dep}~"
+incbins=$(sed -n 's/^.*INCBIN[ \t]*([ \t]*\"\([^\"]*\)\".*$/\1/p' "$src")
+echo $incbins >>"${dep}~"
+mv -f "${dep}~" "$dep"
 
