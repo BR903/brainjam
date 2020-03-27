@@ -1,15 +1,10 @@
 Before 1.0:
 
-* Work on the layout for the opening screen. Seems like it could be
-  improved.
+* The game needs a real icon. This is now the main issue blocking a
+  1.0 release.
 
-* The game needs a real icon.
-
-* Make a full pass through the documentation, looking for errors and
-  outdated information.
-
-* Make a full pass through the comments and code, likewise. Add
-  copyright/license notice to all source files.
+* The layout for the opening screen could stand some improvement, but
+  I don't have any concrete ideas on that score at the moment.
 
 After 1.0:
 

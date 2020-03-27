@@ -1,3 +1,10 @@
+* 2020 Mar 27: version 0.9.5
+
+	Huge, general sweep throughout the code base, including the
+	documentation. The diff for this change is immense, but it's all
+	just clean-up work: file and variable renaming, refactoring, and
+	adding and improving comments in the code.
+
 * 2020 Mar 16: version 0.9.4
 
 	Improved the code portability, and added a process to build
