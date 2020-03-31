@@ -34,8 +34,9 @@ static SDL_Rect bannerrect;             /* location of the banner graphic */
 static SDL_Rect headlinerect;           /* location of the headline text */
 static SDL_Rect listrect;               /* location of the game list */
 static SDL_Rect scorearea;              /* location of the score display */
-static SDL_Point scorelabel;            /* position of score label text */
-static SDL_Point scorenumber;           /* position of score */
+static SDL_Point scorebox[6];           /* outline around the score display */
+static SDL_Point scorelabel;            /* title text of the score display */
+static SDL_Point answerlabel;           /* alignment position of score data */
 static SDL_Point markersize;            /* size of game list markers */
 static int markeroffset;                /* vertical offset of list markers */
 static int rowheight;                   /* height of one list entry */
@@ -179,7 +180,7 @@ static SDL_Point setlayout(SDL_Point display)
 {
     SDL_Rect area;
     SDL_Point size;
-    int textheight, w;
+    int textheight, spacing, w;
 
     quitbutton.pos.x = _graph.margin;
     quitbutton.pos.y = display.y - quitbutton.pos.h - _graph.margin;
@@ -189,7 +190,9 @@ static SDL_Point setlayout(SDL_Point display)
 
     bannerrect.x = 0;
     bannerrect.y = 0;
-    headlinerect.x = display.x < bannerrect.w ? display.x : bannerrect.w;
+    headlinerect.x = display.x;
+    if (headlinerect.x > bannerrect.w + _graph.margin)
+        headlinerect.x = bannerrect.w + _graph.margin;
     headlinerect.x -= headlinerect.w;
     headlinerect.y = bannerrect.y + bannerrect.h - headlinerect.h;
 
@@ -241,21 +244,35 @@ static SDL_Point setlayout(SDL_Point display)
 
     scorearea.x = display.x / 2 + _graph.margin;
     scorearea.y = area.y + 2 * _graph.margin;
-    scorearea.w = display.x / 2 - area.x - helpbutton.pos.w;
-    scorearea.w -= 2 * _graph.margin;
 
     textheight = TTF_FontLineSkip(_graph.smallfont);
-    TTF_SizeUTF8(_graph.smallfont, "Your best answer:", &w, NULL);
-    scorelabel.x = w;
-    scorelabel.y = scorearea.y;
-    TTF_SizeUTF8(_graph.smallfont, "Best possible:", &w, NULL);
-    if (scorelabel.x < w)
-        scorelabel.x = w;
-    scorelabel.x += scorearea.x;
-    TTF_SizeUTF8(_graph.smallfont, " 888", &w, NULL);
-    scorenumber.x = scorelabel.x + w;
-    scorenumber.y = scorearea.y;
+    TTF_SizeUTF8(_graph.smallfont, "X", &spacing, NULL);
+    TTF_SizeUTF8(_graph.smallfont, "Your best answer:  ", &w, NULL);
+    scorearea.w = w;
+    TTF_SizeUTF8(_graph.smallfont, "Minimum possible:  ", &w, NULL);
+    if (scorearea.w < w)
+        scorearea.w = w;
+    answerlabel.x = scorearea.x + scorearea.w + 2 * spacing;
+    answerlabel.y = scorearea.y + (3 * textheight) / 2;
+    TTF_SizeUTF8(_graph.smallfont, "1888", &w, NULL);
+    scorearea.w += w + 3 * spacing;
     scorearea.h = 4 * textheight;
+
+    scorelabel.x = scorearea.x + 2 * spacing;
+    scorelabel.y = scorearea.y;
+    TTF_SizeUTF8(_graph.smallfont, "XGame 1888X", &w, NULL);
+    scorebox[0].x = scorearea.x + spacing;
+    scorebox[0].y = scorearea.y + textheight / 2;
+    scorebox[1].x = scorearea.x;
+    scorebox[1].y = scorebox[0].y;
+    scorebox[2].x = scorebox[1].x;
+    scorebox[2].y = scorearea.y + scorearea.h;
+    scorebox[3].x = scorearea.x + scorearea.w;
+    scorebox[3].y = scorebox[2].y;
+    scorebox[4].x = scorebox[3].x;
+    scorebox[4].y = scorebox[0].y;
+    scorebox[5].x = scorebox[0].x + w;
+    scorebox[5].y = scorebox[4].y;
 
     size.x = listrect.w + scorearea.w + quitbutton.pos.w + helpbutton.pos.w;
     size.x += 6 * _graph.margin;
@@ -284,6 +301,7 @@ static void renderscorearea(int id)
         "to select a random game."
     };
     answerinfo const *answer;
+    char buf[16];
     int h, i;
 
     answer = getanswerfor(id);
@@ -293,11 +311,17 @@ static void renderscorearea(int id)
         for (i = 0 ; i < (int)(sizeof directions / sizeof *directions) ; ++i)
             drawsmalltext(directions[i], scorearea.x, scorearea.y + i * h, +1);
     } else if (answer) {
-        drawsmalltext("Your best answer:", scorelabel.x, scorelabel.y, -1);
-        drawsmalltext("Best possible:", scorelabel.x, scorelabel.y + h, -1);
-        drawsmallnumber(answer->size, scorenumber.x, scorenumber.y, -1);
+        SDL_RenderDrawLines(_graph.renderer, scorebox,
+                            sizeof scorebox / sizeof *scorebox);
+        sprintf(buf, "Game %04d", id);
+        drawsmalltext(buf, scorelabel.x, scorelabel.y, +1);
+        drawsmalltext("Your best answer:  ",
+                      answerlabel.x, answerlabel.y, -1);
+        drawsmalltext("Minimum possible:  ",
+                      answerlabel.x, answerlabel.y + h, -1);
+        drawsmallnumber(answer->size, answerlabel.x, answerlabel.y, +1);
         drawsmallnumber(bestknownanswersize(id),
-                        scorenumber.x, scorenumber.y + h, -1);
+                        answerlabel.x, answerlabel.y + h, +1);
     }
 }
 
