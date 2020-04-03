@@ -17,3 +17,6 @@ src/gamedata/mkgames
 src/test/chklogic
 src/brainjam
 src/brainjam.exe
+src/windows/app.ico
+test/runtests
+test/runtests.c

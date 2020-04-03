@@ -6,29 +6,42 @@
 #
 # The test program takes advantage of the fact that the code it is
 # testing has a limited set of dependencies on other modules, and so
-# it can link the test code with just those dependencies (and the code
-# actually being tested, of course).
+# it can link the test code with just those dependencies.
 
 CC := gcc
 CFLAGS := -Wall -Wextra -I..
 LDFLAGS := -Wall
 
-PROG := chklogic
+PROG := runtests
+
+# The list of object files containing unit tests. Each of these
+# corresponds to a C file that contains a single function of the same
+# name that runs the unit tests, asserting if any tests fail.
+OBJ := chklogic.o chkredo.o
 
 # Since this makefile is not really part of the rest of the build
 # system, it depends on the external object files having already been
 # built before it is invoked. All we really want is game/state.o, but
 # the others are required for game/state.o to link.
-EXTOBJS :=../game/state.o ../game/game.o ../decks.o ../gen.o ../redo/redo.o
+EXTOBJ := ../game/state.o ../game/game.o ../decks.o ../gen.o ../redo/redo.o
 
 .PHONY: check clean cclean
 
 check: $(PROG)
 	./$(PROG)
 
-$(PROG): $(PROG).o $(EXTOBJS)
+$(PROG): $(PROG).c $(OBJ) $(EXTOBJ)
+
+# Since running the tests just requires calling the lone extern
+# function in each test suite, the main() function is generated from
+# the list of object files.
+$(PROG).c:
+	echo $(patsubst %.o,"extern void %(void);",$(OBJ)) > $@
+	echo "int main(void){" >> $@
+	echo $(patsubst %.o,"%();",$(OBJ)) >> $@
+	echo "return 0;}" >> $@
 
 clean:
-	rm -f $(PROG) $(PROG).o
+	rm -f $(PROG) $(PROG).c $(OBJ)
 
 cclean: clean

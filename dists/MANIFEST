@@ -110,6 +110,7 @@ src/sdlui/gfx/alerts.txt
 src/sdlui/gfx/labels.txt
 src/test/Makefile
 src/test/chklogic.c
+src/test/chkredo.c
 src/windows/windows.mk
 src/windows/cross-build.sh
 dists/brainjam.rb.in

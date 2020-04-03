@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "./gen.h"
 #include "./decls.h"
 #include "redo/redo.h"
@@ -413,7 +414,7 @@ static int testgamestate(void)
  * The main() function.
  */
 
-int main(void)
+void chklogic(void)
 {
-    return testgamestate();
+    assert(testgamestate() == 0);
 }
