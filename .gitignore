@@ -18,5 +18,5 @@ src/test/chklogic
 src/brainjam
 src/brainjam.exe
 src/windows/app.ico
-test/runtests
-test/runtests.c
+src/test/runtests
+src/test/runtests.c
