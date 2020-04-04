@@ -1,55 +1,49 @@
-(Note: This document contains the same texts that are readable from
-within the program.)
+(Note: This document has the same information that appears inside the
+program.)
 
 
 1. Rules of the Game
 
-At the start, use the list to select the number of a game to play.
-Each number corresponds to a different initial ordering of cards.
-There are no unsolvable games in the list. Once you select a game, you
-will see the starting layout of the game.
-
-The layout consists of three areas:
+The card layout consists of three areas:
 
 * the four foundations at top left;
-* the four reserves at top right;
-* and the eight columns of the tableau.
+* the four reserves at top right; and
+* the eight columns of the tableau.
 
-The game begins with the complete deck being dealt onto the tableau.
-The object of the game is to move all of the cards onto the four
-foundations.
+The game begins with the complete deck being dealt to the tableau,
+face up. The object of the game is to move all of the cards onto the
+four foundations.
 
 The foundations are to be built up, from Ace to King, in suit. A card
 can only be moved to a foundation if the next lower card of the same
-suit is currently showing (or if it an Ace being moved onto an empty
-foundation).
+suit is already moved there (or if it is an Ace being moved onto an
+empty foundation).
 
 Each of the four reserves can temporarily hold any one card. Cards in
 the reserve can always be moved, but cannot be built upon.
 
-In the tableau, only the last card in each column is available to
-move. In addition, the last card in each column can be built upon, but
-only going downwards and staying in suit.
+In the tableau, only the last-played card in each column is available
+to move. In addition, the last card in each column can be built upon,
+but only going downwards and staying in suit.
 
-For example, if the 3 of clubs was the last card in a tableau column,
-it could be moved onto a tableau column only if the 4 of clubs was the
-last card in that column. Or it could be moved to the clubs'
-foundation pile, but only if the 2 of clubs had already been moved
-there. If neither of these are possible, the card could still be moved
-onto an empty reserve or an empty tableau column.
+For example, if the 3 of clubs was available to move, it could be
+moved onto a tableau column only if the 4 of clubs was the last card
+in that column. Or, it could be moved to the clubs' foundation pile, if
+the 2 of clubs had already been moved there. If neither of these are
+possible, the card could still be moved to any empty reserve.
 
 If a tableau column is emptied of cards, any available card can then
 be played there.
 
 Since it is never detrimental to do so, the program will automatically
 move cards onto the foundations once it becomes possible to do so.
-However, if you find it distracting, you can turn off this behavior
-from the options menu.
+However, if you find it distracting, you can turn this off via the
+options menu.
 
 At any time, you can leave a game and return to the initial display of
-the list of available games. Your move history (and answer, if any)
+the list of available games. Your move history (and solution, if any)
 will be remembered, and if you return to the game at a later time you
-can use redo to pick up where you left off.
+can use the redo command to pick up where you left off.
 
 
 2. How to Play (graphical interface)
@@ -59,7 +53,8 @@ card has a legal move, it will be made.
 
 If there is more than one legal move, the program will choose one. The
 program will generally prefer moves that maximize your options (such
-as moving a card onto a empty tableau column over an empty reserve).
+as moving a card to an empty tableau column rather than an empty
+reserve, since the former can also be built upon).
 
 You can select an alternate destination for your move by using the
 right mouse button instead, or by holding down the Shift key while
@@ -81,17 +76,23 @@ destination.
 As you are playing, the current number of moves is displayed in the
 top right corner.
 
-If at any time, no legal moves are available, a U-turn icon will
-appear at right, below the move count, and you will need to use undo
-in order to proceed. When you complete a game, a checkered-flag icon
-will appear instead. In this situation you can also use undo if you
-wish to try to improve on your answer.
+If at any time no legal moves are available, a U-turn icon will appear
+at the top of the layout, and you will need to use undo in order to
+proceed. When you complete a game, a checkered-flag icon will appear
+instead. (You can use undo in this situation as well, if you wish to
+try to improve your answer. Otherwise, just use the back button in the
+bottom right corner to return to the game selection display.)
 
 If you are playing a game that you have already solved, then the
 number of moves in your answer will be displayed at bottom right, so
-you can see what you are trying to improve. Directly below that will
-be the number of moves in the shortest possible answer, so you can see
-how much room there is for improvement.
+that you can see the number you are trying to beat. Directly below
+that, the number of moves in the shortest possible answer is shown, so
+that you can also see how much room there is for improvement.
+
+The button with the gear icon will open a popup box that will allow
+you to change some of the game's settings. You can turn card movement
+on or off, and some other cosmetic features. You can also turn on the
+branching redo feature from here.
 
 
 3. Branching Redo
@@ -123,7 +124,7 @@ represented by the total number of moves in the answer. This allows
 you to more easily see which moves are part of shorter answers.
 
 Sometimes while trying a new sequence of moves, you will return to a
-state you had already visited via a different path. In that case, an
+point you had already reached via a different path. In that case, an
 indicator will appear below your current move count, showing the
 number of moves in the other path. When the other path is shorter, you
 can switch over to that path if you choose. If, on the other hand,
@@ -133,22 +134,23 @@ solved this game, and this change creates a new, shorter answer, then
 it will immediately be saved as your current best answer.
 
 In addition to the above commands, the program also allows you to
-bookmark a state, so that you can more easily return to it again. When
-a state is bookmarked, an indicator appear on the right-hand side. You
-can switch between the current state and the bookmarked state.
+bookmark any point in your history, so that you can easily return to
+it again. When you do this, a bookmark indicator will appear on the
+right-hand side of the display. You can also jump back and forth
+between your current position and a bookmarked position.
 
 See the list of redo key commands for more information.
 
 
 4. Credits and License
 
-Copyright (C) 2017 by Brian Raiter <breadbox@muppetlabs.com>
+Copyright (C) 2017-2020 Brian Raiter <breadbox@muppetlabs.com>
 License: GNU GPL version 3 or later; see <http://gnu.org/licenses/gpl.html>.
 
 This program is written by Brian Raiter. It is based on the original
-Windows program written by Peter Liepa. The configurations were
-created by Peter Liepa, with assistance from Bert van Oortmarssen, and
-are used here with their permission.
+Windows program, which was written by Peter Liepa. The configurations
+were created by Peter Liepa, with assistance from Bert van
+Oortmarssen, and are used here with their permission.
 
 The rules of Brainjam are based on "Baker's Game", as described by
 Martin Gardner in the June 1968 issue of Scientific American.
