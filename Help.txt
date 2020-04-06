@@ -1,5 +1,5 @@
-(Note: This document has the same information that appears inside the
-program.)
+(Note: This document is a copy of the text that appears in the
+program's help section.)
 
 
 1. Rules of the Game
@@ -152,7 +152,7 @@ Windows program, which was written by Peter Liepa. The configurations
 were created by Peter Liepa, with assistance from Bert van
 Oortmarssen, and are used here with their permission.
 
-The rules of Brainjam are based on "Baker's Game", as described by
+The rules of Brain Jam are based on "Baker's Game", as described by
 Martin Gardner in the June 1968 issue of Scientific American.
 
 This program is free software: you can redistribute it and/or modify

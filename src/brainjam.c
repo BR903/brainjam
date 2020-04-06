@@ -31,7 +31,7 @@ static char const *versiontext =
     " configurations were created by Peter Liepa, with assistance from Bert"
     " van Oortmarssen, and are used here with their permission.\n"
     "\n"
-    "The rules of Brainjam are based on \"Baker's Game\", as described by"
+    "The rules of Brain Jam are based on \"Baker's Game\", as described by"
     " Martin Gardner in the June 1968 issue of Scientific American.";
 
 /* The program's license information.
