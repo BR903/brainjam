@@ -1136,7 +1136,6 @@ static void sdlui_ungetinput(command_t cmd, int msec)
 static void sdlui_ding(void)
 {
     dinging = TRUE;
-    updatedisplay = TRUE;
 }
 
 /* Run the options display.
