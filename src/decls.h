@@ -90,10 +90,10 @@
     ((p) >= FOUNDATION_PLACE_1ST && (p) < FOUNDATION_PLACE_END)
 #define isreserveplace(p)  \
     ((p) >= RESERVE_PLACE_1ST && (p) < RESERVE_PLACE_END)
-#define tableauplace(n)  (n)
+#define tableauplace(n)  (TABLEAU_PLACE_1ST + (n))
 #define reserveplace(n)  (RESERVE_PLACE_1ST + (n))
 #define foundationplace(n)  (FOUNDATION_PLACE_1ST + (n))
-#define tableauplaceindex(p)  (p)
+#define tableauplaceindex(p)  ((p) - TABLEAU_PLACE_1ST)
 #define reserveplaceindex(p)  ((p) - RESERVE_PLACE_1ST)
 #define foundationplaceindex(p)  ((p) - FOUNDATION_PLACE_1ST)
 
@@ -131,7 +131,7 @@
  * why they don't have their own typedef.)
  */
 
-/* Testing for a valid move ID.
+/* Testing for a move ID's type.
  */
 #define MOVEID_CARD_MASK  0x3F
 #define MOVEID_ALT_FLAG  0x40

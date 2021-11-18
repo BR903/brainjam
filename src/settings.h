@@ -1,9 +1,9 @@
 /* ./settings.h: managing the settings for the program.
  *
- * The settings are a small set of values (mostly boolean), that
- * affect program behavior and persist across invocations. The user
- * can modify them via the options menu, the initialization file, and
- * the command-line options. These functions manage the access and
+ * The settings are a small set of values (mostly boolean) that affect
+ * program behavior and persist across invocations. The user can
+ * modify them via the options menu, the initialization file, and the
+ * command-line options. These functions manage the access and
  * modification of these values.
  */
 

@@ -209,7 +209,7 @@ static void yowzitch(void)
 
 /* Display the rules text with an appropriate header and exit.
  */
-static void rhoulz(void)
+static void rouxlz(void)
 {
     printf("Brain Jam: %s\n\n", rulestitle);
     printflowedtext(rulestext);
@@ -253,10 +253,10 @@ static void readcmdline(int argc, char *argv[], settingsinfo *settings)
           case 'r':     settings->readonly = TRUE;              break;
           case 'v':     validateonly = TRUE;                    break;
           case 'd':     dirdisplayonly = TRUE;                  break;
-          case 'H':     yowzitch();
-          case 'V':     printflowedtext(versiontext);
-          case 'L':     printflowedtext(licensetext);
-          case 'R':     rhoulz();
+          case 'H':     yowzitch();                             break;
+          case 'V':     printflowedtext(versiontext);           break;
+          case 'L':     printflowedtext(licensetext);           break;
+          case 'R':     rouxlz();                               break;
           default:
             warn("(try \"--help\" for more information)");
             exit(EXIT_FAILURE);
@@ -298,9 +298,9 @@ static void readcmdline(int argc, char *argv[], settingsinfo *settings)
  * The main() function.
  */
 
-/* Parse the command line, initialize the
- * settings, start the UI, register the interface-independent help
- * texts, and enter the game selection loop.
+/* Parse the command line, initialize the settings, start the UI,
+ * register the interface-independent help texts, and enter the game
+ * selection loop.
  */
 int main(int argc, char *argv[])
 {

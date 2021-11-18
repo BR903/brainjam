@@ -8,8 +8,6 @@
 #ifndef _gen_h_
 #define _gen_h_
 
-#include <stddef.h>
-
 #ifndef TRUE
 #define TRUE  1
 #define FALSE  0

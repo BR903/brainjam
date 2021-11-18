@@ -198,7 +198,7 @@ static void saveextrastatedata(redo_session const *session,
  * are kept in a linked list by reusing the cdr field; a NULL value in
  * the p field indicates that a struct is unused. The redo_branch
  * chunks reserve the first element, instead of the last, to hold the
- * pointer to the next chunk. redo_session usees the bfree and barray
+ * pointer to the next chunk. redo_session uses the bfree and barray
  * fields to point to the heads of these lists.
  */
 

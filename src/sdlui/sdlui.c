@@ -1,4 +1,4 @@
-/* sdlui/sdlui.c: the graphical user interface.
+/* sdlui/sdlui.c: the graphical user interface, implemented using SDL.
  */
 
 #include <stdio.h>

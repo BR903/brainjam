@@ -189,7 +189,7 @@ static int runselectionloop(int selected)
 }
 
 /*
- * API functions.
+ * API function.
  */
 
 /* A wrapper around runselectionloop() that adds and then removes the
