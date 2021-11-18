@@ -24,6 +24,34 @@
  */
 static char const *filename;
 
+/* A wrapper function to read one line of input into a buffer. The
+ * terminating newline is not included in the returned string. The
+ * provided buffer must be at least 256 bytes in size. (If the input
+ * line is longer than this, extra characters are discarded.) The
+ * return value is the length of the line, or negative on EOF or input
+ * error.
+ */
+static int readline(FILE *fp, char *line)
+{
+    int len, ch;
+
+    len = 0;
+    for (;;) {
+        ch = fgetc(fp);
+        if (ch == EOF) {
+            if (len == 0)
+                return -1;
+            break;
+        }
+        if (ch == '\n')
+            break;
+        if (len < 255)
+            line[len++] = ch;
+    }
+    line[len] = '\0';
+    return len;
+}
+
 /* Output a value as a part of a bitstream. The bitlen argument
  * indicates the number of bits to use from value. The bits are output
  * going from most to least significant bit. Thus, if the first call
@@ -126,10 +154,9 @@ static int outputconfig(FILE *outfile, char const *line)
  */
 static int translate(char const *infilename, char const *outfilename)
 {
+    char line[256];
     FILE *infile;
     FILE *outfile;
-    char *line;
-    size_t size;
 
     infile = fopen(infilename, "r");
     if (!infile) {
@@ -143,17 +170,14 @@ static int translate(char const *infilename, char const *outfilename)
     }
 
     filename = infilename;
-    line = NULL;
-    size = 0;
-    while (getline(&line, &size, infile) >= 0) {
-        if (*line == '\0' || *line == '\n' || *line == '#')
+    while (readline(infile, line) >= 0) {
+        if (*line == '\0' || *line == '#')
             continue;
         if (!outputconfig(outfile, line)) {
             perror(outfilename);
             return 0;
         }
     }
-    free(line);
     if (!outputbits(outfile, 0, 0))
         return 0;
     if (fclose(outfile)) {
@@ -169,7 +193,7 @@ static int translate(char const *infilename, char const *outfilename)
 int main(int argc, char *argv[])
 {
     if (argc != 3) {
-        fprintf(stderr, "Usage: mkcfgs INPUT.TXT OUTPUT.BIN\n");
+        fprintf(stderr, "Usage: mkgames INPUT.TXT OUTPUT.BIN\n");
         return 0;
     }
     return translate(argv[1], argv[2]) ? 0 : EXIT_FAILURE;
