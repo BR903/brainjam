@@ -30,22 +30,25 @@ usage ()
   echo ""
   echo "  -m32                  Build a 32-bit target"
   echo "  --target=TARGET       Force the target to TARGET"
+  echo "  --host=HOST           Force the host to HOST"
   echo "  --prefix=PREFIX       Force the path prefix to PREFIX"
   echo "  --help                Display this help and exit"
   echo "  --version             Display the version information and exit"
   echo ""
   echo "After any options to cross-build.sh should be the verb \"configure\","
-  echo "\"make\", \"exec\", or \"check\". This tool should be run from the"
-  echo "directory containing the configure script or makefile, as per usual."
-  echo "The verb \"exec\" runs an arbitrary shell command. The verb \"check\""
-  echo "just validates the target and prefix, and exits."
+  echo "\"make\", \"exec\", \"sh\", or \"check\". This tool should be run from"
+  echo "the directory containing the configure script or makefile, as per"
+  echo "usual. The verb \"exec\" runs an arbitrary command, and \"sh\" runs an"
+  echo "arbitrary shell command. (Note that \"sh\" can be replaced with the"
+  echo "name of a specific shell, which will run the command in a subshell.)"
+  echo "The verb \"check\" does nothing, but validates the other settings."
   exit
 }
 
 # Version number.
 version ()
 {
-  echo "cross-build.sh version 1.0"
+  echo "cross-build.sh version 1.0.1"
   exit
 }
 
@@ -67,6 +70,7 @@ while test $# -gt 0 ; do
     -m32)       proc=i686 ;;
     -m64)       proc=x86_64 ;;
     --target=*) TARGET="${1#--target=}" ;;
+    --host=*)   HOST="${1#--host=}" ;;
     --prefix=*) prefix="${1#--prefix=}" ;;
     --help)     usage ;;
     --version)  version ;;
@@ -97,9 +101,10 @@ if test "$proc" = "x86_64" && test "$(uname -m)" != "x86_64" ; then
   fail "cannot build a 64-bit target"
 fi
 
-# Finalize values for TARGET and BUILD.
+# Finalize values for TARGET, HOST, and BUILD.
 test -z "$proc" && proc="$(uname -m)"
 test -z "$TARGET" && TARGET="${proc}-w64-mingw32"
+test -z "$HOST" && HOST="${proc}-linux-gnu"
 BUILD="${proc}-linux"
 
 # Determine the prefix for the cross-compilation tools. The tools are
@@ -127,9 +132,15 @@ if test -z "$prefix" ; then
 fi
 test -z "$prefix" && fail "unable to find cross-compilation tools."
 
-# Set the environment.
-PATH="$prefix/bin:$PATH"
-export PATH
+# Stash the original environment. The user can access these in order
+# to temporarily build for the host.
+export HOST_PATH="$PATH"
+export HOST_CC="$CC"
+export HOST_CXX="$CXX"
+export HOST_PKG_CONFIG_PATH="$PKG_CONFIG_PATH"
+
+# Set the new environment.
+export PATH="$prefix/bin:$HOST_PATH"
 export CC="$TARGET-gcc -static-libgcc"
 export CXX="$TARGET-g++ -static-libgcc"
 export WINDRES="$TARGET-windres"
@@ -141,14 +152,14 @@ fi
 case "$verb" in
   check)
     echo "Target: $TARGET"
+    echo "Host:   $HOST"
     echo "Build:  $BUILD"
     echo "Prefix: $prefix"
     ;;
   configure | ./configure)
     cache="$TARGET-config.cache"
-    ./configure --target="$TARGET" --host="$TARGET" --build="$BUILD" \
-                --prefix="$prefix" \
-                --cache-file="$cache" "$@"
+    ./configure --target="$TARGET" --host="$HOST" --build="$BUILD" \
+                --prefix="$prefix" --cache-file="$cache" "$@"
     result=$?
     rm -f "$cache"
     exit $result
