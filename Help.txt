@@ -144,7 +144,7 @@ See the list of redo key commands for more information.
 
 4. Credits and License
 
-Copyright (C) 2017-2020 Brian Raiter <breadbox@muppetlabs.com>
+Copyright (C) 2017-2021 Brian Raiter <breadbox@muppetlabs.com>
 License: GNU GPL version 3 or later; see <http://gnu.org/licenses/gpl.html>.
 
 This program is written by Brian Raiter. It is based on the original

@@ -21,7 +21,7 @@
 static char const *versiontitle = "Credits";
 static char const *versiontext =
     "Brain Jam: version " VERSION_ID "\n"
-    "Copyright " GLYPH_COPYRIGHT " 2017-2020 Brian Raiter"
+    "Copyright " GLYPH_COPYRIGHT " 2017-2021 Brian Raiter"
     " <breadbox@muppetlabs.com>\n"
     "License: GNU GPL version 3 or later; see"
     " <http://gnu.org/licenses/gpl.html>.\n"

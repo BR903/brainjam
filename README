@@ -71,7 +71,7 @@ be sufficient to ensure all these dependencies are satisfied:
   sudo apt install libsdl2-dev libsdl2-ttf-dev libpng-dev libncursesw5-dev libfontconfig-dev
 
 Note that you can use the ./configure script to remove some of these
-dependencies the cost of decreased functionality. The option
+dependencies in exchange for decreased functionality. The option
 "--without-ncurses" will drop the ncurses dependency, at the cost of
 removing the text-terminal interface. Similarly, the option
 "--without-sdl" will remove the dependency on SDL2, SDL2_ttf, and
@@ -110,7 +110,7 @@ as play a version that runs in the browser.
 
   * LICENSE
 
-Copyright (C) 2017-2020 Brian Raiter.
+Copyright (C) 2017-2021 Brian Raiter.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -138,7 +138,7 @@ from Bert van Oortmarssen, and are used here with their permission.
 
 The graphics that appear in Brain Jam are taken from public domain
 sources, and/or have been explicitly placed in the public domain by
-their creators.
+their creators. The program's icon was drawn by Kay Lousberg.
 
 
   * CONTACT

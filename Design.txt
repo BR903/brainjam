@@ -73,7 +73,7 @@ distinction between internal and external inclusions easier to spot.)
 
 There is only one makefile for the entire project (more or less),
 which naturally is found in the top-level directory. The makefile
-defines the usual variables, $(CFLAGS) and so on, as well as an
+defines the usual variables, $(CFLAGS) and so on, as well as a
 variable $(SRC). The makefile then includes a file named "modules.mk"
 from every subdirectory. Each modules.mk then appends to the $(SRC)
 variable, creating a master list of source files. (These files can
@@ -142,8 +142,8 @@ answers file on disk is updated whenever a change is made.
 
 The "gamedata" module owns the list of 1500 unique deck configurations
 that make each game different. Since this list is completely static,
-this module actually contains no code; it's just the data representing
-the decks.
+this module actually contains no code; it just holds the data
+representing the decks.
 
 
   ** THE FUNCTIONAL MODULES
@@ -259,9 +259,9 @@ game states, so that even though it has no insight into the game
 logic, it can provide a history of how the player arrived at any given
 state. This fact is used e.g. to produce the saved answer when the
 user completes a game. This feature also comes into play when the user
-finds a new set of moves that lead to a previously seen state. The
+finds a new set of moves that leads to a previously seen state. The
 redo module can determine which path used the fewest number of moves,
-and, if applicable, can paste together disparate parts to produce a
+and can, if applicable, paste together disparate parts to produce a
 new, shorter answer.
 
 In order for this to work, the "game" module maintains a gameplayinfo
@@ -282,6 +282,6 @@ uppermost (and therefore playable). As their combined size is 68
 bytes, it is not very expensive to keep a complete history of visited
 game states in memory.
 
-If you're curious to learn more about the redo library, see
+As mentioned, the redo module is actually a standalone library. See
 <http://www.muppetlabs.com/~breadbox/software/libredo.html> for the
 offical distribution and API documentation.
