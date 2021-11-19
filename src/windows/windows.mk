@@ -12,7 +12,7 @@ GENRES += windows/app.ico
 windows/appres.o: windows/app.ico
 	echo "1 ICON $^" | $(WINDRES) -O coff -o $@
 
-windows/app.ico: $(wildcard windows/icon*.png) sdlui/gfx/icon.png
+windows/app.ico: $(wildcard windows/icon*.png)
 	icotool -c -o $@ $^
 
 # Dummy dependency file, created to avoid generating warnings.
