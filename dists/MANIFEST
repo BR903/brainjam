@@ -54,9 +54,9 @@ src/game/internal.h
 src/game/play.c
 src/game/state.c
 src/gamedata/module.mk
-src/gamedata/Makefile
+src/gamedata/gamedata.bin
 src/gamedata/gamedata.txt
-src/gamedata/mkgames.c
+src/gamedata/mkgames.py
 src/redo/module.mk
 src/redo/redo.c
 src/redo/redo.h

@@ -132,15 +132,9 @@ if test -z "$prefix" ; then
 fi
 test -z "$prefix" && fail "unable to find cross-compilation tools."
 
-# Stash the original environment. The user can access these in order
-# to temporarily build for the host.
-export HOST_PATH="$PATH"
-export HOST_CC="$CC"
-export HOST_CXX="$CXX"
-export HOST_PKG_CONFIG_PATH="$PKG_CONFIG_PATH"
-
 # Set the new environment.
-export PATH="$prefix/bin:$HOST_PATH"
+PATH="$prefix/bin:$PATH"
+export PATH
 export CC="$TARGET-gcc -static-libgcc"
 export CXX="$TARGET-g++ -static-libgcc"
 export WINDRES="$TARGET-windres"

@@ -12,8 +12,6 @@ config.status
 autom4te.cache/*
 src/cfg.mk
 src/version.h
-src/gamedata/gamedata.bin
-src/gamedata/mkgames
 src/test/chklogic
 src/brainjam
 src/brainjam.exe
