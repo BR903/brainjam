@@ -14,8 +14,13 @@
 
 .PHONY: all check install clean cclean
 
-# Define the configuration symbols.
+# Define the configuration symbols. (This file is created by
+# ./configure, but "make clean" is permitted to run without it.)
+ifeq ("clean","$(MAKECMDGOALS)")
+-include ./cfg.mk
+else
 include ./cfg.mk
+endif
 
 # The name of the game.
 PROG := $(NAME)$(EXEEXT)
