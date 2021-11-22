@@ -354,7 +354,6 @@ uimap cursesui_initializeui(void)
         ui.rendergame = NULL;
         return ui;
     }
-    atexit(shutdown);
 
     cursesui_addhelpsection(commandshelptitle, commandshelptext, TRUE);
     cursesui_addhelpsection(gameplayhelptitle, gameplayhelptext, TRUE);

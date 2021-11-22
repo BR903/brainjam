@@ -320,22 +320,24 @@ static void releasetexture(SDL_Texture *texture)
  */
 static void shutdown(void)
 {
-    if (_graph.smallfont) {
-        TTF_CloseFont(_graph.smallfont);
-        _graph.smallfont = NULL;
-    }
-    if (_graph.largefont) {
-        TTF_CloseFont(_graph.largefont);
-        _graph.largefont = NULL;
-    }
-    if (_graph.renderer) {
-        SDL_DestroyRenderer(_graph.renderer);
-        _graph.renderer = NULL;
-    }
-    if (TTF_WasInit())
+    if (TTF_WasInit()) {
+        if (_graph.smallfont) {
+            TTF_CloseFont(_graph.smallfont);
+            _graph.smallfont = NULL;
+        }
+        if (_graph.largefont) {
+            TTF_CloseFont(_graph.largefont);
+            _graph.largefont = NULL;
+        }
         TTF_Quit();
-    if (SDL_WasInit(SDL_INIT_VIDEO))
+    }
+    if (SDL_WasInit(SDL_INIT_VIDEO)) {
+        if (_graph.renderer) {
+            SDL_DestroyRenderer(_graph.renderer);
+            _graph.renderer = NULL;
+        }
         SDL_Quit();
+    }
 }
 
 /* Initialize the SDL libraries. Create the window and renderer, and
@@ -345,11 +347,11 @@ static int startup(void)
 {
     SDL_Surface *image;
 
-    atexit(shutdown);
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))
         return err("SDL_Init");
     if (TTF_Init())
         return err("TTF_Init");
+    atexit(shutdown);
 
     window = SDL_CreateWindow("Brian Jam",
                               SDL_WINDOWPOS_UNDEFINED,
