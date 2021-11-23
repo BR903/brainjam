@@ -1,7 +1,7 @@
 dnl * configure.ac: The autoconf configuration script.
 dnl *
 
-AC_INIT([Brain Jam], [0.9.5], [breadbox@muppetlabs.com], [brainjam],
+AC_INIT([Brain Jam], [1.0], [breadbox@muppetlabs.com], [brainjam],
         [http://www.muppetlabs.com/~breadbox/software/brainjam.html])
 
 

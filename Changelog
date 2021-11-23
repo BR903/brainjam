@@ -1,3 +1,22 @@
+* 2021 Nov 23: version 1.0
+
+	After a long pointless delay, the official 1.0 release is here.
+
+	There are few outwardly visible changes from the last 0.x release.
+	The largest change is the replacement of the game's placeholder
+	icon with a nice-looking one, drawn by a professional artist.
+
+	The build process has been modified in places, in particular to
+	remove the C-based tool introduced in 0.9.1. Having a build tool
+	created during the build turned out to be a problem when
+	cross-compiling. Instead, the binary data file is now simply
+	included in the distribution. (The python script has been
+	restored, but its use is not required for building.)
+
+	Some more grammatical errors in the comments and documentation
+	have been found and fixed, along with some minor bugs, and the
+	layout of the splash screen was tweaked.
+
 * 2020 Mar 27: version 0.9.5
 
 	Huge, general sweep throughout the code base, including the
@@ -49,7 +68,7 @@
 	turned out to be easier to deal with than having the build process
 	have a dependency on libpng.
 
-	The python scripts are no long a mandatory part of the build
+	The python scripts are no longer a mandatory part of the build
 	process. One has been replaced with a short C program, and the
 	other has been made optional. Taking python out of the build
 	dependencies should simplify the process of making packages.
