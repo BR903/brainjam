@@ -1,7 +1,6 @@
 # gamedata/module.mk: build rules for the gamedata module.
 
-RES += gamedata/gamedata.txt
-GENRES += gamedata/gamedata.bin
+RES += gamedata/gamedata.bin
 
 # mkgames.py creates a compressed binary representation of the full
 # set of available games.
