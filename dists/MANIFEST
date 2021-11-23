@@ -113,6 +113,12 @@ src/test/chklogic.c
 src/test/chkredo.c
 src/windows/windows.mk
 src/windows/cross-build.sh
+src/windows/icon128.png
+src/windows/icon64.png
+src/windows/icon32.png
+src/windows/icon32-8bit.png
+src/windows/icon16.png
+src/windows/icon16-8bit.png
 dists/brainjam.rb.in
 dists/install.nsi
 dists/Makefile

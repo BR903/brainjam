@@ -126,8 +126,8 @@ Function MakeDialog
   ${NSD_Check} $CtrlShortcut
 
   ${NSD_CreateLabel} 0 96u 100% 16u \
-      "Brain Jam is free software. See the README.txt included with\
- this program for more information, or visit this program's web page."
+      "Brain Jam is free software. See the README.txt included with \
+this program for more information, or visit this program's web page."
 
   ${NSD_CreateLink} 16u 116u -32u 8u \
       "http://www.muppetlabs.com/~breadbox/software/brainjam.html    "
