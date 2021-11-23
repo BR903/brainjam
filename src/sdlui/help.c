@@ -598,11 +598,12 @@ static void render(void)
  * Managing user input.
  */
 
-/* Scroll the current text by a relative amount, using animation to
- * keep the movement smooth. The return value is cmd_redraw or
- * cmd_none, depending on whether or not a visible change took place.
+/* Scroll the current text by a relative amount. If useanim is true,
+ * use animation to keep the movement smooth. The return value is
+ * cmd_redraw or cmd_none, depending on whether or not a visible
+ * change took place.
  */
-static command_t scrolltext(int delta)
+static command_t scrolltext(int delta, int useanim)
 {
     animinfo *anim;
     int value;
@@ -614,6 +615,10 @@ static command_t scrolltext(int delta)
         value = scroll.range - 1;
     if (value == scroll.value)
         return cmd_none;
+    if (!useanim) {
+        scroll.value = value;
+        return cmd_redraw;
+    }
 
     anim = getaniminfo();
     anim->steps = 8;
@@ -670,12 +675,12 @@ static command_t changesection(int delta, int wraparound)
 static command_t applykeycmd(SDL_Keysym keysym)
 {
     switch (keysym.sym) {
-      case SDLK_UP:             return scrolltext(-lineheight);
-      case SDLK_DOWN:           return scrolltext(+lineheight);
-      case SDLK_PAGEUP:         return scrolltext(-scroll.pagesize);
-      case SDLK_PAGEDOWN:       return scrolltext(+scroll.pagesize);
-      case SDLK_HOME:           return scrolltext(-scroll.range);
-      case SDLK_END:            return scrolltext(+scroll.range);
+      case SDLK_UP:             return scrolltext(-lineheight, TRUE);
+      case SDLK_DOWN:           return scrolltext(+lineheight, TRUE);
+      case SDLK_PAGEUP:         return scrolltext(-scroll.pagesize, TRUE);
+      case SDLK_PAGEDOWN:       return scrolltext(+scroll.pagesize, TRUE);
+      case SDLK_HOME:           return scrolltext(-scroll.range, TRUE);
+      case SDLK_END:            return scrolltext(+scroll.range, TRUE);
       case SDLK_TAB:
         return changesection(keysym.mod & KMOD_SHIFT ? -1 : +1, TRUE);
     }
@@ -689,7 +694,7 @@ static command_t applykeycmd(SDL_Keysym keysym)
  */
 static command_t eventhandler(SDL_Event *event)
 {
-    int n, x, y;
+    int x, y;
 
     if (scrolleventhandler(event, &scroll))
         return cmd_redraw;
@@ -707,13 +712,8 @@ static command_t eventhandler(SDL_Event *event)
         SDL_GetMouseState(&x, &y);
         if (rectcontains(&listrect, x, y))
             return changesection(event->wheel.y > 0 ? -1 : +1, FALSE);
-        if (rectcontains(&textrect, x, y)) {
-            n = scroll.value - lineheight * event->wheel.y;
-            if (n >= 0 && n < scroll.range) {
-                scroll.value = n;
-                return cmd_redraw;
-            }
-        }
+        if (rectcontains(&textrect, x, y))
+            return scrolltext(-lineheight * event->wheel.y, FALSE);
         break;
     }
     return cmd_none;
