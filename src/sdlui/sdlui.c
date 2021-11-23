@@ -69,7 +69,7 @@ typedef struct numbercacheinfo {
 /* A generic font. This is used if the user doesn't specify the name
  * of a preferred font.
  */
-static char const *defaultfontname = "sans";
+static char const *defaultfontname = "sans arial";
 
 /* The help text for the initial list display. Since this might be the
  * first instructions that the user sees, it tries to be a little
