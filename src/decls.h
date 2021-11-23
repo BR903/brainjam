@@ -54,8 +54,9 @@
 #define EMPTY_RESERVE  mkcard(-1, 3)
 #define EMPTY_FOUNDATION(s)  mkcard(0, s)
 #define isemptycard(c)  ((c) < mkcard(1, 0))
-#define JOKER  mkcard(14, 0)
-#define JOKER2  mkcard(14, 1)
+#define JOKER_LOW  mkcard(14, 0)
+#define JOKER_HIGH  mkcard(14, 1)
+#define JOKER  JOKER_HIGH
 #define CARDBACK1  mkcard(14, 2)
 #define CARDBACK2  mkcard(14, 3)
 
