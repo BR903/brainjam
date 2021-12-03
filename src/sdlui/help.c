@@ -30,7 +30,6 @@ typedef struct sectioninfo {
 typedef struct lineinfo {
     int         offset;         /* offset of this line in the string */
     int         len;            /* length of this line in the string */
-    int         w;              /* width in pixels of this line */
 } lineinfo;
 
 /* The complete list of sections making up the display.
@@ -279,7 +278,7 @@ static lineinfo *wraptext(sectioninfo const *section, int maxwidth,
     char *buffer;
     char const *text;
     int linecount;
-    int lastlen, lastwidth, pastfirst;
+    int lastlen, pastfirst;
     int ch, i, w;
 
     text = section->text;
@@ -288,7 +287,6 @@ static lineinfo *wraptext(sectioninfo const *section, int maxwidth,
 
     while (*text) {
         lastlen = 0;
-        lastwidth = 0;
         if (*text != '\n') {
             i = 0;
             pastfirst = FALSE;
@@ -309,7 +307,6 @@ static lineinfo *wraptext(sectioninfo const *section, int maxwidth,
                 if (w > maxwidth)
                     break;
                 lastlen = i;
-                lastwidth = w;
                 if (ch == '\n' || ch == '\0')
                     break;
                 if (pastfirst) {
@@ -324,7 +321,6 @@ static lineinfo *wraptext(sectioninfo const *section, int maxwidth,
         lines = reallocate(lines, (linecount + 1) * sizeof *lines);
         lines[linecount].offset = text - section->text;
         lines[linecount].len = lastlen;
-        lines[linecount].w = lastwidth;
         ++linecount;
         text += lastlen;
         if (*text == '\n')
@@ -357,7 +353,7 @@ static lineinfo *tabulatetext(sectioninfo const *section, int **pwidths,
     lineinfo *lines;
     int *widths;
     char *buffer;
-    int linecount, columncount, fullcount, i, n;
+    int linecount, columncount, fullcount, i, n, w;
 
     text = section->text;
     linecount = 0;
@@ -389,9 +385,9 @@ static lineinfo *tabulatetext(sectioninfo const *section, int **pwidths,
             buffer = getbuffer(lines[n].len);
             memcpy(buffer, text + lines[n].offset, lines[n].len);
             buffer[lines[n].len] = '\0';
-            TTF_SizeUTF8(_graph.smallfont, buffer, &lines[n].w, NULL);
-            if (widths[n / linecount] < lines[n].w)
-                widths[n / linecount] = lines[n].w;
+            TTF_SizeUTF8(_graph.smallfont, buffer, &w, NULL);
+            if (widths[n / linecount] < w)
+                widths[n / linecount] = w;
             if (text[i] == '\0')
                 break;
             else if (text[i] == '\n')
