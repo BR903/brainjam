@@ -66,11 +66,6 @@ typedef struct numbercacheinfo {
     int         h;              /* height of cached texture */
 } numbercacheinfo;
 
-/* A generic font. This is used if the user doesn't specify the name
- * of a preferred font.
- */
-static char const *defaultfontname = "sans arial";
-
 /* The help text for the initial list display. Since this might be the
  * first instructions that the user sees, it tries to be a little
  * extra friendly.
@@ -401,18 +396,17 @@ static SDL_Point measurelayout(SDL_Point size)
 }
 
 /* Create the program's fonts from the given font name, using the
- * playing card drop height to select appropriate character sizes.
- * Note that the fontref object needs to be preserved for the lifetime
- * of the fonts, but since the font lifetime is just the lifetime of
- * the program, this is done by intentionally leaking the pointer.
+ * playing card drop height to select appropriate character sizes. If
+ * fontname is NULL, the GUI's default font will be used. Note that
+ * the fontref object needs to be preserved for the lifetime of the
+ * fonts, but since the font lifetime is just the lifetime of the
+ * program, this is done by intentionally leaking the pointer.
  */
 static int createfonts(char const *fontname)
 {
     fontrefinfo *fontref;
     int smallfontsize, largefontsize;
 
-    if (!fontname)
-        fontname = defaultfontname;
     fontref = findnamedfont(fontname);
     if (!fontref) {
         SDL_SetError("Unable to locate a font with the name \"%s\"", fontname);

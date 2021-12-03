@@ -39,6 +39,7 @@ static int lookupfont(fontrefinfo *fontref);
 /* Use the fontconfig API to look up the filename of a font that the
  * program can use. The font is chosen by the given family/face name,
  * along with a requirement for various glyphs that appear in the UI.
+ * The fontname pointer can be NULL to select a default font to use.
  */
 static int lookupfont(fontrefinfo *fontref)
 {
@@ -68,7 +69,10 @@ static int lookupfont(fontrefinfo *fontref)
     FcCharSetAddChar(charset, 0x2193);
 
     result = FALSE;
-    pattern = FcNameParse((FcChar8 const*)fontref->fontname);
+    if (fontref->fontname)
+        pattern = FcNameParse((FcChar8 const*)fontref->fontname);
+    else
+        pattern = FcPatternCreate();
     if (!pattern)
         goto done;
     result = FcPatternAddCharSet(pattern, "charset", charset);
@@ -132,7 +136,10 @@ static int lookupfont(fontrefinfo *fontref)
     lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
     lf.lfQuality = DEFAULT_QUALITY;
     lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-    snprintf(lf.lfFaceName, sizeof lf.lfFaceName, "%s", fontref->fontname);
+    if (fontref->fontname)
+        snprintf(lf.lfFaceName, sizeof lf.lfFaceName, "%s", fontref->fontname);
+    else
+        lf.lfFaceName[0] = '\0';
 
     hfont = CreateFontIndirect(&lf);
     if (!hfont)
@@ -198,17 +205,19 @@ fontrefinfo *findnamedfont(char const *fontname)
     FILE *fp;
 
     fontref = allocate(sizeof *fontref);
-    fontref->fontname = strallocate(fontname);
+    fontref->fontname = fontname ? strallocate(fontname) : NULL;
     fontref->filename = NULL;
     fontref->databuf = NULL;
     fontref->bufsize = 0;
 
-    fp = fopen(fontname, "rb");
-    if (fp) {
-        fclose(fp);
-        fontref->filename = fontref->fontname;
-        fontref->fontname = NULL;
-        return fontref;
+    if (fontname) {
+        fp = fopen(fontname, "rb");
+        if (fp) {
+            fclose(fp);
+            fontref->filename = fontref->fontname;
+            fontref->fontname = NULL;
+            return fontref;
+        }
     }
 
     if (lookupfont(fontref))

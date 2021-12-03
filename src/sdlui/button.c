@@ -212,11 +212,12 @@ static SDL_Surface *makepushbuttonlabelset(SDL_Surface *label, int w, int h)
  */
 static int placecheckbox(TTF_Font *font, SDL_Rect *box)
 {
-    int baseline, boxsize, margin;
+    int baseline, boxsize, margin, y;
 
     margin = TTF_FontLineSkip(font);
     baseline = TTF_FontAscent(font);
-    TTF_GlyphMetrics(font, 't', NULL, NULL, NULL, &boxsize, NULL);
+    TTF_GlyphMetrics(font, 't', NULL, NULL, &y, &boxsize, NULL);
+    boxsize -= y;
     if (boxsize < 10 * linesize)
         boxsize = 10 * linesize;
     if (margin < boxsize + 2 * linesize)
