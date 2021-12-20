@@ -14,9 +14,9 @@
 extern "C" {
 #endif
 
-/* The library version: 0.8
+/* The library version: 0.9
  */
-#define REDO_LIBRARY_VERSION 0x0008
+#define REDO_LIBRARY_VERSION 0x0009
 
 /*
  * Types.
@@ -37,12 +37,13 @@ struct redo_position {
     redo_position *better;      /* position equal to this one in fewer moves */
     unsigned short movecount;   /* number of moves to reach this position */
     unsigned short solutionsize; /* size of best solution from this position */
-    unsigned short nextcount:12; /* number of entries in next's linked list */
-    unsigned short endpoint:1;  /* true if this position is an endpoint */
-    unsigned short setbetter:1; /* internal: set by using redo_checklater */
-    unsigned short inuse:1;     /* internal: false if not in the tree */
-    unsigned short inarray:1;   /* internal: false at the end of the array */
-    unsigned short hashvalue;   /* internal: the state hash value */
+    unsigned short nextcount;   /* number of moves in next list */
+    signed char endpoint;       /* non-zero if this position is an endpoint */
+    signed char solutionend;    /* endpoint for best solution from here */
+    unsigned int hashvalue:16;  /* internal: the state hash value */
+    unsigned int setbetter:1;   /* internal: set by redo_checkequivlater */
+    unsigned int inuse:1;       /* internal: false if not in the tree */
+    unsigned int inarray:1;     /* internal: false at the end of the array */
 };
 
 /* A labeled branch in the tree of visited states.
@@ -72,7 +73,7 @@ extern redo_session *redo_beginsession(void const *initialstate,
 
 /* Possible values for the grafting argument to redo_setgraftbehavior().
  */
-enum { redo_nograft, redo_graft, redo_copypath, redo_graftandcopy };
+enum { redo_nograft = 0, redo_graft, redo_copypath, redo_graftandcopy };
 
 /* Change the grafting behavior option. This option controls what
  * redo_addposition() does when adding a position that provides a
@@ -103,27 +104,28 @@ extern int redo_getsessionsize(redo_session const *session);
 extern void const *redo_getsavedstate(redo_position const *position);
 
 /* Return the position reached by making move from the given position.
- * NULL is returned if the there is no such branch from this position.
  * Calling this function causes the given move to become the most
- * recently used move for this position.
+ * recently used move for the first position. NULL is returned if the
+ * move in question has not yet been added to the session.
  */
 extern redo_position *redo_getnextposition(redo_position *position, int move);
 
+
 /* Possible values for the checkequiv argument to redo_addposition().
  */
-enum { redo_nocheck, redo_check, redo_checklater };
+enum { redo_nocheck = 0, redo_check, redo_checklater };
 
 /* Return a position in the session, obtained by starting at prev and
  * making the given move. If this position already exists, it is
  * returned. Otherwise, a new position is created and added to the
  * session. state points to a buffer containing the representation of
- * the state for the new position. endpoint is true if this state is a
- * valid solution state. checkequiv can take one of three values. If
- * its value is redo_check, then the function will identify other
+ * the state for the new position. endpoint is non-zero if this
+ * position is a final state. checkequiv can take one of three values.
+ * If its value is redo_check, then the function will identify other
  * positions in the session that have identical states, and if any are
  * found the position's better field will be initialized (or, if the
  * newly created position is actually the other node's better, the
- * latter's subtree can be grafted onto the new position). A value of
+ * latter's subtree will be grafted onto the new position). A value of
  * redo_checklater will delay this check until the next call to
  * redo_setbetterfields(). Finally, a value of redo_nocheck will
  * bypass this check entirely. NULL is returned if a new position
@@ -176,13 +178,13 @@ extern int redo_duplicatepath(redo_session *session,
 extern void redo_updatesavedstate(redo_session const *session,
                                   redo_position *position, void const *state);
 
-/* Examine every position in the session, looking for ones that were
- * added with redo_checklater. The ones that do will then have their
- * better fields re-calculated. (The purpose of this function is to
- * allow a serializer to omit the value of the better fields, merely
- * noting which ones have a non-NULL value. This function can then
- * recreate the values on deserialization.) The return value is the
- * number of better pointers that were set.
+/* Examine every position in the session, looking for ones that have
+ * the setbetter field set to true. The ones that do will then have
+ * their better fields re-initialized. (The purpose of this function
+ * is to allow a serializer to omit the value of the better fields,
+ * merely noting which ones have a non-NULL value. This function can
+ * then recreate the values on deserialization.) The return value is
+ * the number of better pointers that were set.
  */
 extern int redo_setbetterfields(redo_session const *session);
 
