@@ -1,0 +1,11 @@
+#include <winuser.h>
+
+/* Provide an icon.
+ */
+1 ICON "windows/app.ico"
+
+/* Set our charset encoding to utf8.
+ * Don't forget to call SetConsoleOutputCP(CP_UTF8) before using stdout.
+ */
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "windows/utf8.xml"
+
