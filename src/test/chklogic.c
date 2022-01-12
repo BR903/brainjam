@@ -414,7 +414,7 @@ static int testgamestate(void)
  * The main() function.
  */
 
-void chklogic(void)
+int chklogic(void)
 {
-    assert(testgamestate() == 0);
+   return testgamestate();
 }

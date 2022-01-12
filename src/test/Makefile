@@ -36,10 +36,10 @@ $(PROG): $(PROG).c $(OBJ) $(EXTOBJ)
 # function in each test suite, the main() function is generated from
 # the list of object files.
 $(PROG).c:
-	echo $(patsubst %.o,"extern void %(void);",$(OBJ)) > $@
-	echo "int main(void){" >> $@
-	echo $(patsubst %.o,"%();",$(OBJ)) >> $@
-	echo "return 0;}" >> $@
+	echo $(patsubst %.o,"extern int %(void);",$(OBJ)) > $@
+	echo "int main(void){return" >> $@
+	echo $(patsubst %.o,"+%()",$(OBJ)) >> $@
+	echo ";}" >> $@
 
 clean:
 	rm -f $(PROG) $(PROG).c $(OBJ)

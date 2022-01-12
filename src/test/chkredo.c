@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "redo.h"
+#include "redo/redo.h"
 
 /* Variables initialized during setup().
  */
@@ -689,7 +689,7 @@ static void test_endpoints(void)
     teardown();
 }
 
-int main(void)
+int chkredo(void)
 {
     test_init();
     test_statecompares();
