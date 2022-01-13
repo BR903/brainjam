@@ -1,3 +1,9 @@
+* 2022 Jan 12: version 1.0.1
+
+	Nine or so games had inaccurate numbers for the minimum possible
+	answer size. These have been corrected. This release also fixes
+	one or two minor bugs.
+	
 * 2021 Nov 23: version 1.0
 
 	After a long pointless delay, the official 1.0 release is here.
